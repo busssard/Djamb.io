@@ -1,37 +1,36 @@
-import React, {
-  FC, useEffect,
-} from 'react';
-import {
-  BrowserRouter, Routes, Route, useParams,
-} from 'react-router-dom';
+import React, { FC, useEffect, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
+import { CircularProgress } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import NavigationDrawer from '../NavigationDrawer/NavigationDrawer';
 import { loadConfig } from '../../controllers/configController';
 import * as RoutePaths from '../../utilities/routes';
-import NoMatchPage from '../pages/NoMatchPage';
 import RedirectBasedOnStore from '../routing/RedirectBasedOnStore';
-import CreateAccountPage from '../pages/CreateAccountPage';
-import SignInPage from '../pages/SignInPage';
-import UserConfigPage from '../pages/UserConfigPage';
 import { restoreSession } from '../../controllers/userController';
-import RulesPage from '../pages/RulesPage';
-import GameDiplomacyPage from '../pages/GameDiplomacyPage';
-import GameLobbyPage from '../pages/GameLobbyPage';
-import GameOutcomePage from '../pages/GameOutcomePage';
-import GameSnapshotsPage from '../pages/GameSnapshotsPage';
-import GamePage from '../pages/GamePage';
-import GamePlayPage from '../pages/GamePlayPage';
-import CreateGamePage from '../pages/CreateGamePage';
-import HomePage from '../pages/HomePage';
-import SearchGamesPage from '../pages/SearchGamesPage';
 import TopBar from '../TopBar/TopBar';
-import SignOutPage from '../pages/SignOutPage';
 import { theme } from '../../styles/materialTheme';
-import GameInfoPage from '../pages/GameInfoPage';
-import NotificationsPage from '../pages/NotificationsPage';
 import LatestNotificationSnackbar from '../notifications/LatestNotificationSnackBar';
 import { loadGame, blockGameLoading } from '../../controllers/gameController';
+
+// Lazy-loaded page components
+const NoMatchPage = React.lazy(() => import('../pages/NoMatchPage'));
+const CreateAccountPage = React.lazy(() => import('../pages/CreateAccountPage'));
+const SignInPage = React.lazy(() => import('../pages/SignInPage'));
+const UserConfigPage = React.lazy(() => import('../pages/UserConfigPage'));
+const RulesPage = React.lazy(() => import('../pages/RulesPage'));
+const GameDiplomacyPage = React.lazy(() => import('../pages/GameDiplomacyPage'));
+const GameLobbyPage = React.lazy(() => import('../pages/GameLobbyPage'));
+const GameOutcomePage = React.lazy(() => import('../pages/GameOutcomePage'));
+const GameSnapshotsPage = React.lazy(() => import('../pages/GameSnapshotsPage'));
+const GamePage = React.lazy(() => import('../pages/GamePage'));
+const GamePlayPage = React.lazy(() => import('../pages/GamePlayPage'));
+const CreateGamePage = React.lazy(() => import('../pages/CreateGamePage'));
+const HomePage = React.lazy(() => import('../pages/HomePage'));
+const SearchGamesPage = React.lazy(() => import('../pages/SearchGamesPage'));
+const SignOutPage = React.lazy(() => import('../pages/SignOutPage'));
+const GameInfoPage = React.lazy(() => import('../pages/GameInfoPage'));
+const NotificationsPage = React.lazy(() => import('../pages/NotificationsPage'));
 
 const useStyles = makeStyles({
   page: {
@@ -77,8 +76,7 @@ const App: FC = () => {
         .then(() => restoreSession())
         .then(() => loadGame(gameId, true));
     } else {
-      loadConfig()
-        .then(() => restoreSession());
+      loadConfig().then(() => restoreSession());
     }
   }, []);
 
@@ -92,28 +90,30 @@ const App: FC = () => {
         <LatestNotificationSnackbar />
         <TopBar />
         <div className={classes.page}>
-          <Routes>
-            {/* Gameless pages */}
-            <Route path={RoutePaths.settings} element={<UserConfigPage />} />
-            <Route path={RoutePaths.signIn} element={<SignInPage />} />
-            <Route path={RoutePaths.signOut} element={<SignOutPage />} />
-            <Route path={RoutePaths.createAccount} element={<CreateAccountPage />} />
-            <Route path={RoutePaths.rules} element={<RulesPage />} />
-            <Route path={RoutePaths.home} element={<HomePage />} />
-            <Route path={RoutePaths.notifications} element={<NotificationsPage />} />
-            <Route path={RoutePaths.newGame} element={<CreateGamePage />} />
-            <Route path={RoutePaths.searchGames} element={<SearchGamesPage />} />
-            {/* Active game pages */}
-            <Route path={RoutePaths.gameDiplomacyTemplate} element={<GameDiplomacyRoute />} />
-            <Route path={RoutePaths.gameInfoTemplate} element={<GameInfoRoute />} />
-            <Route path={RoutePaths.gameLobbyTemplate} element={<GameLobbyRoute />} />
-            <Route path={RoutePaths.gameOutcomeTemplate} element={<GameOutcomeRoute />} />
-            <Route path={RoutePaths.gamePlayTemplate} element={<GamePlayRoute />} />
-            <Route path={RoutePaths.gameSnapshotsTemplate} element={<GameSnapshotsRoute />} />
-            <Route path={RoutePaths.gameTemplate} element={<GameRoute />} />
-            {/* Misc pages */}
-            <Route path="*" element={<NoMatchPage />} />
-          </Routes>
+          <Suspense fallback={<CircularProgress />}>
+            <Routes>
+              {/* Gameless pages */}
+              <Route path={RoutePaths.settings} element={<UserConfigPage />} />
+              <Route path={RoutePaths.signIn} element={<SignInPage />} />
+              <Route path={RoutePaths.signOut} element={<SignOutPage />} />
+              <Route path={RoutePaths.createAccount} element={<CreateAccountPage />} />
+              <Route path={RoutePaths.rules} element={<RulesPage />} />
+              <Route path={RoutePaths.home} element={<HomePage />} />
+              <Route path={RoutePaths.notifications} element={<NotificationsPage />} />
+              <Route path={RoutePaths.newGame} element={<CreateGamePage />} />
+              <Route path={RoutePaths.searchGames} element={<SearchGamesPage />} />
+              {/* Active game pages */}
+              <Route path={RoutePaths.gameDiplomacyTemplate} element={<GameDiplomacyRoute />} />
+              <Route path={RoutePaths.gameInfoTemplate} element={<GameInfoRoute />} />
+              <Route path={RoutePaths.gameLobbyTemplate} element={<GameLobbyRoute />} />
+              <Route path={RoutePaths.gameOutcomeTemplate} element={<GameOutcomeRoute />} />
+              <Route path={RoutePaths.gamePlayTemplate} element={<GamePlayRoute />} />
+              <Route path={RoutePaths.gameSnapshotsTemplate} element={<GameSnapshotsRoute />} />
+              <Route path={RoutePaths.gameTemplate} element={<GameRoute />} />
+              {/* Misc pages */}
+              <Route path="*" element={<NoMatchPage />} />
+            </Routes>
+          </Suspense>
         </div>
       </BrowserRouter>
     </ThemeProvider>
