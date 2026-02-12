@@ -1,11 +1,10 @@
 import React, { FC } from 'react';
-import {
-  AppBar, Toolbar, Typography, Grid,
-} from '@mui/material';
+import { AppBar, Toolbar, Typography, Grid } from '@mui/material';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import MenuButton from './MenuButton';
 import NotificationsButton from './NotificationsButton';
+import InstallButton from './InstallButton';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -35,15 +34,12 @@ const TopBar: FC = () => {
               <NotificationsButton />
             </Grid>
             <Grid size="grow">
-              <Typography
-                variant="h6"
-                className={classes.title}
-              >
+              <Typography variant="h6" className={classes.title}>
                 Djambi-N
               </Typography>
             </Grid>
-            <Grid size="grow">
-              {/* intentionally blank */}
+            <Grid size="grow" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <InstallButton />
             </Grid>
           </Grid>
         </Toolbar>
