@@ -27,14 +27,17 @@
 ## Phase 2: Frontend Modernization — Build System
 > Migrate from Create React App 3.4 to Vite. This unblocks all other frontend upgrades.
 
-- [ ] Create Vite config (`vite.config.ts`) to replace CRA
-- [ ] Migrate `public/` assets to Vite public directory structure
-- [ ] Update `index.html` to Vite entry point format
-- [ ] Replace `react-scripts` scripts in `package.json` with Vite equivalents
-- [ ] Update `tsconfig.json` target from ES5 to ES2020+
-- [ ] Verify env.json runtime config loading works with Vite
-- [ ] Remove `react-scripts` dependency
-- [ ] Verify build output matches CRA output (assets, routing, etc.)
+- [x] Create Vite config (`vite.config.ts`) — React plugin with classic JSX runtime for React 16
+- [x] Move `index.html` from `public/` to root, add `<script type="module">` entry point
+- [x] Add iOS PWA meta tags (`apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`)
+- [x] Replace `react-scripts` scripts with Vite equivalents (`dev`, `start`, `build`, `preview`)
+- [x] Update `tsconfig.json` — target ES2020, moduleResolution bundler, Vite/Vitest types
+- [x] Replace `process.env` with `import.meta.env` in serviceWorker.ts
+- [x] Remove `react-scripts` dependency, CRA eslintConfig, browserslist
+- [x] Remove `react-app-env.d.ts`, add `vite-env.d.ts`
+- [x] Upgrade TypeScript 3.9 → 4.9, ESLint 6 → 8, @typescript-eslint 3 → 5
+- [x] Add Vitest for testing (replaces CRA's hidden Jest config)
+- [x] Verify build succeeds — 7267 modules, 474KB output (148KB gzip)
 
 ## Phase 3: Frontend Modernization — Dependencies
 > Upgrade React, Redux, Material-UI, and other core dependencies.
