@@ -313,7 +313,7 @@ Djamb.io/
 Meta's [Cicero](https://github.com/facebookresearch/diplomacy_cicero) plays the board game Diplomacy at human level by combining a language model (for negotiation) with a game-theoretic planning engine (for strategy). The repo is archived but the architecture and pretrained models are available under CC-BY-NC 4.0.
 
 ### Why This Matters for Djambi-N
-Djambi and Diplomacy share the same core challenge: **multi-agent strategic reasoning** where you must model what opponents will do, form temporary alliances, and betray at the right moment. Cicero's planning engine solves exactly this class of problem.
+Djambi has been described academically as "Machiavelli's Chessboard" — a game fundamentally about "subversion, duplicity, lying and denial" where political dynamics are inseparable from board tactics. Djambi and Diplomacy share the same core challenge: **multi-agent strategic reasoning** where you must model what opponents will do, form temporary alliances, and betray at the right moment. Cicero's planning engine solves exactly this class of problem. Critically, both games involve a social/negotiation dimension: in Diplomacy, structured negotiation rounds precede simultaneous orders; in Djambi, negotiation is asynchronous and informal — happening between turns through chat, implied threats via piece positioning, and status signaling (draw offers, concession warnings).
 
 ### What Transfers Directly
 - **Strategic planning engine** (`fairdiplomacy/agents/`) - Bilateral and correlated search for multi-player games. This is the core component needed. It handles the "what should I do given what everyone else might do" reasoning.
@@ -327,59 +327,108 @@ Djambi and Diplomacy share the same core challenge: **multi-agent strategic reas
 | Diplomacy map (fixed 75 territories) | Hexagonal board with 3-8 player configurations, curved topology |
 | 7 unit types (all identical armies/fleets) | 7 distinct piece types (Chief, Assassin, Reporter, Diplomat, Militant, Necromobile, Corpse) each with unique movement and capture rules |
 | Simultaneous moves per turn | Sequential turns (one player moves at a time) |
-| NLP negotiation model (`parlai_diplomacy/`) | Not needed for Djambi (no negotiation phase) -- biggest simplification |
+| NLP negotiation model (`parlai_diplomacy/`) | Needs adaptation, not removal. Diplomacy has structured negotiation rounds; Djambi has asynchronous informal negotiation (chat between turns, implied threats via piece movement, status signaling via `AcceptsDraw`/`WillConcede`). See "Social Reasoning" section below. |
 | Fixed 7-player game | Variable 3-8 players with dynamically sized boards |
 | Support/convoy order system | Djambi-specific move/capture/manipulation mechanics |
 
 ### What Does NOT Transfer
-- **The language model component** (`parlai_diplomacy/`) - Cicero's main innovation is blending NLP with strategy. Djambi has no negotiation, so this entire module (~40% of Cicero's codebase) is irrelevant. This is actually good news: it means the Djambi AI is a simpler problem.
 - **webDiplomacy.net integration** - Game-specific UI/protocol code.
+- **Structured negotiation message format** - Diplomacy's negotiation has a formal grammar (propose alliance, request support, etc.). Djambi negotiation is unstructured natural language and implicit board signals, requiring a different NLP approach.
+
+### What Was Previously Underestimated: Social Reasoning
+The NLP/negotiation component (`parlai_diplomacy/`) was originally considered irrelevant to Djambi. This was incorrect. Djambi — described in academic literature as a "Foucauldian chessboard" — is fundamentally a game of political dynamics where social reasoning is as important as tactical play.
+
+**Existing codebase evidence of social/diplomatic mechanics:**
+- **`web2/src/components/pages/GameDiplomacyPage.tsx`** - A stub diplomacy page already exists (currently displays `JSON.stringify(game)`), indicating diplomacy features were planned from early in the project
+- **`web2/src/utilities/routes.ts`** - Defines `/games/:gameId/diplomacy` route, wired into the app router and navigation drawer with a diplomacy icon
+- **`PlayerStatus` enum** (`api/api.enums/Enums.fs`) includes `AcceptsDraw` and `WillConcede` — implicit social signals broadcast to all players
+- **Draw coordination** (`api/api.logic/Services/PlayerStatusChangeService.fs`) - Draw requires all living players to independently set `AcceptsDraw`; the last player accepting triggers game end. This IS multi-party negotiation mediated through game mechanics
+- **Status change API** (`PUT /api/games/{gameId}/players/{playerId}/status/{status}`) - The current endpoint for social signaling
+- **WebSocket + SSE infrastructure** (`api/api.web/Controllers/NotificationController.fs`, `api/api.logic/Services/NotificationService.fs`) - Real-time notification system exists for pushing game events to all players, ready to be extended for chat/messaging
+
+**How negotiation differs between the games:**
+| Aspect | Diplomacy | Djambi |
+|--------|-----------|--------|
+| Timing | Structured rounds before each simultaneous-move phase | Asynchronous, between sequential turns |
+| Format | Formal messages with game-specific grammar | Unstructured chat + implicit board signals |
+| Social signals | Explicit proposals (alliance, support, betrayal) | Piece positioning as threats, draw/concede timing, move patterns |
+| Turn structure | Negotiate then all move simultaneously | One player moves at a time; others observe and react socially |
+| Commitment | Agreements are non-binding (can betray on move submission) | Status changes (`AcceptsDraw`) are visible and revocable |
+
+**Implication:** Cicero's NLP component (~40% of its codebase) is not irrelevant — it needs adaptation. The Djambi AI needs to: (1) reason about implicit social signals (piece positioning as threats, draw timing, concession timing), (2) model opponent social intent alongside tactical intent, and (3) potentially participate in unstructured chat if a messaging system is built on top of the existing notification infrastructure.
 
 ### Architecture Sketch for Djambi AI
 
 ```
-┌─────────────────────────────────────────┐
-│           Djambi AI Agent               │
-├─────────────────────────────────────────┤
-│  Intent Prediction Model                │
-│  (What will each opponent do next?)     │
-│  - Trained via supervised learning on   │
-│    game logs + self-play RL             │
-├─────────────────────────────────────────┤
-│  Strategic Search Engine                │
-│  (Adapted from Cicero's bilateral      │
-│   search for multi-player reasoning)    │
-│  - Evaluates board positions            │
-│  - Models opponent responses            │
-│  - Handles alliance/betrayal dynamics   │
-├─────────────────────────────────────────┤
-│  Djambi Action Space                    │
-│  - 7 piece types with unique rules      │
-│  - Hex board with variable geometry     │
-│  - Move generation + validation         │
-├─────────────────────────────────────────┤
-│  Game State Encoder                     │
-│  - Board → tensor representation        │
-│  - Player status, piece positions,      │
-│    threat maps, territory control       │
-└─────────────────────────────────────────┘
+┌───────────────────────────────────────────────────┐
+│              Djambi AI Agent                       │
+├───────────────────────────────────────────────────┤
+│  Social Reasoning Layer                            │
+│  (Adapted from Cicero's parlai_diplomacy)          │
+│  - Interprets implicit social signals              │
+│    (draw offers, concede warnings, move            │
+│    patterns as threats/alliances)                   │
+│  - Models opponent social intent alongside         │
+│    tactical intent                                  │
+│  - Generates chat messages (if messaging added)    │
+│  - Decides when to signal AcceptsDraw/             │
+│    WillConcede via status API                       │
+├───────────────────────────────────────────────────┤
+│  Intent Prediction Model                           │
+│  (What will each opponent do next?)                │
+│  - Trained via supervised learning on              │
+│    game logs + self-play RL                        │
+│  - Incorporates social signals as input            │
+│    features (not just board state)                  │
+├───────────────────────────────────────────────────┤
+│  Strategic Search Engine                           │
+│  (Adapted from Cicero's bilateral                  │
+│   search for multi-player reasoning)               │
+│  - Evaluates board positions                       │
+│  - Models opponent responses                       │
+│  - Handles alliance/betrayal dynamics              │
+│  - Integrates social reasoning into search         │
+│    (e.g., "if I signal draw, how does              │
+│    opponent X likely respond?")                     │
+├───────────────────────────────────────────────────┤
+│  Djambi Action Space                               │
+│  - 7 piece types with unique rules                 │
+│  - Hex board with variable geometry                │
+│  - Move generation + validation                    │
+│  - Social actions: AcceptsDraw, WillConcede,       │
+│    revoke draw, chat messages                       │
+├───────────────────────────────────────────────────┤
+│  Game State Encoder                                │
+│  - Board → tensor representation                   │
+│  - Player status (Alive/AcceptsDraw/               │
+│    WillConcede) as social signal features          │
+│  - Piece positions, threat maps,                   │
+│    territory control                                │
+│  - Social history (status change sequence,         │
+│    chat log embeddings)                             │
+└───────────────────────────────────────────────────┘
 ```
 
 ### Implementation Path
-1. **Define Djambi action space** - Encode all legal moves for all 7 piece types on the hex board as a structured output space
-2. **Build game state encoder** - Convert board state to tensor format suitable for neural network input (piece positions, player status, threat maps)
-3. **Collect training data** - Record games from the live site, or generate via random/heuristic play
-4. **Train base strategy model** - Supervised learning from game records (behavioral cloning), adapting Cicero's `train_sl.py` pipeline
-5. **Self-play RL** - Adapt Cicero's self-play infrastructure to improve beyond human-level play
-6. **Integrate with API** - AI agent connects as a player via the existing `/api/turns` and `/api/games` endpoints, using the `Neutral` PlayerKind
+1. **Define Djambi action space** - Encode all legal moves for all 7 piece types on the hex board as a structured output space. Include social actions (`AcceptsDraw`, `WillConcede`, revoke draw) as first-class actions in the action space.
+2. **Build game state encoder** - Convert board state to tensor format suitable for neural network input. Include player status signals (`AcceptsDraw`/`WillConcede`) and social history (status change sequences) as input features, not just board positions and piece types.
+3. **Build out diplomacy infrastructure** - Implement the `GameDiplomacyPage.tsx` stub into a functional chat/negotiation interface. Extend the existing WebSocket/SSE notification system (`NotificationController.fs` / `NotificationService.fs`) to support player-to-player messaging. This creates the social channel the AI will eventually use.
+4. **Collect training data** - Record games from the live site (including social signals and chat logs), or generate via random/heuristic play with simulated social behavior
+5. **Train base strategy model** - Supervised learning from game records (behavioral cloning), adapting Cicero's `train_sl.py` pipeline. Train jointly on move prediction and social signal prediction.
+6. **Add social reasoning model** - Adapt Cicero's NLP architecture for Djambi's asynchronous informal negotiation. Train on chat logs and status signal patterns. This can start simple (rule-based social heuristics) and evolve toward learned models.
+7. **Self-play RL** - Adapt Cicero's self-play infrastructure to improve beyond human-level play. Self-play must include social actions (draw offers, concessions, chat) not just board moves.
+8. **Integrate with API** - AI agent connects as a player via the existing `/api/turns`, `/api/games`, and `/api/games/{gameId}/players/{playerId}/status/{status}` endpoints, using the `Neutral` PlayerKind. Social actions use the player status endpoint; chat uses the extended notification system.
 
 ### Key Technical Decisions (Open)
 - **Board representation**: Flat hex grid vs. graph-based (curved topology complicates standard CNN approaches; graph neural networks may be more natural)
-- **Action encoding**: Per-piece move selection vs. global policy over all legal moves
-- **Training compute**: Cicero required significant GPU resources; a Djambi model would be smaller (no language model) but self-play still needs scale
-- **Serving**: Run AI inference as a separate service, or embed in the F# API process?
+- **Action encoding**: Per-piece move selection vs. global policy over all legal moves. Must also encode social actions (draw/concede signals) as part of the action space.
+- **Social reasoning complexity**: Start with rule-based social heuristics (e.g., "offer draw when board position is symmetric") or go directly to learned social models? Rule-based is faster to ship but caps the AI's political sophistication.
+- **Chat system scope**: Full natural language chat (requiring LLM integration) vs. structured diplomatic signals only (draw/concede/alliance requests via UI buttons). The former is more faithful to Djambi's political nature; the latter is far simpler to implement and train on.
+- **Training compute**: Cicero required significant GPU resources; a Djambi model with social reasoning will be more complex than a pure strategy model, though still simpler than Cicero (smaller board, fewer players per game on average). Self-play with social actions increases the action space considerably.
+- **Serving**: Run AI inference as a separate service, or embed in the F# API process? Social reasoning (especially if LLM-based) likely requires a separate Python service communicating via the existing WebSocket infrastructure.
 
 ### Reference
 - Paper: "Human-level play in the game of Diplomacy by combining language models with strategic reasoning" (Meta AI, Science 2022)
 - Repo: https://github.com/facebookresearch/diplomacy_cicero (archived April 2025)
-- The Diplodocus variant (no-press, strategy-only) is the closest analog to what Djambi needs
+- Djambi as political game: The academic literature on Djambi frames it as "Machiavelli's Chessboard" / "the Foucauldian chessboard" — a game fundamentally about subversion, duplicity, and political maneuvering, not merely tactical piece movement. Social dynamics (alliance formation, betrayal timing, implicit communication through moves) are core to expert play, not peripheral.
+- The Diplodocus variant (no-press, strategy-only) represents a **lower bound** for Djambi AI, not the target. A strategy-only AI can play legal moves but cannot engage in the political dynamics that define expert Djambi play. The full Cicero architecture (strategy + social reasoning) is the appropriate target, adapted for Djambi's asynchronous informal negotiation style.
