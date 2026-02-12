@@ -78,34 +78,102 @@
 
 ## Phase 4: PWA Enablement
 > Make the app installable on Android/iOS with offline support.
+> **Current state**: CRA boilerplate service worker in `web2/src/serviceWorker.ts` (explicitly `unregister()`'d in `index.tsx`). Manifest at `web2/public/manifest.json` has only favicon.ico + logo192.png. iOS meta tags already in `index.html`. No Vite PWA plugin.
 
-- [ ] Enable service worker in `index.tsx` (`serviceWorker.register()`)
-- [ ] Implement proper service worker caching strategy
-  - [ ] Cache-first for static assets (JS, CSS, images)
-  - [ ] Network-first for API calls
-  - [ ] Offline fallback page
-- [ ] Update `manifest.json`
-  - [ ] Add 512x512 icon
-  - [ ] Add maskable icon for Android
-  - [ ] Add screenshots for install prompt
-  - [ ] Set proper `scope` and `start_url`
-  - [ ] Add `display_override: ["standalone", "window-controls-overlay"]`
-- [ ] Add `<meta name="apple-mobile-web-app-capable">` and iOS meta tags
-- [ ] Implement "Add to Home Screen" prompt UI
-- [ ] Test installability on Android (Chrome) and iOS (Safari)
-- [ ] Add Web App Manifest validation to CI
-- [ ] Implement app update notification (new version available)
+- [ ] Replace CRA service worker with Vite PWA plugin
+  - [ ] Install `vite-plugin-pwa` and add to `web2/vite.config.ts`
+  - [ ] Configure Workbox with `generateSW` strategy
+  - [ ] Delete legacy `web2/src/serviceWorker.ts` (CRA boilerplate, 139 lines)
+  - [ ] Remove `serviceWorker.unregister()` call from `web2/src/index.tsx`
+- [ ] Configure caching strategies in `vite.config.ts` PWA plugin
+  - [ ] Cache-first for static assets (JS, CSS, images, fonts) — `CacheFirst` with max-age
+  - [ ] Network-first for API calls (`/api/*`) — `NetworkFirst` with 5s timeout fallback
+  - [ ] Precache app shell (index.html, main JS/CSS bundles)
+  - [ ] Set `navigateFallback: '/index.html'` for SPA routing
+- [ ] Create offline fallback page
+  - [ ] Design minimal offline page with "No connection" message and retry button
+  - [ ] Register as fallback in service worker config
+- [ ] Complete `web2/public/manifest.json` (currently minimal)
+  - [ ] Generate 512x512 app icon from existing logo192.png
+  - [ ] Generate maskable icon (safe zone padding) for Android adaptive icons
+  - [ ] Add icon entries: 48x48, 72x72, 96x96, 144x144, 192x192, 512x512
+  - [ ] Set `"start_url": "/"` (currently `"."` which is ambiguous)
+  - [ ] Set `"scope": "/"`
+  - [ ] Add `"display_override": ["standalone", "window-controls-overlay"]`
+  - [ ] Set `"theme_color": "#161616"` (match app background, currently `#ffffff`)
+  - [ ] Add `"orientation": "any"` (game works in both orientations)
+  - [ ] Add `"categories": ["games", "entertainment"]`
+  - [ ] Add screenshots for richer install prompt (1 mobile, 1 desktop)
+- [ ] iOS-specific PWA support
+  - [x] `apple-mobile-web-app-capable` meta tag — already in `index.html`
+  - [x] `apple-mobile-web-app-status-bar-style` meta tag — already in `index.html`
+  - [x] `apple-touch-icon` link tag — already in `index.html` (logo192.png)
+  - [ ] Add multiple `apple-touch-icon` sizes (120x120, 152x152, 167x167, 180x180)
+  - [ ] Add `apple-touch-startup-image` for splash screen on iOS
+- [ ] Implement "Add to Home Screen" install prompt
+  - [ ] Listen for `beforeinstallprompt` event
+  - [ ] Show install banner/button in UI (e.g., TopBar or snackbar)
+  - [ ] Track install outcome for analytics
+- [ ] Implement app update notification
+  - [ ] Detect new service worker via `onUpdate` callback
+  - [ ] Show "New version available — refresh" snackbar using existing `LatestNotificationSnackBar.tsx`
+  - [ ] Handle `skipWaiting` + page reload on user confirmation
+- [ ] Validation and testing
+  - [ ] Run Lighthouse PWA audit — target all green checks
+  - [ ] Test install flow on Android Chrome
+  - [ ] Test install flow on iOS Safari (Add to Home Screen)
+  - [ ] Verify offline mode shows fallback page (not browser error)
+  - [ ] Verify app opens as standalone (no browser chrome)
 
 ## Phase 5: Mobile-First Responsive Design
 > Ensure the game works well on phone and tablet screens.
+> **Current state**: Zero `@media` queries in codebase. Board size (`CanvasBoard.tsx`) is passed as fixed `width`/`height`/`scale` props with no viewport awareness. No `resize` event listeners. Navigation is a desktop-style side drawer. Forms use hardcoded `width: '50%'`.
 
-- [ ] Audit all pages for mobile responsiveness
-- [ ] Make navigation drawer responsive (full sidebar on desktop, bottom nav or hamburger on mobile)
-- [ ] Make game board responsive (pinch-to-zoom, fit-to-screen on Konva canvas)
-- [ ] Make forms mobile-friendly (proper input types, touch targets)
-- [ ] Add viewport-aware board sizing
-- [ ] Test on various screen sizes (320px to 1440px+)
-- [ ] Handle safe areas for notched phones (env(safe-area-inset-*))
+- [ ] Add responsive viewport foundation
+  - [ ] Create shared breakpoint constants (align with MUI defaults: xs=0, sm=600, md=900, lg=1200)
+  - [ ] Add `useWindowSize` hook (listen to `resize` event, return `{ width, height }`)
+  - [ ] Add `useIsMobile` hook (returns true if `width < sm breakpoint`)
+- [ ] Make game board responsive — `web2/src/components/Canvas/CanvasBoard.tsx`
+  - [ ] Calculate board dimensions from viewport size instead of fixed values
+  - [ ] Add `resize` listener to re-render `<Stage>` when window resizes
+  - [ ] Cap board size to `min(viewportWidth, viewportHeight) - padding`
+  - [ ] Implement pinch-to-zoom on touch devices (Konva supports `touchmove` events)
+  - [ ] Implement drag-to-pan on mobile (Konva `Stage` draggable)
+  - [ ] Add zoom controls (+ / - buttons) visible on mobile
+  - [ ] Ensure tooltips (`CanvasTooltip.tsx`) work with touch (long-press → show, tap elsewhere → hide)
+- [ ] Make navigation responsive
+  - [ ] `NavigationDrawer.tsx`: Keep side drawer on desktop (>= 900px), use full-screen overlay on mobile
+  - [ ] `TopBar.tsx`: Stack title below buttons on small screens, or hide title on xs
+  - [ ] Ensure hamburger menu touch target is >= 48x48px (accessibility minimum)
+  - [ ] Add swipe-to-open gesture for drawer on mobile
+- [ ] Make forms mobile-friendly
+  - [ ] `web2/src/styles/styles.ts`: Change `useFormStyles` button width from `'50%'` → responsive (100% on mobile, 50% on desktop)
+  - [ ] All form pages (`SignInForm`, `CreateAccountForm`, `CreateGameForm`, `UserConfigForm`): Full-width on mobile, constrained max-width on desktop
+  - [ ] Set appropriate `inputMode` on text fields (e.g., `inputMode="email"` for email fields)
+  - [ ] Ensure touch targets are >= 48px height on all buttons and interactive elements
+- [ ] Make tables mobile-friendly
+  - [ ] `GameSearchResultsTable.tsx`: Horizontal scroll or card layout on narrow screens
+  - [ ] `LobbyPlayersTable.tsx`: Stack columns or use card layout on mobile
+  - [ ] `GameParametersTable.tsx`: Responsive column hiding or stacking
+  - [ ] `InfoPlayersTable.tsx`: Responsive layout
+- [ ] Make game pages responsive
+  - [ ] `GamePlayPage.tsx`: Board fills available space, controls below on mobile / sidebar on desktop
+  - [ ] `GameInfoPage.tsx`: Single-column layout on mobile
+  - [ ] `GameLobbyPage.tsx`: Full-width player list on mobile
+  - [ ] `HomePage.tsx`: Responsive game list / search results
+- [ ] Handle device-specific concerns
+  - [ ] Add `env(safe-area-inset-*)` padding for notched phones (iPhone X+)
+  - [ ] Prevent double-tap zoom on game board (interferes with gameplay)
+  - [ ] Prevent pull-to-refresh on game board (interferes with drag/pan)
+  - [ ] Handle on-screen keyboard appearing (form pages shouldn't scroll weirdly)
+  - [ ] Test landscape orientation (game board should rotate and fill space)
+- [ ] Testing
+  - [ ] Test at 320px width (iPhone SE / small Android)
+  - [ ] Test at 375px width (iPhone 12/13/14)
+  - [ ] Test at 768px width (iPad portrait)
+  - [ ] Test at 1024px width (iPad landscape / small laptop)
+  - [ ] Test at 1440px+ (desktop)
+  - [ ] Test touch interactions on actual mobile device or emulator
 
 ## Phase 6: Real-Time WebSocket Integration
 > Connect the frontend to the existing backend WebSocket infrastructure.
@@ -192,7 +260,7 @@
 
 ## Current Focus
 
-**Active work**: Phase 3 complete (core dependency upgrades). Next: Phase 4 (PWA) or remaining Phase 3 items (Redux Toolkit, TypeScript 5, ESLint).
+**Active work**: Phase 3 complete (core dependency upgrades). Next: Phase 4 (PWA enablement) → Phase 5 (mobile responsive design).
 
 **Completed milestones**:
 - Phase 0: Documentation restructured ✓
