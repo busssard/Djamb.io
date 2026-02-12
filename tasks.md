@@ -12,7 +12,7 @@
 - [x] Correct social reasoning treatment (NLP IS relevant to Djambi)
 - [x] Restructure docs: CLAUDE.md (general) + repo_doc.md (technical) + tasks.md (tracking)
 - [x] Comprehensive codebase quality assessment
-- [>] Review and finalize implementation plan
+- [x] Review and finalize implementation plan
 
 ## Phase 1: Critical Bug Fixes
 > Fix showstopper bugs in the current codebase before any modernization.
@@ -42,30 +42,37 @@
 ## Phase 3: Frontend Modernization — Dependencies
 > Upgrade React, Redux, Material-UI, and other core dependencies.
 
-- [ ] Upgrade React 16 → 18
-  - [ ] Update `react` and `react-dom` packages
-  - [ ] Replace `ReactDOM.render()` with `createRoot()` in index.tsx
-  - [ ] Fix any breaking changes in components
+- [x] Upgrade React 16 → 18
+  - [x] Update `react` and `react-dom` packages to ^18.3.1
+  - [x] Replace `ReactDOM.render()` with `createRoot()` in index.tsx
+  - [x] Upgrade `react-konva` v16 → v18.2.14 for React 18 compatibility
   - [ ] Update `@testing-library/react` to v14+
-- [ ] Upgrade TypeScript 3.9 → 5.x
-  - [ ] Update `tsconfig.json` for new TS features
+- [ ] Upgrade TypeScript 4.9 → 5.x
+  - [ ] Update `tsconfig.json` for new TS features (bundler moduleResolution)
   - [ ] Fix any new strict mode errors
 - [ ] Migrate Redux to Redux Toolkit (or evaluate Zustand as lighter alternative)
   - [ ] Install `@reduxjs/toolkit`
   - [ ] Convert slices one at a time: `session` → `activeGame` → `notifications` → rest
   - [ ] Replace manual action types/creators/reducers with `createSlice`
   - [ ] Add Redux DevTools integration
-- [ ] Upgrade Material-UI v4 → MUI v5
-  - [ ] Install `@mui/material`, `@mui/icons-material`
-  - [ ] Replace `@material-ui/core` imports
-  - [ ] Migrate `makeStyles` → `styled` or `sx` prop
-  - [ ] Update theme from `createMuiTheme` → `createTheme`
-- [ ] Upgrade React Router 5 → 6
-  - [ ] Replace `<Switch>` with `<Routes>`
-  - [ ] Replace `<Route component=...>` with `<Route element=...>`
-  - [ ] Update route params access
+- [x] Upgrade Material-UI v4 → MUI v7
+  - [x] Install `@mui/material`, `@mui/icons-material`, `@mui/lab`, `@emotion/react`, `@emotion/styled`, `@mui/styles`
+  - [x] Replace `@material-ui/core` → `@mui/material` imports across 43 files
+  - [x] Replace `@material-ui/icons` → `@mui/icons-material` (5 files)
+  - [x] Replace `@material-ui/lab` → `@mui/material` (Alert graduated)
+  - [x] Move `makeStyles`/`withStyles` to `@mui/styles` (legacy compat package)
+  - [x] Update theme: `createMuiTheme` → `createTheme`, `palette.type` → `palette.mode`
+  - [x] Fix Grid API for MUI v7: `item`/`xs` → `size="grow"`
+  - [x] Fix `ListItem button` → `ListItemButton`
+  - [x] Remove old `@material-ui/*` packages
+- [x] Upgrade React Router 5 → 6
+  - [x] Replace `<Switch>` with `<Routes>`
+  - [x] Replace `<Route component=...>` / `<Route render=...>` with `<Route element=...>`
+  - [x] Replace `Redirect` with `Navigate`
+  - [x] Add `useParams()` hook wrappers for game page route params
   - [ ] Add route-based lazy loading (`React.lazy` + `Suspense`)
-- [ ] Upgrade Konva.js 7 → latest
+- [x] Upgrade Konva.js 7 → 9
+  - [x] Update type import paths from `konva/types/*` to `konva/lib/*`
 - [ ] Upgrade ESLint to v9+ with flat config
 - [ ] Add Prettier for code formatting
 
@@ -185,6 +192,14 @@
 
 ## Current Focus
 
-**Active work**: Phase 0 (documentation) → Phase 1 (critical fixes) → Phase 2 (Vite migration)
+**Active work**: Phase 3 complete (core dependency upgrades). Next: Phase 4 (PWA) or remaining Phase 3 items (Redux Toolkit, TypeScript 5, ESLint).
+
+**Completed milestones**:
+- Phase 0: Documentation restructured ✓
+- Phase 1: Critical useEffect bugs fixed across 9 components ✓
+- Phase 2: CRA → Vite migration ✓ (build: 474KB → 603KB with MUI v7 additions, 191KB gzip)
+- Phase 3 (core): React 18 + MUI v7 + React Router 6 + Konva 9 ✓
+
+Dev server runs on `http://localhost:3000` via `npm start` (Vite). Build passes TypeScript strict check + Vite production build.
 
 The strategy is: fix bugs first, modernize the build system, then incrementally upgrade dependencies while keeping the app functional at every step. PWA enablement (Phase 4) is the key milestone — once the app is installable, all other improvements layer on top.
