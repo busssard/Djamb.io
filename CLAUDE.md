@@ -40,6 +40,87 @@ This is a **fork of an abandoned project** (last active development ~2020). The 
 7. **Prioritize PWA compatibility** — all new frontend work should consider offline-first, installability, and mobile responsiveness
 8. **Keep it simple** — don't over-engineer; this codebase needs modernization, not more abstraction layers
 
+## User Preferences & Workflow
+
+### Git Commit Strategy
+- **Always create multiple commits** — separate features/changes logically rather than one large commit
+- Group related changes together (e.g., one commit for a dependency upgrade, another for the code changes it requires)
+- Write clear, descriptive commit messages
+- **Never commit real server IPs, passwords, or secrets** — use placeholders and reference environment variables or GitHub secrets
+
+### Writing Documentation & Instructions
+- **Self-contained copy-paste blocks** — when writing setup guides, deployment docs, or how-to instructions, inline everything the reader needs right where they need it. Don't say "see file X for the values" and make them cross-reference — put the actual values, commands, and config directly in the step.
+- **Append-friendly over edit-in-place** — when modifying config files, prefer appending a block to the end rather than asking the reader to find and edit specific lines scattered through a large file. Most config formats use "last value wins".
+- **Assume the reader follows top-to-bottom** — each step should be runnable in sequence without jumping ahead or back. If step 5 depends on something from step 2, repeat the relevant info rather than saying "as configured in step 2".
+- **No jargon without context** — if a step says "apply tuning parameters", show exactly what to run. If it says "edit the config", show the exact commands and content.
+
+### Bug-Driven Testing Policy
+- **Every bug reported by the user must get a thorough regression test** before or alongside the fix
+- Tests should be resilient: not break on simple refactors, but also not just test one narrow case
+- Think through edge cases, boundary conditions, and related scenarios
+- Test the behavior, not the implementation — if a function name changes, the test should still validate the concept
+- Include both the exact failing case and reasonable variations
+
+## Multi-Agent Team Workflow
+
+### Team Structure
+- **Optimal structure**: 3-5 specialist agents + 1 coordinating team lead
+- Each specialist should own a clear domain with minimal overlap
+- Give each agent a specific role, deliverable format, and file path to prevent overlap and confusion
+- The team lead should NOT do specialist work — focus on orchestration, conflict resolution, and synthesis
+
+### Model Selection for Agents
+Choose the model per agent based on what the task demands. This is about cost efficiency, not hard rules — use judgment.
+
+**Opus** is worth the cost when the task involves:
+- Debugging, complex problem solving, multi-step reasoning
+- Architecture decisions or resolving conflicting requirements
+- Code that touches tricky logic, concurrency, security, or subtle edge cases
+- Synthesizing information across many sources into coherent decisions
+
+**Sonnet** is the right pick when the task is primarily:
+- Writing documentation, analysis, or other prose
+- Generating straightforward, well-defined code (CRUD endpoints, boilerplate, tests from a clear spec)
+- Cross-review and refinement of existing drafts
+- Translating requirements into structured output (config files, migration scripts, data models)
+
+**Haiku** makes sense for:
+- Quick lookups, file searches, formatting, or validation checks
+- Simple boilerplate or template generation
+- Tasks where speed matters more than nuance
+
+The goal is to avoid running 5 Opus agents when 3 of them are writing docs. Match the model to the cognitive demand of the task.
+
+### The 2-3 Round Review Pattern
+1. **Round 1**: Independent specialist work with clear deliverable and file path
+2. **Round 2**: Each specialist reads ALL other outputs and refines their own, with specific cross-references called out by the coordinator. This is the biggest value-add — surfaces contradictions, sharpens estimates, creates interdisciplinary insights
+3. **Round 3** (optional): Final coherence pass with explicit resolution of all open tensions. Diminishing returns beyond Round 2.
+
+### Communication
+- **Specific cross-team prompts outperform generic ones.** Messages that point to specific disagreements produce much better refinements than generic "review and update" instructions
+- **Direct messages to specific agents are more effective and cheaper than broadcasts.** Use broadcasts only for universal policy changes
+- **Direct agent-to-agent messaging resolves alignment issues faster** than routing everything through the team lead
+
+### File Ownership
+- **Assign each deliverable to exactly one agent.** Other agents provide input via messages, not direct file edits
+- When spawning agent teams, assign non-overlapping file sets to avoid merge conflicts
+- Documentation-only agents should never touch code/test files and vice versa
+- CLAUDE.md updates should be done by the team lead after all agents finish
+
+### Task Dependencies & Parallel Execution
+- Use `blockedBy` for tasks that genuinely depend on prior work
+- Don't block tasks that can start in parallel — let agents read partial outputs from peers
+- All specialists working simultaneously saves significant time
+- Pre-reading during idle time accelerates cross-review rounds
+
+### Common Pitfalls
+- **Agent context limits cause stalling** — keep documents focused; consider summary sections for cross-team consumption
+- **Don't spawn agents before test infrastructure works** — multiple agents all running broken tests simultaneously is wasteful
+- **Fix foundation first** — test output, CI, then feature work
+- **File conflict risk is real** — exclusive file ownership is critical
+- **Cold-start for agents requires full context** — include all critical context (file paths, team decisions, specific cross-references) in every round's message
+- **Linters/hooks can revert changes** — work WITH the linter, not against it
+
 ## Future Direction: AI Players via Cicero-Style Architecture
 
 ### Inspiration

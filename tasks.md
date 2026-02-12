@@ -46,10 +46,10 @@
   - [x] Update `react` and `react-dom` packages to ^18.3.1
   - [x] Replace `ReactDOM.render()` with `createRoot()` in index.tsx
   - [x] Upgrade `react-konva` v16 → v18.2.14 for React 18 compatibility
-  - [ ] Update `@testing-library/react` to v14+
-- [ ] Upgrade TypeScript 4.9 → 5.x
-  - [ ] Update `tsconfig.json` for new TS features (bundler moduleResolution)
-  - [ ] Fix any new strict mode errors
+  - [x] Update `@testing-library/react` to v16
+- [x] Upgrade TypeScript 4.9 → 5.7
+  - [x] Update `tsconfig.json` for new TS features (bundler moduleResolution, jsx: react-jsx)
+  - [x] No new strict mode errors
 - [ ] Migrate Redux to Redux Toolkit (or evaluate Zustand as lighter alternative)
   - [ ] Install `@reduxjs/toolkit`
   - [ ] Convert slices one at a time: `session` → `activeGame` → `notifications` → rest
@@ -70,54 +70,53 @@
   - [x] Replace `<Route component=...>` / `<Route render=...>` with `<Route element=...>`
   - [x] Replace `Redirect` with `Navigate`
   - [x] Add `useParams()` hook wrappers for game page route params
-  - [ ] Add route-based lazy loading (`React.lazy` + `Suspense`)
+  - [x] Add route-based lazy loading (`React.lazy` + `Suspense`) — 17 page components lazy-loaded, 28 output chunks
 - [x] Upgrade Konva.js 7 → 9
   - [x] Update type import paths from `konva/types/*` to `konva/lib/*`
-- [ ] Upgrade ESLint to v9+ with flat config
-- [ ] Add Prettier for code formatting
+- [x] Upgrade ESLint to v9+ with flat config (`eslint.config.mjs`)
+- [x] Add Prettier for code formatting (`.prettierrc`, `npm run format`)
 
 ## Phase 4: PWA Enablement
 > Make the app installable on Android/iOS with offline support.
 > **Current state**: CRA boilerplate service worker in `web2/src/serviceWorker.ts` (explicitly `unregister()`'d in `index.tsx`). Manifest at `web2/public/manifest.json` has only favicon.ico + logo192.png. iOS meta tags already in `index.html`. No Vite PWA plugin.
 
-- [ ] Replace CRA service worker with Vite PWA plugin
-  - [ ] Install `vite-plugin-pwa` and add to `web2/vite.config.ts`
-  - [ ] Configure Workbox with `generateSW` strategy
-  - [ ] Delete legacy `web2/src/serviceWorker.ts` (CRA boilerplate, 139 lines)
-  - [ ] Remove `serviceWorker.unregister()` call from `web2/src/index.tsx`
-- [ ] Configure caching strategies in `vite.config.ts` PWA plugin
-  - [ ] Cache-first for static assets (JS, CSS, images, fonts) — `CacheFirst` with max-age
-  - [ ] Network-first for API calls (`/api/*`) — `NetworkFirst` with 5s timeout fallback
-  - [ ] Precache app shell (index.html, main JS/CSS bundles)
-  - [ ] Set `navigateFallback: '/index.html'` for SPA routing
-- [ ] Create offline fallback page
-  - [ ] Design minimal offline page with "No connection" message and retry button
-  - [ ] Register as fallback in service worker config
-- [ ] Complete `web2/public/manifest.json` (currently minimal)
-  - [ ] Generate 512x512 app icon from existing logo192.png
-  - [ ] Generate maskable icon (safe zone padding) for Android adaptive icons
-  - [ ] Add icon entries: 48x48, 72x72, 96x96, 144x144, 192x192, 512x512
-  - [ ] Set `"start_url": "/"` (currently `"."` which is ambiguous)
-  - [ ] Set `"scope": "/"`
-  - [ ] Add `"display_override": ["standalone", "window-controls-overlay"]`
-  - [ ] Set `"theme_color": "#161616"` (match app background, currently `#ffffff`)
-  - [ ] Add `"orientation": "any"` (game works in both orientations)
-  - [ ] Add `"categories": ["games", "entertainment"]`
+- [x] Replace CRA service worker with Vite PWA plugin
+  - [x] Install `vite-plugin-pwa` and add to `web2/vite.config.ts`
+  - [x] Configure Workbox with `generateSW` strategy
+  - [x] Delete legacy `web2/src/serviceWorker.ts` (CRA boilerplate, 139 lines)
+  - [x] Remove `serviceWorker.unregister()` call from `web2/src/index.tsx`
+- [x] Configure caching strategies in `vite.config.ts` PWA plugin
+  - [x] Cache-first for static assets (JS, CSS, images, fonts) — precache with globPatterns
+  - [x] Network-first for API calls (`/api/*`) — `NetworkFirst` with 10s timeout fallback
+  - [x] Precache app shell (index.html, main JS/CSS bundles) — 47 precache entries
+  - [x] Set `navigateFallback: '/index.html'` for SPA routing
+- [x] Create offline fallback page
+  - [x] Design minimal offline page with "No connection" message and retry button (`public/offline.html`)
+  - [x] Registered as fallback in service worker config
+- [x] Complete `web2/public/manifest.json`
+  - [x] Generate 512x512 app icon from existing logo192.png
+  - [x] Generate maskable icon (safe zone padding) for Android adaptive icons
+  - [x] Add icon entries: 48x48, 72x72, 96x96, 144x144, 192x192, 512x512
+  - [x] Set `"start_url": "/"`
+  - [x] Set `"scope": "/"`
+  - [x] Add `"display_override": ["standalone", "minimal-ui"]`
+  - [x] Set `"theme_color": "#161616"` (match app background)
+  - [x] Add `"orientation": "any"`
+  - [x] Add `"categories": ["games", "entertainment"]`
   - [ ] Add screenshots for richer install prompt (1 mobile, 1 desktop)
-- [ ] iOS-specific PWA support
+- [x] iOS-specific PWA support
   - [x] `apple-mobile-web-app-capable` meta tag — already in `index.html`
   - [x] `apple-mobile-web-app-status-bar-style` meta tag — already in `index.html`
-  - [x] `apple-touch-icon` link tag — already in `index.html` (logo192.png)
-  - [ ] Add multiple `apple-touch-icon` sizes (120x120, 152x152, 167x167, 180x180)
+  - [x] `apple-touch-icon` link tags with multiple sizes (72, 96, 144, 192)
   - [ ] Add `apple-touch-startup-image` for splash screen on iOS
-- [ ] Implement "Add to Home Screen" install prompt
-  - [ ] Listen for `beforeinstallprompt` event
-  - [ ] Show install banner/button in UI (e.g., TopBar or snackbar)
+- [x] Implement "Add to Home Screen" install prompt
+  - [x] Listen for `beforeinstallprompt` event (`useInstallPrompt` hook)
+  - [x] Show install button in TopBar (`InstallButton` component)
   - [ ] Track install outcome for analytics
-- [ ] Implement app update notification
-  - [ ] Detect new service worker via `onUpdate` callback
-  - [ ] Show "New version available — refresh" snackbar using existing `LatestNotificationSnackBar.tsx`
-  - [ ] Handle `skipWaiting` + page reload on user confirmation
+- [x] Implement app update notification
+  - [x] Detect new service worker via `registerSW` `onNeedRefresh` callback
+  - [x] Show confirm prompt for update (simpler than snackbar for now)
+  - [x] Handle reload on user confirmation
 - [ ] Validation and testing
   - [ ] Run Lighthouse PWA audit — target all green checks
   - [ ] Test install flow on Android Chrome
