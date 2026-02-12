@@ -1,4 +1,5 @@
-import { Theme, makeStyles } from '@material-ui/core';
+import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useFormStyles(theme: Theme) {

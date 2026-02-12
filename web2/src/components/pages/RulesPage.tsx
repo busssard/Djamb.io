@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Typography, Link } from '@material-ui/core';
+import { Typography, Link } from '@mui/material';
 
 const RulesPage: FC = () => {
   return (

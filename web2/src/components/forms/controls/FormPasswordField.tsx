@@ -1,5 +1,5 @@
 import React, { FC, ChangeEvent } from 'react';
-import { FormControlLabel, TextField, useTheme } from '@material-ui/core';
+import { FormControlLabel, TextField, useTheme } from '@mui/material';
 import { useFormStyles } from '../../../styles/styles';
 
 interface Props {

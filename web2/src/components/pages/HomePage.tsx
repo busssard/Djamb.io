@@ -1,5 +1,5 @@
 import React, { FC, useState, useEffect } from 'react';
-import { Typography, Container } from '@material-ui/core';
+import { Typography, Container } from '@mui/material';
 import { useSelector } from 'react-redux';
 import RedirectToSignInIfSignedOut from '../routing/RedirectToSignInIfSignedOut';
 import GameSearchResultsTable from '../tables/GameSearchResultsTable';

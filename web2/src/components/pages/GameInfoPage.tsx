@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Typography, Container } from '@material-ui/core';
+import { Typography, Container } from '@mui/material';
 import RedirectToSignInIfSignedOut from '../routing/RedirectToSignInIfSignedOut';
 import { GamePageProps } from './GamePage';
 import { selectActiveGame } from '../../hooks/selectors';

@@ -1,11 +1,13 @@
 import React, { FC } from 'react';
 import {
-  AppBar, Toolbar, Typography, makeStyles, Grid,
-} from '@material-ui/core';
+  AppBar, Toolbar, Typography, Grid,
+} from '@mui/material';
+import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 import MenuButton from './MenuButton';
 import NotificationsButton from './NotificationsButton';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
   root: {
     flexGrow: 1,
   },
@@ -28,11 +30,11 @@ const TopBar: FC = () => {
       <AppBar position="static" color="inherit">
         <Toolbar>
           <Grid container className={classes.root}>
-            <Grid item xs style={{ display: 'flex' }}>
+            <Grid size="grow" style={{ display: 'flex' }}>
               <MenuButton />
               <NotificationsButton />
             </Grid>
-            <Grid item xs>
+            <Grid size="grow">
               <Typography
                 variant="h6"
                 className={classes.title}
@@ -40,8 +42,8 @@ const TopBar: FC = () => {
                 Djambi-N
               </Typography>
             </Grid>
-            <Grid item xs>
-              {/* itentionally blank */}
+            <Grid size="grow">
+              {/* intentionally blank */}
             </Grid>
           </Grid>
         </Toolbar>

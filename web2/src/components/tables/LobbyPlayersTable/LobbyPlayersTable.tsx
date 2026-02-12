@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import {
   Table, TableContainer, TableHead, TableCell, TableRow, TableBody,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useSelector } from 'react-redux';
 import { selectActiveGame, selectSession } from '../../../hooks/selectors';
 import LobbyPlayerRow from './LobbyPlayerRow';

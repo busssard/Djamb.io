@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Snackbar } from '@material-ui/core';
+import { Snackbar } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { selectNotifications, selectConfig } from '../../hooks/selectors';
 import NotificationAlert from './NotificationAlert';

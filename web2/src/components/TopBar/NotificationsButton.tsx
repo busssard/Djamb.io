@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
-import { IconButton, Typography } from '@material-ui/core';
-import { Notifications as NotificationsIcon } from '@material-ui/icons';
+import { IconButton, Typography } from '@mui/material';
+import { Notifications as NotificationsIcon } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { selectNotifications } from '../../hooks/selectors';
 import { navigateTo } from '../../controllers/navigationController';

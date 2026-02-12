@@ -7,7 +7,7 @@ import {
   TableRow,
   TextField,
   Checkbox,
-} from '@material-ui/core';
+} from '@mui/material';
 import { createGame } from '../../controllers/gameController';
 import FormSubmitButton from './controls/FormSubmitButton';
 import FormTableCell from './controls/FormTableCell';

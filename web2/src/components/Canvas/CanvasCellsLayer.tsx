@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { Layer } from 'react-konva';
-import { Animation } from 'konva/types/Animation';
-import { IFrame } from 'konva/types/types';
+import { Animation } from 'konva/lib/Animation';
+import { IFrame } from 'konva/lib/types';
 import { BoardView, CellView, PieceView } from '../../board/model';
 import { BoardTooltipState } from './model';
 import CanvasCell from './CanvasCell/CanvasCell';

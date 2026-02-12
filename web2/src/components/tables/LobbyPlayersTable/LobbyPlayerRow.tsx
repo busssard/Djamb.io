@@ -1,11 +1,11 @@
 import React, { FC, useState } from 'react';
 import {
   TableCell, TableRow, TextField, Button,
-} from '@material-ui/core';
+} from '@mui/material';
 import {
   Add as AddIcon,
   Remove as RemoveIcon,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { GameDto, PlayerKind } from '../../../api-client';
 import { LobbyPlayerViewModel, LobbyPlayerActionType } from './viewModel';

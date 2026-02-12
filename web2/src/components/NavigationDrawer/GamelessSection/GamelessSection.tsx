@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { List } from '@material-ui/core';
+import { List } from '@mui/material';
 import {
   Input as SignInIcon,
   PersonAdd as CreateAccountIcon,
@@ -10,7 +10,7 @@ import {
   Gavel as RulesIcon,
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import NavigationItem from '../NavigationItem';
 import { selectSession } from '../../../hooks/selectors';

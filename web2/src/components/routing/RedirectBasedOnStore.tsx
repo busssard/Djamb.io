@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import React, { FC } from 'react';
-import { useLocation, Redirect } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import { selectNavigation } from '../../hooks/selectors';
 import { defaultNavigationState } from '../../redux/navigation/state';
 
@@ -11,7 +11,7 @@ const RedirectBasedOnStore: FC = () => {
   if (navigation !== defaultNavigationState
     && navigation.path !== location.pathname) {
     return (
-      <Redirect to={navigation.path} />
+      <Navigate to={navigation.path} replace />
     );
   }
 

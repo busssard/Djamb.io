@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Typography, Container, List } from '@material-ui/core';
+import { Typography, Container, List } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { selectNotifications } from '../../hooks/selectors';
 import NotificationAlert from '../notifications/NotificationAlert';

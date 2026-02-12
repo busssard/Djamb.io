@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Button, useTheme } from '@material-ui/core';
+import { Button, useTheme } from '@mui/material';
 import { useFormStyles } from '../../../styles/styles';
 
 interface FormSubmitButtonProps {

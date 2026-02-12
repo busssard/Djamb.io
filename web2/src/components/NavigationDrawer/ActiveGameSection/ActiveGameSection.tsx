@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { List, Typography, Divider } from '@material-ui/core';
+import { List, Typography, Divider } from '@mui/material';
 import {
   AccountBalance as DiplomacyIcon,
   CameraAlt as SnapshotsIcon,
@@ -7,7 +7,7 @@ import {
   MeetingRoom as LobbyIcon,
   PlayArrow as PlayIcon,
   Info as InfoIcon,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import NavigationItem from '../NavigationItem';
 import { sectionHeaderStyle } from '../styles';

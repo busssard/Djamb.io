@@ -1,4 +1,4 @@
-import { Context } from 'konva/types/Context';
+import { Context } from 'konva/lib/Context';
 import React, { FC } from 'react';
 import { Shape } from 'react-konva';
 import { Polygon } from '../../board/model';

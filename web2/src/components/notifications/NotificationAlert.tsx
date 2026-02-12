@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Alert } from '@material-ui/lab';
+import { Alert } from '@mui/material';
 import { Notification, NotificationLevel } from '../../model/notifications';
 import { removeNotification } from '../../controllers/notificationsController';
 

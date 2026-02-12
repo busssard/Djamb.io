@@ -1,4 +1,4 @@
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 
 // eslint-disable-next-line import/prefer-default-export
 export const sectionHeaderStyle = makeStyles({

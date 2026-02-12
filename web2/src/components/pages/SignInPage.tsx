@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import SignInForm from '../forms/SignInForm';
 import RedirectToHomeIfSignedIn from '../routing/RedirectToHomeIfSignedIn';
 

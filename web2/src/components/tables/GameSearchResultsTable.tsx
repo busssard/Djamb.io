@@ -1,7 +1,8 @@
 import React, { FC } from 'react';
 import {
-  Table, TableContainer, TableCell, TableRow, TableBody, TableHead, makeStyles,
-} from '@material-ui/core';
+  Table, TableContainer, TableCell, TableRow, TableBody, TableHead,
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { SearchGameDto } from '../../api-client';
 import * as Routes from '../../utilities/routes';
 import { navigateTo } from '../../controllers/navigationController';

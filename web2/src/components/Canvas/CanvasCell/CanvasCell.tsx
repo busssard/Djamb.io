@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { Group } from 'react-konva';
-import { KonvaEventObject } from 'konva/types/Node';
+import { KonvaEventObject } from 'konva/lib/Node';
 import CanvasCellPieceLayer from './CanvasCellPieceLayer';
 import CanvasCellHighlightLayer from './CanvasCellHighlightLayer';
 import CanvasCellBackgroundLayer from './CanvasCellBackgroundLayer';

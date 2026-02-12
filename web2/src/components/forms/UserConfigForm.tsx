@@ -7,7 +7,7 @@ import {
   TableRow,
   Checkbox,
   TextField,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useSelector } from 'react-redux';
 import { setUserConfig } from '../../controllers/configController';
 import FormSubmitButton from './controls/FormSubmitButton';

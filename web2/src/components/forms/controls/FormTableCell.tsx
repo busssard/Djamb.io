@@ -1,7 +1,5 @@
-import {
-  TableCell,
-  withStyles,
-} from '@material-ui/core';
+import { TableCell } from '@mui/material';
+import { withStyles } from '@mui/styles';
 
 const FormTableCell = withStyles({
   root: {

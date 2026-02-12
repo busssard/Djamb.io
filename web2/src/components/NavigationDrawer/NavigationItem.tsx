@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import { ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { navigateTo } from '../../controllers/navigationController';
 
 interface NavigationItemProps {
@@ -14,10 +14,10 @@ const NavigationItem: FC<NavigationItemProps> = ({ text, icon, path }) => {
   };
 
   return (
-    <ListItem key={text} button onClick={onClick}>
+    <ListItemButton key={text} onClick={onClick}>
       <ListItemIcon>{icon}</ListItemIcon>
       <ListItemText primary={text} />
-    </ListItem>
+    </ListItemButton>
   );
 };
 
