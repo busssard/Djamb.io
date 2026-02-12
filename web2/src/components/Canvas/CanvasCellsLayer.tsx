@@ -40,7 +40,9 @@ const CanvasCellsLayer : FC<Props> = ({
     });
 
     a.start();
-  });
+
+    return () => { a.stop(); };
+  }, []);
 
   const pieceSize = scale * getBoardPieceScale(board);
   return (

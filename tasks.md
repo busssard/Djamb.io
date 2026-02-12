@@ -17,10 +17,11 @@
 ## Phase 1: Critical Bug Fixes
 > Fix showstopper bugs in the current codebase before any modernization.
 
-- [ ] Fix `useEffect` infinite loop in `web2/src/components/pages/HomePage.tsx` (missing dependency array)
-- [ ] Fix `useEffect` infinite loop in `web2/src/components/pages/GamePlayPage.tsx` (missing dependency array)
-- [ ] Fix `useEffect` infinite loop in `web2/src/components/pages/GameDiplomacyPage.tsx` (same pattern)
-- [ ] Audit all other `useEffect` calls for missing dependency arrays
+- [x] Fix `useEffect` infinite loop in `web2/src/components/pages/HomePage.tsx` — added `[user?.name]` deps
+- [x] Fix `useEffect` infinite loop in `web2/src/components/pages/GamePlayPage.tsx` — added `[game?.id, game?.status, gameId]`
+- [x] Fix `useEffect` infinite loop in `web2/src/components/pages/GameDiplomacyPage.tsx` — added deps
+- [x] Audit all `useEffect` calls — fixed 9 files total (GamePage, GameInfoPage, GameSnapshotsPage, GameLobbyPage, GameOutcomePage, CanvasCellsLayer)
+- [x] Fix CanvasCellsLayer animation leak — added `[]` deps + cleanup `return () => { a.stop(); }`
 - [ ] Fix session token logging vulnerability in `api/api.web/SessionContextProvider.fs` (line 25 — logs full token)
 
 ## Phase 2: Frontend Modernization — Build System

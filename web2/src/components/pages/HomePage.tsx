@@ -12,10 +12,6 @@ const HomePage: FC = () => {
   const { user } = useSelector(selectSession);
 
   useEffect(() => {
-    if (recentGames.length > 0) {
-      return;
-    }
-
     searchGames({
       playerUserName: user?.name,
       statuses: [GameStatus.Pending, GameStatus.InProgress],
@@ -24,7 +20,8 @@ const HomePage: FC = () => {
         const sorted = games.sort((x) => x.id).reverse();
         setRecentGames(sorted);
       });
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.name]);
 
   return (
     <div>

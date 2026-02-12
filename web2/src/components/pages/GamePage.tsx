@@ -34,7 +34,8 @@ const GamePage: FC<GamePageProps> = ({ gameId }) => {
       default:
         throw new Error(`Invalid game status ${game.status}`);
     }
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.id, game?.status, gameId]);
 
   return (
     <div>

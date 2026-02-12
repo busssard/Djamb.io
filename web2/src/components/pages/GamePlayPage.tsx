@@ -18,7 +18,8 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
     } else if (![GameStatus.InProgress, GameStatus.Over].includes(game.status)) {
       navigateTo(Routes.game(gameId));
     }
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.id, game?.status, gameId]);
 
   return (
     <div>

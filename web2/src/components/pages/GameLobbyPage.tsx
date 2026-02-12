@@ -20,7 +20,8 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
     if (game?.id !== gameId) {
       loadGame(gameId);
     }
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.id, gameId]);
 
   const styles = useFormStyles(theme);
 

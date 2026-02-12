@@ -13,7 +13,8 @@ const GameSnapshotsPage: FC<GamePageProps> = ({ gameId }) => {
     if (game?.id !== gameId) {
       loadGame(gameId);
     }
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.id, gameId]);
 
   return (
     <div>
