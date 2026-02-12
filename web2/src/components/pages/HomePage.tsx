@@ -15,25 +15,20 @@ const HomePage: FC = () => {
     searchGames({
       playerUserName: user?.name,
       statuses: [GameStatus.Pending, GameStatus.InProgress],
-    })
-      .then((games) => {
-        const sorted = games.sort((x) => x.id).reverse();
-        setRecentGames(sorted);
-      });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    }).then((games) => {
+      const sorted = games.sort((x) => x.id).reverse();
+      setRecentGames(sorted);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.name]);
 
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        Home
-      </Typography>
+      <Typography variant="h4">Home</Typography>
       <br />
       <br />
-      <Typography variant="h5">
-        Recent games
-      </Typography>
+      <Typography variant="h5">Recent games</Typography>
       <br />
       <Container maxWidth="md">
         <GameSearchResultsTable games={recentGames} />

@@ -1,7 +1,7 @@
 export type ImagesState = {
-  pieces: Map<string, HTMLImageElement>
+  pieces: Map<string, HTMLImageElement>;
 };
 
-export const defaultImagesState : ImagesState = {
+export const defaultImagesState: ImagesState = {
   pieces: new Map<string, HTMLImageElement>(),
 };

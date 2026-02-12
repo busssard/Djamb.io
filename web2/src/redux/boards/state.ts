@@ -6,7 +6,7 @@ export type BoardsState = {
   emptyBoardViews: Map<number, BoardView>;
 };
 
-export const defaultBoardsState : BoardsState = {
+export const defaultBoardsState: BoardsState = {
   boards: new Map<number, BoardDto>(),
   emptyBoardViews: new Map<number, BoardView>(),
 };

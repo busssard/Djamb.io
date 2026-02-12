@@ -6,9 +6,9 @@ import FormSubmitButton from './controls/FormSubmitButton';
 import FormPasswordField from './controls/FormPasswordField';
 
 type FormState = {
-  username: string,
-  password1: string,
-  password2: string
+  username: string;
+  password1: string;
+  password2: string;
 };
 
 const defaultState: FormState = {
@@ -20,54 +20,54 @@ const defaultState: FormState = {
 const CreateAccountForm: FC = () => {
   const [state, setState] = useState(defaultState);
 
-  const passwordsDontMatch = (state.password1 !== state.password2)
-    && (state.password2 !== '');
+  const passwordsDontMatch = state.password1 !== state.password2 && state.password2 !== '';
 
-  const submit = () => createAccount({
-    name: state.username,
-    password: state.password1,
-  });
+  const submit = () =>
+    createAccount({
+      name: state.username,
+      password: state.password1,
+    });
 
   return (
     <div>
-      <FormControl
-        component="fieldset"
-        onSubmit={submit}
-      >
+      <FormControl component="fieldset" onSubmit={submit}>
         <FormGroup>
           <FormTextField
             label="Username"
             value={state.username}
-            onChanged={(e) => setState({
-              ...state,
-              username: e.target.value,
-            })}
+            onChanged={(e) =>
+              setState({
+                ...state,
+                username: e.target.value,
+              })
+            }
           />
           <FormPasswordField
             label="Password"
             value={state.password1}
-            onChanged={(e) => setState({
-              ...state,
-              password1: e.target.value,
-            })}
+            onChanged={(e) =>
+              setState({
+                ...state,
+                password1: e.target.value,
+              })
+            }
             error={passwordsDontMatch}
             helperText={passwordsDontMatch ? 'Passwords do not match' : undefined}
           />
           <FormPasswordField
             label="Confirm password"
             value={state.password2}
-            onChanged={(e) => setState({
-              ...state,
-              password2: e.target.value,
-            })}
+            onChanged={(e) =>
+              setState({
+                ...state,
+                password2: e.target.value,
+              })
+            }
             error={passwordsDontMatch}
             helperText={passwordsDontMatch ? 'Passwords do not match' : undefined}
           />
           <br />
-          <FormSubmitButton
-            text="Submit"
-            onClick={submit}
-          />
+          <FormSubmitButton text="Submit" onClick={submit} />
         </FormGroup>
       </FormControl>
     </div>

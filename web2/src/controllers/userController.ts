@@ -1,15 +1,16 @@
 import {
-  CreateUserRequestDto, ApiUsersPostRequest, ApiSessionsPostRequest, LoginRequestDto,
+  CreateUserRequestDto,
+  ApiUsersPostRequest,
+  ApiSessionsPostRequest,
+  LoginRequestDto,
 } from '../api-client';
 import * as Api from '../utilities/api';
-import {
-  loggedIn, restoreSucceeded, restoreFailed,
-} from '../redux/session/actionFactory';
+import { loggedIn, restoreSucceeded, restoreFailed } from '../redux/session/actionFactory';
 import { store } from '../redux';
 import { preloadAllBoards } from './boardController';
 import { preloadAllPieceImages } from './imageController';
 
-function postLoginActions() : void {
+function postLoginActions(): void {
   preloadAllBoards();
   preloadAllPieceImages();
 }

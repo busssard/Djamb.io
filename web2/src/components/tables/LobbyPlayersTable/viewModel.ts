@@ -1,30 +1,31 @@
-import {
-  UserDto, GameDto, PlayerKind, PlayerDto,
-} from '../../../api-client';
+import { UserDto, GameDto, PlayerKind, PlayerDto } from '../../../api-client';
 
 export enum LobbyPlayerActionType {
   None,
   SelfJoin,
   AddGuest,
   Remove,
-  SelfQuit
+  SelfQuit,
 }
 
 export type LobbyPlayerViewModel = {
-  id: number | null,
-  name: string,
-  kind: PlayerKind | null,
-  userId: number | null,
-  note: string,
-  actionType: LobbyPlayerActionType
+  id: number | null;
+  name: string;
+  kind: PlayerKind | null;
+  userId: number | null;
+  note: string;
+  actionType: LobbyPlayerActionType;
 };
 
 function getPlayerNote(player: PlayerDto, game: GameDto): string {
   switch (player.kind) {
     case PlayerKind.Guest: {
-      const host = game.players.find((p) => p.kind === PlayerKind.User
-        && p.userId === player.userId);
-      if (!host) { throw new Error('Host player for guest not found.'); }
+      const host = game.players.find(
+        (p) => p.kind === PlayerKind.User && p.userId === player.userId,
+      );
+      if (!host) {
+        throw new Error('Host player for guest not found.');
+      }
       return `Guest of ${host.name}`;
     }
     case PlayerKind.Neutral:
@@ -62,8 +63,7 @@ function getViewModelsForCurrentPlayers(currentUser: UserDto, game: GameDto) {
   });
 }
 
-export function getViewModels(currentUser: UserDto, game: GameDto)
-  : LobbyPlayerViewModel[] {
+export function getViewModels(currentUser: UserDto, game: GameDto): LobbyPlayerViewModel[] {
   const viewModels = getViewModelsForCurrentPlayers(currentUser, game);
   const emptySlotCount = game.parameters.regionCount - viewModels.length;
   const userIsPlayer = game.players.map((p) => p.userId).includes(currentUser.id);

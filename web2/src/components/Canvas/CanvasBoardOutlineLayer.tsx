@@ -4,17 +4,14 @@ import { BoardView } from '../../board/model';
 import CanvasPolygon, { CanvasPolygonStyle } from './CanvasPolygon';
 
 interface Props {
-  board: BoardView,
-  style: CanvasPolygonStyle
+  board: BoardView;
+  style: CanvasPolygonStyle;
 }
 
-const CanvasBoardOutlineLayer : FC<Props> = ({ board, style }) => {
+const CanvasBoardOutlineLayer: FC<Props> = ({ board, style }) => {
   return (
     <Layer>
-      <CanvasPolygon
-        polygon={board.polygon}
-        style={style}
-      />
+      <CanvasPolygon polygon={board.polygon} style={style} />
     </Layer>
   );
 };

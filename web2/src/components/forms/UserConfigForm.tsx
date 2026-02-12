@@ -26,10 +26,7 @@ const UserConfigForm: FC = () => {
   const submit = () => setUserConfig(state);
 
   return (
-    <FormControl
-      component="fieldset"
-      onSubmit={submit}
-    >
+    <FormControl component="fieldset" onSubmit={submit}>
       <FormGroup>
         <Table>
           <TableBody>
@@ -39,10 +36,12 @@ const UserConfigForm: FC = () => {
                 <Checkbox
                   className={styles.control}
                   checked={state.logRedux}
-                  onChange={(e) => setState({
-                    ...state,
-                    logRedux: e.target.checked,
-                  })}
+                  onChange={(e) =>
+                    setState({
+                      ...state,
+                      logRedux: e.target.checked,
+                    })
+                  }
                 />
               </TableCell>
             </TableRow>
@@ -52,10 +51,12 @@ const UserConfigForm: FC = () => {
                 <Checkbox
                   className={styles.control}
                   checked={state.showCellAndPieceIds}
-                  onChange={(e) => setState({
-                    ...state,
-                    showCellAndPieceIds: e.target.checked,
-                  })}
+                  onChange={(e) =>
+                    setState({
+                      ...state,
+                      showCellAndPieceIds: e.target.checked,
+                    })
+                  }
                 />
               </TableCell>
             </TableRow>
@@ -65,10 +66,12 @@ const UserConfigForm: FC = () => {
                 <Checkbox
                   className={styles.control}
                   checked={state.showBoardTooltips}
-                  onChange={(e) => setState({
-                    ...state,
-                    showBoardTooltips: e.target.checked,
-                  })}
+                  onChange={(e) =>
+                    setState({
+                      ...state,
+                      showBoardTooltips: e.target.checked,
+                    })
+                  }
                 />
               </TableCell>
             </TableRow>
@@ -79,20 +82,19 @@ const UserConfigForm: FC = () => {
                   type="number"
                   className={styles.control}
                   value={state.notificationDisplaySeconds}
-                  onChange={(e) => setState({
-                    ...state,
-                    notificationDisplaySeconds: Number(e.target.value),
-                  })}
+                  onChange={(e) =>
+                    setState({
+                      ...state,
+                      notificationDisplaySeconds: Number(e.target.value),
+                    })
+                  }
                 />
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
         <br />
-        <FormSubmitButton
-          text="Save"
-          onClick={submit}
-        />
+        <FormSubmitButton text="Save" onClick={submit} />
       </FormGroup>
     </FormControl>
   );

@@ -4,9 +4,7 @@ import { Typography } from '@mui/material';
 const NoMatchPage: FC = () => {
   return (
     <div>
-      <Typography variant="h4">
-        Page not found
-      </Typography>
+      <Typography variant="h4">Page not found</Typography>
     </div>
   );
 };

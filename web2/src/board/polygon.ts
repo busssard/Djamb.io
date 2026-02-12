@@ -1,7 +1,5 @@
 import * as MathJs from 'mathjs';
-import {
-  Polygon, Point, Rectangle, Line,
-} from './model';
+import { Polygon, Point, Rectangle, Line } from './model';
 import * as P from './point';
 
 export function boundingBox(p: Polygon): Rectangle {

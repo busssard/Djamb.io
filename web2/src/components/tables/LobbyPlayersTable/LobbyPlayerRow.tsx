@@ -1,11 +1,6 @@
 import React, { FC, useState } from 'react';
-import {
-  TableCell, TableRow, TextField, Button,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Remove as RemoveIcon,
-} from '@mui/icons-material';
+import { TableCell, TableRow, TextField, Button } from '@mui/material';
+import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { GameDto, PlayerKind } from '../../../api-client';
 import { LobbyPlayerViewModel, LobbyPlayerActionType } from './viewModel';
@@ -15,8 +10,8 @@ import { useFormStyles } from '../../../styles/styles';
 import { theme } from '../../../styles/materialTheme';
 
 interface Props {
-  player: LobbyPlayerViewModel,
-  game: GameDto
+  player: LobbyPlayerViewModel;
+  game: GameDto;
 }
 
 const getActionIcon = (action: LobbyPlayerActionType | null) => {
@@ -108,35 +103,34 @@ const LobbyPlayerRow: FC<Props> = ({ player, game }) => {
 
   return (
     <TableRow>
-      <TableCell>{
-        player.actionType === LobbyPlayerActionType.AddGuest
-          ? (
-            <TextField
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              error={!isValidName}
-              helperText={helperText}
-              placeholder="Guest player name"
-            />
-          )
-          : player.name
-      }
+      <TableCell>
+        {player.actionType === LobbyPlayerActionType.AddGuest ? (
+          <TextField
+            value={guestName}
+            onChange={(e) => setGuestName(e.target.value)}
+            error={!isValidName}
+            helperText={helperText}
+            placeholder="Guest player name"
+          />
+        ) : (
+          player.name
+        )}
       </TableCell>
       <TableCell>{player.note}</TableCell>
       <TableCell>
-        {player.actionType === LobbyPlayerActionType.None || player.actionType === null
-          ? <></>
-          : (
-            <Button
-              className={styles.button}
-              onClick={onClick}
-              style={{ width: '100%' }}
-              disabled={player.actionType === LobbyPlayerActionType.AddGuest && !guestName}
-            >
-              {getActionIcon(player.actionType)}
-              {getActionLabel(player.actionType)}
-            </Button>
-          )}
+        {player.actionType === LobbyPlayerActionType.None || player.actionType === null ? (
+          <></>
+        ) : (
+          <Button
+            className={styles.button}
+            onClick={onClick}
+            style={{ width: '100%' }}
+            disabled={player.actionType === LobbyPlayerActionType.AddGuest && !guestName}
+          >
+            {getActionIcon(player.actionType)}
+            {getActionLabel(player.actionType)}
+          </Button>
+        )}
       </TableCell>
     </TableRow>
   );

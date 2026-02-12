@@ -18,11 +18,7 @@ import * as Routes from '../../../utilities/routes';
 
 const getUnauthenticatedItems = () => (
   <>
-    <NavigationItem
-      text="Sign in"
-      icon={<SignInIcon />}
-      path={Routes.signIn}
-    />
+    <NavigationItem text="Sign in" icon={<SignInIcon />} path={Routes.signIn} />
     <NavigationItem
       text="Create account"
       icon={<CreateAccountIcon />}
@@ -33,46 +29,18 @@ const getUnauthenticatedItems = () => (
 
 const getAuthenticatedItems = () => (
   <>
-    <NavigationItem
-      text="Home"
-      icon={<HomeIcon />}
-      path={Routes.home}
-    />
-    <NavigationItem
-      text="New game"
-      icon={<NewGameIcon />}
-      path={Routes.newGame}
-    />
-    <NavigationItem
-      text="Search games"
-      icon={<SearchIcon />}
-      path={Routes.searchGames}
-    />
-    <NavigationItem
-      text="Sign out"
-      icon={<SignOutIcon />}
-      path={Routes.signOut}
-    />
+    <NavigationItem text="Home" icon={<HomeIcon />} path={Routes.home} />
+    <NavigationItem text="New game" icon={<NewGameIcon />} path={Routes.newGame} />
+    <NavigationItem text="Search games" icon={<SearchIcon />} path={Routes.searchGames} />
+    <NavigationItem text="Sign out" icon={<SignOutIcon />} path={Routes.signOut} />
   </>
 );
 
 const getConstantItems = () => (
   <>
-    <NavigationItem
-      text="Notifications"
-      icon={<NotificationsIcon />}
-      path={Routes.notifications}
-    />
-    <NavigationItem
-      text="Settings"
-      icon={<SettingsIcon />}
-      path={Routes.settings}
-    />
-    <NavigationItem
-      text="Rules"
-      icon={<RulesIcon />}
-      path={Routes.rules}
-    />
+    <NavigationItem text="Notifications" icon={<NotificationsIcon />} path={Routes.notifications} />
+    <NavigationItem text="Settings" icon={<SettingsIcon />} path={Routes.settings} />
+    <NavigationItem text="Rules" icon={<RulesIcon />} path={Routes.rules} />
   </>
 );
 

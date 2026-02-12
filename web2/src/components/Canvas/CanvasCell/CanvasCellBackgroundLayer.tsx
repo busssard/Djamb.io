@@ -4,10 +4,10 @@ import CanvasPolygon from '../CanvasPolygon';
 import { getCellColor, getCellBorderColor } from '../styles';
 
 interface Props {
-  cell: CellView,
+  cell: CellView;
 }
 
-const CanvasCellBackgroundLayer : FC<Props> = ({ cell }) => {
+const CanvasCellBackgroundLayer: FC<Props> = ({ cell }) => {
   const color = getCellColor(cell);
   let borderColor = getCellBorderColor(cell);
   if (!borderColor) {

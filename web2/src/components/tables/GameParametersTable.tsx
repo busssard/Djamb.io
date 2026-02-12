@@ -1,7 +1,5 @@
 import React, { FC } from 'react';
-import {
-  Table, TableContainer, TableCell, TableRow, TableBody,
-} from '@mui/material';
+import { Table, TableContainer, TableCell, TableRow, TableBody } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { selectActiveGame } from '../../hooks/selectors';
 

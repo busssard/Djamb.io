@@ -6,9 +6,7 @@ const SignOutPage: FC = () => {
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        Sign out
-      </Typography>
+      <Typography variant="h4">Sign out</Typography>
     </div>
   );
 };

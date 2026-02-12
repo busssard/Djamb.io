@@ -1,4 +1,8 @@
-import { navigateTo as createNavigateToAction, openDrawer, closeDrawer } from '../redux/navigation/actionFactory';
+import {
+  navigateTo as createNavigateToAction,
+  openDrawer,
+  closeDrawer,
+} from '../redux/navigation/actionFactory';
 import { store } from '../redux';
 
 export async function navigateTo(path: string): Promise<void> {

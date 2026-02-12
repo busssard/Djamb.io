@@ -18,7 +18,7 @@ const GameInfoPage: FC<GamePageProps> = ({ gameId }) => {
     if (game?.id !== gameId) {
       loadGame(gameId);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id, gameId]);
 
   if (game === null) {
@@ -33,22 +33,16 @@ const GameInfoPage: FC<GamePageProps> = ({ gameId }) => {
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        {`Game ${gameId} info page`}
-      </Typography>
+      <Typography variant="h4">{`Game ${gameId} info page`}</Typography>
       <br />
       <Container maxWidth="xs">
-        <Typography variant="h5">
-          Settings
-        </Typography>
+        <Typography variant="h5">Settings</Typography>
         <GameParametersTable />
       </Container>
       <br />
       <br />
       <Container maxWidth="sm">
-        <Typography variant="h5">
-          Players
-        </Typography>
+        <Typography variant="h5">Players</Typography>
         <InfoPlayersTable />
       </Container>
     </div>

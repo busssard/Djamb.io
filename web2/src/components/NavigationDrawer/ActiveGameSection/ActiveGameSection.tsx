@@ -28,12 +28,8 @@ const ActiveGameSection: FC = () => {
     <>
       <Divider />
       <List>
-        <Typography
-          variant="h5"
-          className={headerStyle.h5}
-        >
+        <Typography variant="h5" className={headerStyle.h5}>
           {`Game ${game.id}`}
-
         </Typography>
 
         {game.parameters.description ? (
@@ -43,26 +39,13 @@ const ActiveGameSection: FC = () => {
         ) : undefined}
 
         {game.status === GameStatus.Pending ? (
-          <NavigationItem
-            text="Lobby"
-            icon={<LobbyIcon />}
-            path={Routes.gameLobby(game.id)}
-          />
-        )
-          : (
-            <NavigationItem
-              text="Info"
-              icon={<InfoIcon />}
-              path={Routes.gameInfo(game.id)}
-            />
-          )}
+          <NavigationItem text="Lobby" icon={<LobbyIcon />} path={Routes.gameLobby(game.id)} />
+        ) : (
+          <NavigationItem text="Info" icon={<InfoIcon />} path={Routes.gameInfo(game.id)} />
+        )}
 
         {[GameStatus.InProgress, GameStatus.Over].includes(game.status) ? (
-          <NavigationItem
-            text="Resume"
-            icon={<PlayIcon />}
-            path={Routes.gamePlay(game.id)}
-          />
+          <NavigationItem text="Resume" icon={<PlayIcon />} path={Routes.gamePlay(game.id)} />
         ) : undefined}
 
         {game.status === GameStatus.InProgress ? (

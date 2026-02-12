@@ -1,5 +1,5 @@
 export type ApiClientState = {
-  pendingRequestIds: string[]
+  pendingRequestIds: string[];
 };
 
 export const defaultApiClientState: ApiClientState = {

@@ -11,8 +11,8 @@ export interface CanvasPolygonStyle {
 }
 
 interface Props {
-  polygon: Polygon,
-  style: CanvasPolygonStyle
+  polygon: Polygon;
+  style: CanvasPolygonStyle;
 }
 
 const CanvasPolygon: FC<Props> = ({ polygon, style }) => (

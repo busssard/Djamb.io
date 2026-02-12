@@ -3,17 +3,15 @@ import { FormControlLabel, TextField, useTheme } from '@mui/material';
 import { useFormStyles } from '../../../styles/styles';
 
 interface Props {
-  value: string,
-  label: string,
-  onChanged: (e: ChangeEvent<HTMLInputElement>) => void,
-  error?: boolean,
-  helperText?: string
-  placeholder?: string
+  value: string;
+  label: string;
+  onChanged: (e: ChangeEvent<HTMLInputElement>) => void;
+  error?: boolean;
+  helperText?: string;
+  placeholder?: string;
 }
 
-const FormTextField: FC<Props> = ({
-  value, label, onChanged, error, helperText, placeholder,
-}) => {
+const FormTextField: FC<Props> = ({ value, label, onChanged, error, helperText, placeholder }) => {
   const theme = useTheme();
   const styles = useFormStyles(theme);
 
@@ -23,7 +21,7 @@ const FormTextField: FC<Props> = ({
       label={label}
       labelPlacement="start"
       className={styles.label}
-      control={(
+      control={
         <TextField
           className={styles.control}
           onChange={onChanged}
@@ -31,7 +29,7 @@ const FormTextField: FC<Props> = ({
           helperText={helperText}
           placeholder={placeholder}
         />
-      )}
+      }
     />
   );
 };

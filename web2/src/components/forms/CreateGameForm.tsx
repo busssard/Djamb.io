@@ -13,10 +13,10 @@ import FormSubmitButton from './controls/FormSubmitButton';
 import FormTableCell from './controls/FormTableCell';
 
 type FormState = {
-  description: string,
-  allowGuests: boolean,
-  isPublic: boolean,
-  regionCount: number
+  description: string;
+  allowGuests: boolean;
+  isPublic: boolean;
+  regionCount: number;
 };
 
 const defaultState: FormState = {
@@ -35,77 +35,71 @@ const CreateGameForm: FC = () => {
 
   return (
     <div>
-      <FormControl
-        component="fieldset"
-        onSubmit={submit}
-      >
+      <FormControl component="fieldset" onSubmit={submit}>
         <FormGroup>
           <Table>
             <TableBody>
               <TableRow>
-                <TableCell>
-                  Description
-                </TableCell>
+                <TableCell>Description</TableCell>
                 <TableCell>
                   <TextField
                     value={state.description}
-                    onChange={(e) => setState({
-                      ...state,
-                      description: e.target.value,
-                    })}
+                    onChange={(e) =>
+                      setState({
+                        ...state,
+                        description: e.target.value,
+                      })
+                    }
                   />
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>
-                  Allow guest players
-                </TableCell>
+                <TableCell>Allow guest players</TableCell>
                 <TableCell>
                   <Checkbox
                     checked={state.allowGuests}
-                    onChange={(e) => setState({
-                      ...state,
-                      allowGuests: e.target.checked,
-                    })}
+                    onChange={(e) =>
+                      setState({
+                        ...state,
+                        allowGuests: e.target.checked,
+                      })
+                    }
                   />
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>
-                  Public
-                </TableCell>
+                <TableCell>Public</TableCell>
                 <TableCell>
                   <Checkbox
                     checked={state.isPublic}
-                    onChange={(e) => setState({
-                      ...state,
-                      isPublic: e.target.checked,
-                    })}
+                    onChange={(e) =>
+                      setState({
+                        ...state,
+                        isPublic: e.target.checked,
+                      })
+                    }
                   />
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>
-                  Board regions
-                </TableCell>
+                <TableCell>Board regions</TableCell>
                 <TableCell>
                   <TextField
                     type="number"
                     value={state.regionCount}
-                    onChange={(e) => setState({
-                      ...state,
-                      regionCount: Number(e.target.value),
-                    })}
+                    onChange={(e) =>
+                      setState({
+                        ...state,
+                        regionCount: Number(e.target.value),
+                      })
+                    }
                   />
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
           <br />
-          <FormSubmitButton
-            text="Submit"
-            onClick={submit}
-          />
+          <FormSubmitButton text="Submit" onClick={submit} />
         </FormGroup>
       </FormControl>
     </div>

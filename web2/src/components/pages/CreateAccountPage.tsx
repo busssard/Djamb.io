@@ -7,9 +7,7 @@ const CreateAccountPage: FC = () => {
   return (
     <div>
       <RedirectToHomeIfSignedIn />
-      <Typography variant="h4">
-        Create account
-      </Typography>
+      <Typography variant="h4">Create account</Typography>
       <br />
       <CreateAccountForm />
     </div>

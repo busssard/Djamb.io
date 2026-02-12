@@ -7,9 +7,7 @@ const CreateGamePage: FC = () => {
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        Create game
-      </Typography>
+      <Typography variant="h4">Create game</Typography>
       <br />
       <CreateGameForm />
     </div>

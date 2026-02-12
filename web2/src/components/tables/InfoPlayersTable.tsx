@@ -1,7 +1,5 @@
 import React, { FC } from 'react';
-import {
-  Table, TableContainer, TableHead, TableCell, TableRow, TableBody,
-} from '@mui/material';
+import { Table, TableContainer, TableHead, TableCell, TableRow, TableBody } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { selectActiveGame } from '../../hooks/selectors';
 import { PlayerKind, PlayerDto, GameDto } from '../../api-client';
@@ -9,9 +7,12 @@ import { PlayerKind, PlayerDto, GameDto } from '../../api-client';
 function getPlayerNote(player: PlayerDto, game: GameDto): string {
   switch (player.kind) {
     case PlayerKind.Guest: {
-      const host = game.players.find((p) => p.kind === PlayerKind.User
-        && p.userId === player.userId);
-      if (!host) { throw new Error('Host player for guest not found.'); }
+      const host = game.players.find(
+        (p) => p.kind === PlayerKind.User && p.userId === player.userId,
+      );
+      if (!host) {
+        throw new Error('Host player for guest not found.');
+      }
       return `Guest of ${host.name}`;
     }
     case PlayerKind.Neutral:
@@ -38,15 +39,13 @@ const InfoPlayersTable: FC = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {
-            game.players.map((p, i) => (
-              <TableRow key={i.toString()}>
-                <TableCell>{p.name}</TableCell>
-                <TableCell>{getPlayerNote(p, game)}</TableCell>
-                <TableCell>{p.status}</TableCell>
-              </TableRow>
-            ))
-          }
+          {game.players.map((p, i) => (
+            <TableRow key={i.toString()}>
+              <TableCell>{p.name}</TableCell>
+              <TableCell>{getPlayerNote(p, game)}</TableCell>
+              <TableCell>{p.status}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>

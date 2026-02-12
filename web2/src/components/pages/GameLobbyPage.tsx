@@ -20,7 +20,7 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
     if (game?.id !== gameId) {
       loadGame(gameId);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id, gameId]);
 
   const styles = useFormStyles(theme);
@@ -39,42 +39,31 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        {`Game ${gameId} lobby page`}
-      </Typography>
+      <Typography variant="h4">{`Game ${gameId} lobby page`}</Typography>
       <br />
       <Container maxWidth="xs">
-        <Typography variant="h5">
-          Settings
-        </Typography>
+        <Typography variant="h5">Settings</Typography>
         <GameParametersTable />
       </Container>
       <br />
       <br />
       <Container maxWidth="sm">
-        <Typography variant="h5">
-          Players
-        </Typography>
+        <Typography variant="h5">Players</Typography>
         <LobbyPlayersTable />
       </Container>
       <br />
       <br />
       <Container maxWidth="xs">
-        <Button
-          className={styles.button}
-          onClick={() => startGame(game.id)}
-          disabled={!canStart}
-        >
+        <Button className={styles.button} onClick={() => startGame(game.id)} disabled={!canStart}>
           Start
         </Button>
         <br />
         <br />
-        {canStart ? <></>
-          : (
-            <Typography variant="caption">
-              Cannot start until more players to join.
-            </Typography>
-          )}
+        {canStart ? (
+          <></>
+        ) : (
+          <Typography variant="caption">Cannot start until more players to join.</Typography>
+        )}
       </Container>
     </div>
   );

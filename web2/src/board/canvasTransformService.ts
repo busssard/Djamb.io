@@ -6,11 +6,11 @@ import * as Rectangle from './rectangle';
 import * as RegularPolygon from './regularPolygon';
 
 export type CanvasTranformData = {
-  containerSize: Point,
-  canvasMargin: number,
-  contentPadding: number,
-  regionCount: number,
-  zoomLevel: number
+  containerSize: Point;
+  canvasMargin: number;
+  contentPadding: number;
+  regionCount: number;
+  zoomLevel: number;
 };
 
 function getBoardPolygonBaseSize(regionCount: number): Point {
@@ -34,21 +34,21 @@ function getTotalMargin(data: CanvasTranformData): number {
 const zoomLevelScales = new Map<number, number>([
   [-7, 0.25],
   [-6, 0.33],
-  [-5, 0.50],
+  [-5, 0.5],
   [-4, 0.67],
   [-3, 0.75],
-  [-2, 0.80],
-  [-1, 0.90],
-  [0, 1.00],
-  [1, 1.10],
+  [-2, 0.8],
+  [-1, 0.9],
+  [0, 1.0],
+  [1, 1.1],
   [2, 1.25],
-  [3, 1.50],
+  [3, 1.5],
   [4, 1.75],
-  [5, 2.00],
-  [6, 2.50],
-  [7, 3.00],
-  [8, 4.00],
-  [9, 5.00],
+  [5, 2.0],
+  [6, 2.5],
+  [7, 3.0],
+  [8, 4.0],
+  [9, 5.0],
 ]);
 
 export function getZoomScaleFactor(zoomLevel: number): number {
@@ -59,15 +59,22 @@ export function getZoomScaleFactor(zoomLevel: number): number {
   return result;
 }
 
-export function minZoomLevel(): number { return -7; }
+export function minZoomLevel(): number {
+  return -7;
+}
 
-export function maxZoomLevel(): number { return 9; }
+export function maxZoomLevel(): number {
+  return 9;
+}
 
 export function getScale(data: CanvasTranformData): number {
   const contentAreaSizeWithNoZoom = Pt.subtractScalar(data.containerSize, getTotalMargin(data));
   const boardBaseSize = getBoardPolygonBaseSize(data.regionCount);
   // eslint-disable-next-line max-len
-  const containerSizeScaleFactor = Rectangle.largestScaleWithinBox(boardBaseSize, contentAreaSizeWithNoZoom);
+  const containerSizeScaleFactor = Rectangle.largestScaleWithinBox(
+    boardBaseSize,
+    contentAreaSizeWithNoZoom,
+  );
   const zoomScaleFactor = getZoomScaleFactor(data.zoomLevel);
   return containerSizeScaleFactor * zoomScaleFactor;
 }
@@ -97,7 +104,9 @@ function getTransformToCenterBoardInCanvas(data: CanvasTranformData): MathJs.Mat
   let offset = Pt.multiplyScalar(canvasSize, 0.5);
 
   // eslint-disable-next-line max-len
-  let centroidToCenterOffset = RegularPolygon.sideToCentroidOffsetFromCenterRatios(data.regionCount);
+  let centroidToCenterOffset = RegularPolygon.sideToCentroidOffsetFromCenterRatios(
+    data.regionCount,
+  );
   centroidToCenterOffset = Pt.multiplyScalar(centroidToCenterOffset, getScale(data));
 
   offset = Pt.add(offset, centroidToCenterOffset);

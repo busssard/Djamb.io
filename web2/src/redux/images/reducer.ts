@@ -6,11 +6,10 @@ import { defaultImagesState, ImagesState } from './state';
 
 export function imagesReducer(
   state: ImagesState = defaultImagesState,
-  action : ImagesAction,
-) : ImagesState {
+  action: ImagesAction,
+): ImagesState {
   switch (action.type) {
-    case ImagesActionTypes.PieceImageLoaded:
-    {
+    case ImagesActionTypes.PieceImageLoaded: {
       const { image, kind, playerColorId } = action.info;
       const key = getPieceImageKey(kind, playerColorId);
       return {

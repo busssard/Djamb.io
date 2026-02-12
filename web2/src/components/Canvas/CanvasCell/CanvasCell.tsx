@@ -9,17 +9,23 @@ import { CellView } from '../../../board/model';
 import { getCellViewLabel, getPieceViewLabel } from '../../../utilities/copy';
 
 interface Props {
-  cell : CellView,
-  highlightOpacity : number,
-  selectCell : (cell : CellView) => void,
-  pieceImage : HTMLImageElement | null,
-  pieceSize : number,
-  showBoardTooltip : boolean,
-  setTooltip : (state : BoardTooltipState) => void,
+  cell: CellView;
+  highlightOpacity: number;
+  selectCell: (cell: CellView) => void;
+  pieceImage: HTMLImageElement | null;
+  pieceSize: number;
+  showBoardTooltip: boolean;
+  setTooltip: (state: BoardTooltipState) => void;
 }
 
-const CanvasCell : FC<Props> = ({
-  cell, highlightOpacity, selectCell, pieceImage, pieceSize, showBoardTooltip, setTooltip,
+const CanvasCell: FC<Props> = ({
+  cell,
+  highlightOpacity,
+  selectCell,
+  pieceImage,
+  pieceSize,
+  showBoardTooltip,
+  setTooltip,
 }) => {
   function onClick() {
     if (cell.isSelectable) {
@@ -27,7 +33,7 @@ const CanvasCell : FC<Props> = ({
     }
   }
 
-  function updateTooltip(e : KonvaEventObject<MouseEvent>) {
+  function updateTooltip(e: KonvaEventObject<MouseEvent>) {
     if (!showBoardTooltip) {
       return;
     }
@@ -54,23 +60,10 @@ const CanvasCell : FC<Props> = ({
   }
 
   return (
-    <Group
-      onMouseMove={updateTooltip}
-      onClick={onClick}
-      onTap={onClick}
-    >
-      <CanvasCellBackgroundLayer
-        cell={cell}
-      />
-      <CanvasCellHighlightLayer
-        cell={cell}
-        opacity={highlightOpacity}
-      />
-      <CanvasCellPieceLayer
-        cell={cell}
-        size={pieceSize}
-        image={pieceImage}
-      />
+    <Group onMouseMove={updateTooltip} onClick={onClick} onTap={onClick}>
+      <CanvasCellBackgroundLayer cell={cell} />
+      <CanvasCellHighlightLayer cell={cell} opacity={highlightOpacity} />
+      <CanvasCellPieceLayer cell={cell} size={pieceSize} image={pieceImage} />
     </Group>
   );
 };

@@ -13,15 +13,13 @@ const GameSnapshotsPage: FC<GamePageProps> = ({ gameId }) => {
     if (game?.id !== gameId) {
       loadGame(gameId);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id, gameId]);
 
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        {`Game ${gameId} snapshots page`}
-      </Typography>
+      <Typography variant="h4">{`Game ${gameId} snapshots page`}</Typography>
       <br />
       {game ? JSON.stringify(game) : ''}
     </div>

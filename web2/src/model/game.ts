@@ -1,9 +1,4 @@
-import {
-  PlayerKind,
-  CreationSourceDto,
-  GameStatus,
-  Privilege,
-} from '../api-client';
+import { PlayerKind, CreationSourceDto, GameStatus, Privilege } from '../api-client';
 
 export type PlayerInfo = {
   id: number;

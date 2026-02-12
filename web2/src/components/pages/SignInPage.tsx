@@ -7,9 +7,7 @@ const SignInPage: FC = () => {
   return (
     <div>
       <RedirectToHomeIfSignedIn />
-      <Typography variant="h4">
-        Sign in
-      </Typography>
+      <Typography variant="h4">Sign in</Typography>
       <SignInForm />
     </div>
   );

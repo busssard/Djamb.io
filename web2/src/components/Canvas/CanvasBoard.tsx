@@ -12,26 +12,24 @@ import { colors, outlineThickness } from './styles';
 import { selectConfig } from '../../hooks/selectors';
 
 interface CanvasBoardStyle {
-  width : number,
-  height : number
-  scale : number,
+  width: number;
+  height: number;
+  scale: number;
 }
 
 interface Props {
-  game : GameDto,
-  board : BoardView,
-  selectCell : (cell : CellView) => void,
-  style : CanvasBoardStyle,
-  pieceImages : Map<string, HTMLImageElement>,
+  game: GameDto;
+  board: BoardView;
+  selectCell: (cell: CellView) => void;
+  style: CanvasBoardStyle;
+  pieceImages: Map<string, HTMLImageElement>;
 }
 
-const CanvasBoard : FC<Props> = ({
-  board, selectCell, style, pieceImages,
-}) => {
+const CanvasBoard: FC<Props> = ({ board, selectCell, style, pieceImages }) => {
   const [tooltipState, setTooltipState] = useState(defaultBoardTooltipState);
   const { showBoardTooltips } = useSelector(selectConfig).user;
 
-  function updateTooltip(state : BoardTooltipState) {
+  function updateTooltip(state: BoardTooltipState) {
     if (showBoardTooltips) {
       setTooltipState(state);
     }
@@ -44,10 +42,7 @@ const CanvasBoard : FC<Props> = ({
   }
 
   return (
-    <Stage
-      width={style.width}
-      height={style.height}
-    >
+    <Stage width={style.width} height={style.height}>
       <CanvasBackgroundLayer
         size={{ x: style.width, y: style.height }}
         onMouseEnter={clearTooltip}

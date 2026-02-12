@@ -8,23 +8,14 @@ const PageContent: FC = () => {
   const { notifications } = useSelector(selectNotifications);
 
   if (notifications.length === 0) {
-    return (
-      <Typography variant="body1">
-        You do not have any notifications.
-      </Typography>
-    );
+    return <Typography variant="body1">You do not have any notifications.</Typography>;
   }
 
   return (
     <List>
-      {
-        notifications.map((n, i) => (
-          <NotificationAlert
-            notification={n}
-            key={i.toString()}
-          />
-        ))
-      }
+      {notifications.map((n, i) => (
+        <NotificationAlert notification={n} key={i.toString()} />
+      ))}
     </List>
   );
 };
@@ -32,9 +23,7 @@ const PageContent: FC = () => {
 const NotificationsPage: FC = () => {
   return (
     <div>
-      <Typography variant="h4">
-        Notifications
-      </Typography>
+      <Typography variant="h4">Notifications</Typography>
       <br />
       <Container maxWidth="sm">
         <PageContent />

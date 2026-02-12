@@ -1,14 +1,12 @@
 import React, { FC } from 'react';
-import {
-  Table, TableContainer, TableCell, TableRow, TableBody, TableHead,
-} from '@mui/material';
+import { Table, TableContainer, TableCell, TableRow, TableBody, TableHead } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { SearchGameDto } from '../../api-client';
 import * as Routes from '../../utilities/routes';
 import { navigateTo } from '../../controllers/navigationController';
 
 interface Props {
-  games: SearchGameDto[]
+  games: SearchGameDto[];
 }
 
 const GameSearchResultsTable: FC<Props> = ({ games }) => {
@@ -32,19 +30,17 @@ const GameSearchResultsTable: FC<Props> = ({ games }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {
-            games.map((g, i) => (
-              <TableRow
-                className={classes.row}
-                key={i.toString()}
-                onClick={() => navigateTo(Routes.game(g.id))}
-              >
-                <TableCell>{g.id}</TableCell>
-                <TableCell>{g.parameters.description}</TableCell>
-                <TableCell>{g.status}</TableCell>
-              </TableRow>
-            ))
-          }
+          {games.map((g, i) => (
+            <TableRow
+              className={classes.row}
+              key={i.toString()}
+              onClick={() => navigateTo(Routes.game(g.id))}
+            >
+              <TableCell>{g.id}</TableCell>
+              <TableCell>{g.parameters.description}</TableCell>
+              <TableCell>{g.status}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>

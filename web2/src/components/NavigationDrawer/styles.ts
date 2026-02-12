@@ -1,6 +1,5 @@
 import { makeStyles } from '@mui/styles';
 
-// eslint-disable-next-line import/prefer-default-export
 export const sectionHeaderStyle = makeStyles({
   h5: {
     padding: '10px 20px 0px 20px',

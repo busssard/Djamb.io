@@ -52,7 +52,7 @@ export function sideToRadiusRatio(numberOfSides: number): number {
           radius * sin(internalAngle/2) = edge/2
           radius = (edge/2)/sin(internalAngle/2)
   */
-  return (sideLength / 2) / Math.sin(internalAngle(numberOfSides) / 2);
+  return sideLength / 2 / Math.sin(internalAngle(numberOfSides) / 2);
 }
 
 export function sideToApothemRatio(numberOfSides: number): number {
@@ -64,7 +64,7 @@ export function sideToApothemRatio(numberOfSides: number): number {
           apothem * tan(internalAngle/2) = edge/2
           apothem = (edge/2)/tan(internalAngle/2)
   */
-  return (sideLength / 2) / Math.tan(internalAngle(numberOfSides) / 2);
+  return sideLength / 2 / Math.tan(internalAngle(numberOfSides) / 2);
 }
 
 // eslint-disable-next-line no-shadow
@@ -98,9 +98,7 @@ export function sideToHeightRatio(numberOfSides: number): number {
   */
   const a = sideToApothemRatio(numberOfSides);
 
-  return isEven(numberOfSides)
-    ? a * 2
-    : a + sideToRadiusRatio(numberOfSides);
+  return isEven(numberOfSides) ? a * 2 : a + sideToRadiusRatio(numberOfSides);
 }
 
 export function sideToWidthRatio(numberOfSides: number): number {
@@ -111,10 +109,12 @@ export function sideToWidthRatio(numberOfSides: number): number {
   if (numberOfSides === 3 || numberOfSides === 4) {
     // The width of an equilateral triangle or a square is obviously the length of its side.
     return 1;
-  } if (isDivisibleBy(4, numberOfSides)) {
+  }
+  if (isDivisibleBy(4, numberOfSides)) {
     // For squares, octogons, 12-gons, 16-gons, etc, the width will always equal the height.
     return sideToApothemRatio(numberOfSides) * 2;
-  } if (isEven(numberOfSides)) {
+  }
+  if (isEven(numberOfSides)) {
     // For hexagons, 10-gons, 14-gons, etc, the width will always be 2 * radius.
     return sideToRadiusRatio(numberOfSides) * 2;
   }
@@ -150,9 +150,7 @@ export function sideToCentroidOffsetFromTopLeftRatios(numberOfSides: number): Po
   */
   return {
     x: sideToWidthRatio(numberOfSides) / 2,
-    y: isEven(numberOfSides)
-      ? sideToApothemRatio(numberOfSides)
-      : sideToRadiusRatio(numberOfSides),
+    y: isEven(numberOfSides) ? sideToApothemRatio(numberOfSides) : sideToRadiusRatio(numberOfSides),
   };
 }
 

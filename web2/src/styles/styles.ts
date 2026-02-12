@@ -34,10 +34,14 @@ const playerColors = new Map<number, string>([
 
 export const pieceColors = {
   placeholder: '#CCCC33',
-  getPlayer: (colorId: number | null) : string => {
-    if (colorId === null) { return '#555555'; }
+  getPlayer: (colorId: number | null): string => {
+    if (colorId === null) {
+      return '#555555';
+    }
     const color = playerColors.get(colorId);
-    if (!color) { throw Error(`Invalid colorID: ${colorId}`); }
+    if (!color) {
+      throw Error(`Invalid colorID: ${colorId}`);
+    }
     return color;
   },
 };

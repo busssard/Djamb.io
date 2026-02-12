@@ -9,19 +9,26 @@ import { getBoardPieceScale } from '../../board/canvasTransformService';
 import { getPieceImageKey } from '../../utilities/images';
 
 interface Props {
-  board : BoardView,
-  selectCell : (cell : CellView) => void,
-  pieceImages : Map<string, HTMLImageElement>,
-  scale : number,
-  setTooltip : (state : BoardTooltipState) => void,
-  showBoardTooltip : boolean
+  board: BoardView;
+  selectCell: (cell: CellView) => void;
+  pieceImages: Map<string, HTMLImageElement>;
+  scale: number;
+  setTooltip: (state: BoardTooltipState) => void;
+  showBoardTooltip: boolean;
 }
 
-const CanvasCellsLayer : FC<Props> = ({
-  board, selectCell, pieceImages, scale, setTooltip, showBoardTooltip,
+const CanvasCellsLayer: FC<Props> = ({
+  board,
+  selectCell,
+  pieceImages,
+  scale,
+  setTooltip,
+  showBoardTooltip,
 }) => {
-  function getPieceImage(piece : PieceView | null) : HTMLImageElement | null {
-    if (!piece) { return null; }
+  function getPieceImage(piece: PieceView | null): HTMLImageElement | null {
+    if (!piece) {
+      return null;
+    }
     const key = getPieceImageKey(piece.kind, piece.colorId);
     return pieceImages.get(key) || null;
   }
@@ -33,7 +40,9 @@ const CanvasCellsLayer : FC<Props> = ({
     const maxOpactiy = 0.5;
 
     const a = new Animation((frame?: IFrame) => {
-      if (!frame) { return; }
+      if (!frame) {
+        return;
+      }
       const timeSec = frame.time / 1000;
       const opacity = Math.abs(Math.sin(timeSec / period)) * maxOpactiy;
       setHighlightOpacity(opacity);
@@ -41,7 +50,9 @@ const CanvasCellsLayer : FC<Props> = ({
 
     a.start();
 
-    return () => { a.stop(); };
+    return () => {
+      a.stop();
+    };
   }, []);
 
   const pieceSize = scale * getBoardPieceScale(board);

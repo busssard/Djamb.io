@@ -1,3 +1,3 @@
 export enum BoardsActionTypes {
-  BoardLoaded = 'BOARDS_LOADED'
+  BoardLoaded = 'BOARDS_LOADED',
 }

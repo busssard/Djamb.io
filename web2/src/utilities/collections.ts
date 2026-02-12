@@ -2,10 +2,7 @@ export function exists<T>(xs: T[], predicate: (value: T) => boolean): boolean {
   return xs.find((x) => predicate(x)) !== undefined;
 }
 
-export function groupMatches<T>(
-  elements: T[],
-  areMatch: (a: T, b: T) => boolean,
-): T[][] {
+export function groupMatches<T>(elements: T[], areMatch: (a: T, b: T) => boolean): T[][] {
   const results: T[][] = [];
 
   elements.forEach((el) => {
@@ -29,8 +26,7 @@ export function mergeMatches<T>(
   areMatch: (a: T, b: T) => boolean,
   merge: (a: T, b: T) => T,
 ): T[] {
-  return groupMatches(elements, areMatch)
-    .map((g) => g.reduce((x, y) => merge(x, y)));
+  return groupMatches(elements, areMatch).map((g) => g.reduce((x, y) => merge(x, y)));
 }
 
 export function add<TKey, TValue>(

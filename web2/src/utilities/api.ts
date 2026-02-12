@@ -27,8 +27,7 @@ function getApiUrl(state: RootState): string {
 function mapProblemToNotificationMessage(problem: Problem): string {
   if (problem.title === 'One or more validation errors occurred.') {
     const vp = problem as ValidationProblem;
-    const messages = Object.keys(vp.errors)
-      .flatMap((k) => vp.errors[k]);
+    const messages = Object.keys(vp.errors).flatMap((k) => vp.errors[k]);
 
     return messages.join('\n');
   }
@@ -37,13 +36,20 @@ function mapProblemToNotificationMessage(problem: Problem): string {
 
 function getDefaultNotificationMessage(statusCode: number): string {
   switch (statusCode) {
-    case 400: return 'Bad request';
-    case 401: return 'Unauthorized';
-    case 403: return 'Forbidden';
-    case 404: return 'Not found';
-    case 409: return 'Conflict';
-    case 500: return 'Server error';
-    default: return `Unexpected error (${statusCode})`;
+    case 400:
+      return 'Bad request';
+    case 401:
+      return 'Unauthorized';
+    case 403:
+      return 'Forbidden';
+    case 404:
+      return 'Not found';
+    case 409:
+      return 'Conflict';
+    case 500:
+      return 'Server error';
+    default:
+      return `Unexpected error (${statusCode})`;
   }
 }
 
@@ -83,9 +89,7 @@ function getConfigParams(apiUrl: string): ConfigurationParameters {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    middleware: [
-      getNotificationsMiddleware(),
-    ],
+    middleware: [getNotificationsMiddleware()],
   };
 }
 

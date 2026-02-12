@@ -1,9 +1,9 @@
 import { Point } from '../../board/model';
 
 export interface BoardTooltipState {
-  text : string,
-  position : Point,
-  visible : boolean
+  text: string;
+  position: Point;
+  visible: boolean;
 }
 
 export const defaultBoardTooltipState = {

@@ -14,8 +14,8 @@ export function fractionPoint(l: Line, fraction: number): Point {
   const compliment = 1 - fr;
 
   return {
-    x: (l.a.x * compliment) + (l.b.x * fr),
-    y: (l.a.y * compliment) + (l.b.y * fr),
+    x: l.a.x * compliment + l.b.x * fr,
+    y: l.a.y * compliment + l.b.y * fr,
   };
 }
 
@@ -32,8 +32,10 @@ export function isChainedTo(l1: Line, l2: Line, threshold: number): boolean {
 // Determines if both lines share both vertices, within the given threshold of error
 // Ignores orientation of each line
 export function isCloseTo(l1: Line, l2: Line, threshold: number): boolean {
-  return (P.isCloseTo(l1.a, l2.a, threshold) && P.isCloseTo(l1.b, l2.b, threshold))
-    || (P.isCloseTo(l1.a, l2.b, threshold) && P.isCloseTo(l1.b, l2.a, threshold));
+  return (
+    (P.isCloseTo(l1.a, l2.a, threshold) && P.isCloseTo(l1.b, l2.b, threshold)) ||
+    (P.isCloseTo(l1.a, l2.b, threshold) && P.isCloseTo(l1.b, l2.a, threshold))
+  );
 }
 
 // TS compiler won't let you use `length` because of `Function.length`

@@ -1,7 +1,5 @@
 import React, { FC } from 'react';
-import {
-  Table, TableContainer, TableHead, TableCell, TableRow, TableBody,
-} from '@mui/material';
+import { Table, TableContainer, TableHead, TableCell, TableRow, TableBody } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { selectActiveGame, selectSession } from '../../../hooks/selectors';
 import LobbyPlayerRow from './LobbyPlayerRow';
@@ -33,15 +31,9 @@ const LobbyPlayersTable: FC = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {
-            viewModels.map((p, i) => (
-              <LobbyPlayerRow
-                key={i.toString()}
-                player={p}
-                game={game}
-              />
-            ))
-          }
+          {viewModels.map((p, i) => (
+            <LobbyPlayerRow key={i.toString()} player={p} game={game} />
+          ))}
         </TableBody>
       </Table>
     </TableContainer>

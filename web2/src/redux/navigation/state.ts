@@ -1,6 +1,6 @@
 export type NavigationState = {
-  path: string,
-  isDrawerOpen: boolean
+  path: string;
+  isDrawerOpen: boolean;
 };
 
 export const defaultNavigationState: NavigationState = {

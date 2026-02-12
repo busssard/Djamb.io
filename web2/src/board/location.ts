@@ -5,9 +5,7 @@ export function create(region: number, x: number, y: number): LocationDto {
 }
 
 export function equals(a: LocationDto, b: LocationDto): boolean {
-  return a.x === b.x
-    && a.y === b.y
-    && a.region === b.region;
+  return a.x === b.x && a.y === b.y && a.region === b.region;
 }
 
 export function toString(location: LocationDto): string {

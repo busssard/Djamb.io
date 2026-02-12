@@ -18,19 +18,15 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
     } else if (![GameStatus.InProgress, GameStatus.Over].includes(game.status)) {
       navigateTo(Routes.game(gameId));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id, game?.status, gameId]);
 
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        {`Game ${gameId} play page`}
-      </Typography>
+      <Typography variant="h4">{`Game ${gameId} play page`}</Typography>
       <br />
-      <Typography variant="body1">
-        {game ? JSON.stringify(game) : ''}
-      </Typography>
+      <Typography variant="body1">{game ? JSON.stringify(game) : ''}</Typography>
     </div>
   );
 };

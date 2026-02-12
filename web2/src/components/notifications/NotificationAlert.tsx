@@ -19,7 +19,7 @@ function getAlertSeverity(level: NotificationLevel): AlertSeverity {
 }
 
 interface AlertProps {
-  notification: Notification
+  notification: Notification;
 }
 
 const NotificationAlert: FC<AlertProps> = ({ notification }) => {
@@ -31,10 +31,7 @@ const NotificationAlert: FC<AlertProps> = ({ notification }) => {
       onClose={() => removeNotification(notification.id)}
     >
       {messages.map((m, i) => (
-        <div
-          key={i.toString()}
-          style={{ textAlign: 'left' }}
-        >
+        <div key={i.toString()} style={{ textAlign: 'left' }}>
           {m}
         </div>
       ))}

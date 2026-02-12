@@ -3,8 +3,8 @@ import { Button, useTheme } from '@mui/material';
 import { useFormStyles } from '../../../styles/styles';
 
 interface FormSubmitButtonProps {
-  onClick: () => void,
-  text: string
+  onClick: () => void;
+  text: string;
 }
 
 const FormSubmitButton: FC<FormSubmitButtonProps> = ({ onClick, text }) => {
@@ -12,11 +12,7 @@ const FormSubmitButton: FC<FormSubmitButtonProps> = ({ onClick, text }) => {
   const styles = useFormStyles(theme);
 
   return (
-    <Button
-      onClick={onClick}
-      className={styles.button}
-      type="submit"
-    >
+    <Button onClick={onClick} className={styles.button} type="submit">
       {text}
     </Button>
   );

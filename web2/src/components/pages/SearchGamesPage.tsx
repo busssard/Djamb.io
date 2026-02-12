@@ -6,9 +6,7 @@ const SearchGamesPage: FC = () => {
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        Search games
-      </Typography>
+      <Typography variant="h4">Search games</Typography>
     </div>
   );
 };

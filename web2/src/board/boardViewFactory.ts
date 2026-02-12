@@ -1,21 +1,11 @@
 import { flatMap } from 'lodash';
-import {
-  BoardView,
-  CellType,
-  CellView,
-  Line,
-  Point,
-  Polygon,
-  PieceView,
-} from './model';
+import { BoardView, CellType, CellView, Line, Point, Polygon, PieceView } from './model';
 import * as Pt from './point';
 import * as Pl from './polygon';
 import * as Rpl from './regularPolygon';
 import * as Li from './line';
 import * as Loc from './location';
-import {
-  LocationDto, BoardDto, GameDto, UserDto, PieceDto,
-} from '../api-client';
+import { LocationDto, BoardDto, GameDto, UserDto, PieceDto } from '../api-client';
 import { exists, groupMatches, mergeMatches } from '../utilities/collections';
 
 // --- Empty boardview creation ---
@@ -30,9 +20,7 @@ export function getRegionPolygon(boardPolygon: Polygon, regionNumber: number): P
     boardPolygon.vertices[regionNumber],
     Li.midPoint(boardEdges[regionNumber]),
     boardCentroid,
-    Li.midPoint(boardEdges[
-      (regionNumber + (regionCount - 1)) % regionCount
-    ]),
+    Li.midPoint(boardEdges[(regionNumber + (regionCount - 1)) % regionCount]),
   ]);
 }
 
@@ -42,41 +30,37 @@ export function getRowOrColumnBorderDistanceFromRegionEdge(
   isLowerBorder: boolean,
   cellCountPerSide: number,
 ): number {
-  const borderNumber = isLowerBorder
-    ? rowOrCol
-    : rowOrCol + 1;
+  const borderNumber = isLowerBorder ? rowOrCol : rowOrCol + 1;
 
-  const borderDistance = borderNumber === 0
-    ? 0
-    : (2 * borderNumber) - 1;
+  const borderDistance = borderNumber === 0 ? 0 : 2 * borderNumber - 1;
 
   /*
-       * If there are n cells per side, then there are n/2 cells per side in each region.
-       * The first row/column should be half cells, split with the neighboring region.
-       * Further rows/columns will be whole cells.
-       *
-       * borderNumber | borderDistance
-       * -------------|---------------
-       *            0 | 0
-       *            1 | 1 <-- only increase by 1 because 1/2 cells
-       *            2 | 3 <-- start increasing by 2 each border
-       *            3 | 5
-       *            4 | 7
-       *            5 | 9
-       *
-       * Assuming 9 cells per side
-       *
-       * borderNumber | result
-       * -------------|-------
-       *            0 | 1-(0/9) = 1
-       *            1 | 1-(1/9) = 8/9
-       *            2 | 1-(3/9) = 6/9 = 2/3
-       *            3 | 1-(5/9) = 4/9
-       *            4 | 1-(7/9) = 2/9
-       *            5 | 1-(9/9) = 0
-       */
+   * If there are n cells per side, then there are n/2 cells per side in each region.
+   * The first row/column should be half cells, split with the neighboring region.
+   * Further rows/columns will be whole cells.
+   *
+   * borderNumber | borderDistance
+   * -------------|---------------
+   *            0 | 0
+   *            1 | 1 <-- only increase by 1 because 1/2 cells
+   *            2 | 3 <-- start increasing by 2 each border
+   *            3 | 5
+   *            4 | 7
+   *            5 | 9
+   *
+   * Assuming 9 cells per side
+   *
+   * borderNumber | result
+   * -------------|-------
+   *            0 | 1-(0/9) = 1
+   *            1 | 1-(1/9) = 8/9
+   *            2 | 1-(3/9) = 6/9 = 2/3
+   *            3 | 1-(5/9) = 4/9
+   *            4 | 1-(7/9) = 2/9
+   *            5 | 1-(9/9) = 0
+   */
 
-  return 1 - (borderDistance / cellCountPerSide);
+  return 1 - borderDistance / cellCountPerSide;
 }
 
 // TODO: Add unit tests
@@ -87,9 +71,17 @@ export function getRowBorders(
 ): Line[] {
   const edges = Pl.edges(regionPolygon);
   // eslint-disable-next-line max-len
-  const lowerFraction = getRowOrColumnBorderDistanceFromRegionEdge(locationY, true, cellCountPerSide);
+  const lowerFraction = getRowOrColumnBorderDistanceFromRegionEdge(
+    locationY,
+    true,
+    cellCountPerSide,
+  );
   // eslint-disable-next-line max-len
-  const upperFraction = getRowOrColumnBorderDistanceFromRegionEdge(locationY, false, cellCountPerSide);
+  const upperFraction = getRowOrColumnBorderDistanceFromRegionEdge(
+    locationY,
+    false,
+    cellCountPerSide,
+  );
 
   return [
     Li.create(
@@ -110,9 +102,17 @@ export function getCellPolygon(
   cellCountPerSide: number,
 ): Polygon {
   // eslint-disable-next-line max-len
-  const lowerFraction = getRowOrColumnBorderDistanceFromRegionEdge(locationX, true, cellCountPerSide);
+  const lowerFraction = getRowOrColumnBorderDistanceFromRegionEdge(
+    locationX,
+    true,
+    cellCountPerSide,
+  );
   // eslint-disable-next-line max-len
-  const upperFraction = getRowOrColumnBorderDistanceFromRegionEdge(locationX, false, cellCountPerSide);
+  const upperFraction = getRowOrColumnBorderDistanceFromRegionEdge(
+    locationX,
+    false,
+    cellCountPerSide,
+  );
 
   return Pl.create([
     Li.fractionPoint(rowBorders[0], lowerFraction),
@@ -141,8 +141,7 @@ export function getCellView(
 ): CellView {
   const polygon = getCellPolygon(rowBorders, location.x, cellCountPerSide);
 
-  const cell = board.cells
-    .find((c) => exists(c.locations, (loc) => Loc.equals(loc, location)));
+  const cell = board.cells.find((c) => exists(c.locations, (loc) => Loc.equals(loc, location)));
 
   if (!cell) {
     throw Error(`No cell exists with location ${Loc.toString(location)}`);
@@ -174,15 +173,10 @@ export function mergePolygons(polygons: Polygon[]): Polygon {
   const edges = flatMap(polygons, Pl.edges);
 
   // Group by which are the same line segment
-  const groupedEdges = groupMatches(
-    edges,
-    (a, b) => Li.isCloseTo(a, b, threshold),
-  );
+  const groupedEdges = groupMatches(edges, (a, b) => Li.isCloseTo(a, b, threshold));
 
   // Filter out any edges that are shared by 2 polygons
-  let resultEdges = groupedEdges
-    .filter((g) => g.length === 1)
-    .map((g) => g[0]);
+  let resultEdges = groupedEdges.filter((g) => g.length === 1).map((g) => g[0]);
 
   const vertices: Point[] = [];
 
@@ -211,7 +205,9 @@ export function mergePolygons(polygons: Polygon[]): Polygon {
 
     // Add the vertex not already in the list
     // eslint-disable-next-line
-    const nextVertex = exists(vertices, (p) => Pt.isCloseTo(p, (e as Line).a, threshold)) ? e.b : e.a;
+    const nextVertex = exists(vertices, (p) => Pt.isCloseTo(p, (e as Line).a, threshold))
+      ? e.b
+      : e.a;
     vertices.push(nextVertex);
   }
 
@@ -242,7 +238,7 @@ export function mergePartialCellViews(cells: CellView[]): CellView[] {
 
 // TODO: Add unit tests
 export function createEmptyBoardView(board: BoardDto): BoardView {
-  const cellCountPerSide = (board.regionSize * 2) - 1;
+  const cellCountPerSide = board.regionSize * 2 - 1;
   const boardPolygon = Rpl.create(board.regionCount, 1);
   let cellViews: CellView[] = [];
 
@@ -282,22 +278,20 @@ export function fillEmptyBoardView(board: BoardView, game: GameDto, user: UserDt
     const currentUserPlayerIds = game.players.filter((p) => p.userId === user.id).map((p) => p.id);
     const isCurrentUsersTurn = currentUserPlayerIds.includes(currentPlayerId);
 
-    const isSelected = !!turn
-      && isCurrentUsersTurn
-      && exists(turn.selections, (s) => s.cellId === c.id);
-    const isSelectable = !!turn
-      && isCurrentUsersTurn
-      && exists(turn.selectionOptions, (cellId) => cellId === c.id);
+    const isSelected =
+      !!turn && isCurrentUsersTurn && exists(turn.selections, (s) => s.cellId === c.id);
+    const isSelectable =
+      !!turn && isCurrentUsersTurn && exists(turn.selectionOptions, (cellId) => cellId === c.id);
     const piece = game.pieces?.find((p) => p.cellId === c.id) as PieceDto;
     const owner = piece ? game.players.find((p) => p.id === piece.playerId) : null;
-    const colorId = owner ? owner.colorId as number : null;
+    const colorId = owner ? (owner.colorId as number) : null;
     const pieceView: PieceView | null = piece
       ? {
-        id: piece.id,
-        kind: piece.kind,
-        colorId,
-        playerName: owner ? owner.name : null,
-      }
+          id: piece.id,
+          kind: piece.kind,
+          colorId,
+          playerName: owner ? owner.name : null,
+        }
       : null;
 
     return {

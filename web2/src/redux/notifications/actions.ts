@@ -2,25 +2,25 @@ import { NotificationActionTypes } from './actionTypes';
 import { Notification } from '../../model/notifications';
 
 export type NotificationAddedAction = {
-  type: typeof NotificationActionTypes.NotificationAdded,
-  notification: Notification
+  type: typeof NotificationActionTypes.NotificationAdded;
+  notification: Notification;
 };
 
 export type NotificationRemovedAction = {
-  type: typeof NotificationActionTypes.NotificationRemoved,
-  id: string
+  type: typeof NotificationActionTypes.NotificationRemoved;
+  id: string;
 };
 
 export type ShowNotificationSnackbarAction = {
-  type: typeof NotificationActionTypes.ShowSnackbar
+  type: typeof NotificationActionTypes.ShowSnackbar;
 };
 
 export type HideNotificationSnackbarAction = {
-  type: typeof NotificationActionTypes.HideSnackbar
+  type: typeof NotificationActionTypes.HideSnackbar;
 };
 
 export type NotificationAction =
-  NotificationAddedAction |
-  NotificationRemovedAction |
-  ShowNotificationSnackbarAction |
-  HideNotificationSnackbarAction;
+  | NotificationAddedAction
+  | NotificationRemovedAction
+  | ShowNotificationSnackbarAction
+  | HideNotificationSnackbarAction;

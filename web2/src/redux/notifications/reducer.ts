@@ -23,17 +23,13 @@ export function notificationsReducer(
     case NotificationActionTypes.NotificationAdded:
       return {
         ...state,
-        notifications: sortByTimeDescending(
-          [...state.notifications, action.notification],
-        ),
+        notifications: sortByTimeDescending([...state.notifications, action.notification]),
       };
 
     case NotificationActionTypes.NotificationRemoved:
       return {
         ...state,
-        notifications: sortByTimeDescending(
-          state.notifications.filter((n) => n.id !== action.id),
-        ),
+        notifications: sortByTimeDescending(state.notifications.filter((n) => n.id !== action.id)),
       };
 
     case NotificationActionTypes.ShowSnackbar:

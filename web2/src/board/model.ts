@@ -1,52 +1,52 @@
 import { PieceKind, LocationDto } from '../api-client';
 
 export type Point = {
-  x: number,
-  y: number
+  x: number;
+  y: number;
 };
 
 export type Line = {
-  a: Point,
-  b: Point
+  a: Point;
+  b: Point;
 };
 
 export type Polygon = {
-  vertices: Point[]
+  vertices: Point[];
 };
 
 export enum CellType {
   Even,
   Odd,
-  Center
+  Center,
 }
 
 export type PieceView = {
-  id: number,
-  kind: PieceKind,
-  colorId: number | null,
-  playerName: string | null
+  id: number;
+  kind: PieceKind;
+  colorId: number | null;
+  playerName: string | null;
 };
 
 export type CellView = {
-  id: number,
-  locations: LocationDto[],
-  type: CellType,
-  isSelected: boolean,
-  isSelectable: boolean,
-  piece: PieceView | null,
-  polygon: Polygon
+  id: number;
+  locations: LocationDto[];
+  type: CellType;
+  isSelected: boolean;
+  isSelectable: boolean;
+  piece: PieceView | null;
+  polygon: Polygon;
 };
 
 export type BoardView = {
-  regionCount: number,
-  cellCountPerSide: number,
-  polygon: Polygon,
-  cells: CellView[]
+  regionCount: number;
+  cellCountPerSide: number;
+  polygon: Polygon;
+  cells: CellView[];
 };
 
 export type Rectangle = {
-  top: number,
-  left: number,
-  bottom: number,
-  right: number
+  top: number;
+  left: number;
+  bottom: number;
+  right: number;
 };

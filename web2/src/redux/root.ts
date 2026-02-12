@@ -33,35 +33,35 @@ import { imagesReducer } from './images/reducer';
 import { ImagesAction } from './images/actions';
 
 export type RootState = {
-  activeGame: ActiveGameState,
-  apiClient: ApiClientState,
-  boards: BoardsState,
-  config: ConfigState,
-  images: ImagesState,
-  navigation: NavigationState,
-  notifications: NotificationsState,
-  session: SessionState
+  activeGame: ActiveGameState;
+  apiClient: ApiClientState;
+  boards: BoardsState;
+  config: ConfigState;
+  images: ImagesState;
+  navigation: NavigationState;
+  notifications: NotificationsState;
+  session: SessionState;
 };
 
 export type RootActionTypes =
-  ActiveGameActionTypes |
-  ApiClientActionTypes |
-  BoardsActionTypes |
-  ConfigActionTypes |
-  ImagesActionTypes |
-  NavigationActionTypes |
-  NotificationActionTypes |
-  SessionActionTypes;
+  | ActiveGameActionTypes
+  | ApiClientActionTypes
+  | BoardsActionTypes
+  | ConfigActionTypes
+  | ImagesActionTypes
+  | NavigationActionTypes
+  | NotificationActionTypes
+  | SessionActionTypes;
 
 export type RootAction =
-  ActiveGameAction |
-  ApiClientAction |
-  BoardsAction |
-  ConfigAction |
-  ImagesAction |
-  NavigationAction |
-  NotificationAction |
-  SessionAction;
+  | ActiveGameAction
+  | ApiClientAction
+  | BoardsAction
+  | ConfigAction
+  | ImagesAction
+  | NavigationAction
+  | NotificationAction
+  | SessionAction;
 
 export const defaultRootState: RootState = {
   activeGame: defaultActiveGameState,

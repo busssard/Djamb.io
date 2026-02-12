@@ -18,15 +18,13 @@ const GameOutcomePage: FC<GamePageProps> = ({ gameId }) => {
     } else if (game.status !== GameStatus.Over) {
       navigateTo(Routes.game(gameId));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id, game?.status, gameId]);
 
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">
-        {`Game ${gameId} outcome page`}
-      </Typography>
+      <Typography variant="h4">{`Game ${gameId} outcome page`}</Typography>
       <br />
       {game ? JSON.stringify(game) : ''}
     </div>

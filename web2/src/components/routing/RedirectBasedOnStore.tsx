@@ -8,11 +8,8 @@ const RedirectBasedOnStore: FC = () => {
   const navigation = useSelector(selectNavigation);
   const location = useLocation();
 
-  if (navigation !== defaultNavigationState
-    && navigation.path !== location.pathname) {
-    return (
-      <Navigate to={navigation.path} replace />
-    );
+  if (navigation !== defaultNavigationState && navigation.path !== location.pathname) {
+    return <Navigate to={navigation.path} replace />;
   }
 
   return <></>;

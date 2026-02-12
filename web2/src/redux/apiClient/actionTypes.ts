@@ -1,4 +1,4 @@
 export enum ApiClientActionTypes {
   RequestSent = 'ApiClient_RequestSent',
-  ResponseReceived = 'ApiClient_ResponseReceived'
+  ResponseReceived = 'ApiClient_ResponseReceived',
 }

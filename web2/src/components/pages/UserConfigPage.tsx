@@ -5,9 +5,7 @@ import UserConfigForm from '../forms/UserConfigForm';
 const UserConfigPage: FC = () => {
   return (
     <div>
-      <Typography variant="h4">
-        Settings
-      </Typography>
+      <Typography variant="h4">Settings</Typography>
       <br />
       <UserConfigForm />
     </div>

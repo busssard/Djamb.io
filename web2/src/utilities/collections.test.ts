@@ -24,19 +24,8 @@ describe('collections', () => {
     const areMatch = (a: string, b: string) => a[0] === b[0];
 
     it('Groups elements by "areMatch"', () => {
-      const xs = [
-        'apple',
-        'artichoke',
-        'banana',
-        'orange',
-        'avocado',
-        'oatmeal',
-      ];
-      const expected = [
-        ['apple', 'artichoke', 'avocado'],
-        ['banana'],
-        ['orange', 'oatmeal'],
-      ];
+      const xs = ['apple', 'artichoke', 'banana', 'orange', 'avocado', 'oatmeal'];
+      const expected = [['apple', 'artichoke', 'avocado'], ['banana'], ['orange', 'oatmeal']];
       const actual = groupMatches(xs, areMatch);
       expect(actual).toStrictEqual(expected);
     });
@@ -52,19 +41,8 @@ describe('collections', () => {
     const merge = (a: string, b: string) => `${a}, ${b}`;
 
     it('Merges matching elements', () => {
-      const xs = [
-        'apple',
-        'artichoke',
-        'banana',
-        'orange',
-        'avocado',
-        'oatmeal',
-      ];
-      const expected = [
-        'apple, artichoke, avocado',
-        'banana',
-        'orange, oatmeal',
-      ];
+      const xs = ['apple', 'artichoke', 'banana', 'orange', 'avocado', 'oatmeal'];
+      const expected = ['apple, artichoke, avocado', 'banana', 'orange, oatmeal'];
       const actual = mergeMatches(xs, areMatch, merge);
       expect(actual).toStrictEqual(expected);
     });

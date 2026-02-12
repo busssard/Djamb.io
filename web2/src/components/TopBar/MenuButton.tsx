@@ -16,11 +16,7 @@ const MenuButton: FC = () => {
   };
 
   return (
-    <IconButton
-      edge="start"
-      className={classes.button}
-      onClick={toggle}
-    >
+    <IconButton edge="start" className={classes.button} onClick={toggle}>
       <MenuIcon />
     </IconButton>
   );

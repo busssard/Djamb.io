@@ -1,4 +1,8 @@
-import { NavigateToAction, OpenNavigationDrawerAction, CloseNavigationDrawerAction } from './actions';
+import {
+  NavigateToAction,
+  OpenNavigationDrawerAction,
+  CloseNavigationDrawerAction,
+} from './actions';
 import { NavigationActionTypes } from './actionTypes';
 
 export function navigateTo(path: string): NavigateToAction {

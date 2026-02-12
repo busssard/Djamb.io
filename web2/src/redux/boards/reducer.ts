@@ -6,7 +6,7 @@ import { BoardsState, defaultBoardsState } from './state';
 
 export function boardsReducer(
   state: BoardsState = defaultBoardsState,
-  action : BoardsAction,
+  action: BoardsAction,
 ): BoardsState {
   switch (action.type) {
     case BoardsActionTypes.BoardLoaded: {

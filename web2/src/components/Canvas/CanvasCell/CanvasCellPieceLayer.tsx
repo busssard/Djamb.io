@@ -5,12 +5,12 @@ import * as Point from '../../../board/point';
 import * as Cell from '../../../board/cell';
 
 interface Props {
-  size: number,
-  image: HTMLImageElement | null,
-  cell: CellView
+  size: number;
+  image: HTMLImageElement | null;
+  cell: CellView;
 }
 
-const CanvasCellPieceLayer : FC<Props> = ({ size, image, cell }) => {
+const CanvasCellPieceLayer: FC<Props> = ({ size, image, cell }) => {
   if (!cell.piece || !image) {
     return null;
   }

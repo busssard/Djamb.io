@@ -4,11 +4,11 @@ import CanvasPolygon from '../CanvasPolygon';
 import { colors } from '../styles';
 
 interface Props {
-  cell: CellView,
-  opacity: number
+  cell: CellView;
+  opacity: number;
 }
 
-const CanvasCellHighlightLayer : FC<Props> = ({ cell, opacity }) => {
+const CanvasCellHighlightLayer: FC<Props> = ({ cell, opacity }) => {
   if (!cell.isSelectable) {
     return null;
   }

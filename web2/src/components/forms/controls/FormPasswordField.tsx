@@ -3,16 +3,14 @@ import { FormControlLabel, TextField, useTheme } from '@mui/material';
 import { useFormStyles } from '../../../styles/styles';
 
 interface Props {
-  value: string,
-  label: string,
-  onChanged: (e: ChangeEvent<HTMLInputElement>) => void,
-  error?: boolean,
-  helperText?: string
+  value: string;
+  label: string;
+  onChanged: (e: ChangeEvent<HTMLInputElement>) => void;
+  error?: boolean;
+  helperText?: string;
 }
 
-const FormPasswordField: FC<Props> = ({
-  value, label, onChanged, error, helperText,
-}) => {
+const FormPasswordField: FC<Props> = ({ value, label, onChanged, error, helperText }) => {
   const theme = useTheme();
   const styles = useFormStyles(theme);
 
@@ -22,7 +20,7 @@ const FormPasswordField: FC<Props> = ({
       label={label}
       labelPlacement="start"
       className={styles.label}
-      control={(
+      control={
         <TextField
           className={styles.control}
           onChange={onChanged}
@@ -30,7 +28,7 @@ const FormPasswordField: FC<Props> = ({
           helperText={helperText}
           type="password"
         />
-      )}
+      }
     />
   );
 };
