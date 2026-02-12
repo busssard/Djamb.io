@@ -306,3 +306,80 @@ Djamb.io/
 5. **Respect F# file ordering** - Files in `.fsproj` are compiled top-to-bottom; dependencies must come first
 6. **Set environment variables** before running locally outside Docker - especially `DJAMBI_Sql__ConnectionString` and `DJAMBI_Api__allowedOrigins`
 7. **Test with Docker Compose first** if unsure about local setup - `docker-compose up` gets everything running
+
+## Future Direction: AI Players via Cicero-Style Architecture
+
+### Inspiration
+Meta's [Cicero](https://github.com/facebookresearch/diplomacy_cicero) plays the board game Diplomacy at human level by combining a language model (for negotiation) with a game-theoretic planning engine (for strategy). The repo is archived but the architecture and pretrained models are available under CC-BY-NC 4.0.
+
+### Why This Matters for Djambi-N
+Djambi and Diplomacy share the same core challenge: **multi-agent strategic reasoning** where you must model what opponents will do, form temporary alliances, and betray at the right moment. Cicero's planning engine solves exactly this class of problem.
+
+### What Transfers Directly
+- **Strategic planning engine** (`fairdiplomacy/agents/`) - Bilateral and correlated search for multi-player games. This is the core component needed. It handles the "what should I do given what everyone else might do" reasoning.
+- **Base strategy model** (`fairdiplomacy/models/base_strategy_model/`) - Supervised learning from game records (behavioral cloning) + reinforcement learning via self-play. The training pipeline could be adapted for Djambi game logs.
+- **Self-play infrastructure** (`fairdiplomacy/selfplay/`) - RL training loop where the AI plays against copies of itself to improve. Directly applicable once the Djambi action space is defined.
+- **Agent architecture** - Modular agent specification via protobuf configs, allowing different AI personalities/strategies.
+
+### What Needs Adaptation
+| Cicero Component | Djambi Adaptation Needed |
+|-----------------|-------------------------|
+| Diplomacy map (fixed 75 territories) | Hexagonal board with 3-8 player configurations, curved topology |
+| 7 unit types (all identical armies/fleets) | 7 distinct piece types (Chief, Assassin, Reporter, Diplomat, Militant, Necromobile, Corpse) each with unique movement and capture rules |
+| Simultaneous moves per turn | Sequential turns (one player moves at a time) |
+| NLP negotiation model (`parlai_diplomacy/`) | Not needed for Djambi (no negotiation phase) -- biggest simplification |
+| Fixed 7-player game | Variable 3-8 players with dynamically sized boards |
+| Support/convoy order system | Djambi-specific move/capture/manipulation mechanics |
+
+### What Does NOT Transfer
+- **The language model component** (`parlai_diplomacy/`) - Cicero's main innovation is blending NLP with strategy. Djambi has no negotiation, so this entire module (~40% of Cicero's codebase) is irrelevant. This is actually good news: it means the Djambi AI is a simpler problem.
+- **webDiplomacy.net integration** - Game-specific UI/protocol code.
+
+### Architecture Sketch for Djambi AI
+
+```
+┌─────────────────────────────────────────┐
+│           Djambi AI Agent               │
+├─────────────────────────────────────────┤
+│  Intent Prediction Model                │
+│  (What will each opponent do next?)     │
+│  - Trained via supervised learning on   │
+│    game logs + self-play RL             │
+├─────────────────────────────────────────┤
+│  Strategic Search Engine                │
+│  (Adapted from Cicero's bilateral      │
+│   search for multi-player reasoning)    │
+│  - Evaluates board positions            │
+│  - Models opponent responses            │
+│  - Handles alliance/betrayal dynamics   │
+├─────────────────────────────────────────┤
+│  Djambi Action Space                    │
+│  - 7 piece types with unique rules      │
+│  - Hex board with variable geometry     │
+│  - Move generation + validation         │
+├─────────────────────────────────────────┤
+│  Game State Encoder                     │
+│  - Board → tensor representation        │
+│  - Player status, piece positions,      │
+│    threat maps, territory control       │
+└─────────────────────────────────────────┘
+```
+
+### Implementation Path
+1. **Define Djambi action space** - Encode all legal moves for all 7 piece types on the hex board as a structured output space
+2. **Build game state encoder** - Convert board state to tensor format suitable for neural network input (piece positions, player status, threat maps)
+3. **Collect training data** - Record games from the live site, or generate via random/heuristic play
+4. **Train base strategy model** - Supervised learning from game records (behavioral cloning), adapting Cicero's `train_sl.py` pipeline
+5. **Self-play RL** - Adapt Cicero's self-play infrastructure to improve beyond human-level play
+6. **Integrate with API** - AI agent connects as a player via the existing `/api/turns` and `/api/games` endpoints, using the `Neutral` PlayerKind
+
+### Key Technical Decisions (Open)
+- **Board representation**: Flat hex grid vs. graph-based (curved topology complicates standard CNN approaches; graph neural networks may be more natural)
+- **Action encoding**: Per-piece move selection vs. global policy over all legal moves
+- **Training compute**: Cicero required significant GPU resources; a Djambi model would be smaller (no language model) but self-play still needs scale
+- **Serving**: Run AI inference as a separate service, or embed in the F# API process?
+
+### Reference
+- Paper: "Human-level play in the game of Diplomacy by combining language models with strategic reasoning" (Meta AI, Science 2022)
+- Repo: https://github.com/facebookresearch/diplomacy_cicero (archived April 2025)
+- The Diplodocus variant (no-press, strategy-only) is the closest analog to what Djambi needs
