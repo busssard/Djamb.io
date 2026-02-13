@@ -1,19 +1,17 @@
-﻿namespace Djambi.Api.Host
+namespace Djambi.Api.Host
 
 open System
 open System.ComponentModel
 open System.ComponentModel.DataAnnotations
 open System.Data
 open System.Security.Authentication
+open System.Text.Json
 open System.Threading.Tasks
-open FSharp.Control.Tasks
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc
 open MySqlConnector
-open Newtonsoft.Json
 open Serilog
 open Djambi.Api.Common.Control
-open Newtonsoft.Json.Serialization
 
 type ErrorHandlingMiddleware(next : RequestDelegate) =
 
@@ -33,7 +31,7 @@ type ErrorHandlingMiddleware(next : RequestDelegate) =
 
     let getMessage (ex : Exception) : string =
         match ex with
-        | :? MySqlException as e when e.Message.StartsWith("Access denied") -> 
+        | :? MySqlException as e when e.Message.StartsWith("Access denied") ->
             "Error connecting to database."
         | _ -> ex.Message
 
@@ -41,10 +39,10 @@ type ErrorHandlingMiddleware(next : RequestDelegate) =
         match ex with
         | :? AggregateException as e -> e.InnerExceptions.[0]
         | _ -> ex
-    
+
     let toProblem (ex : Exception) : ProblemDetails =
-        let ex = unNest ex;
-        let message = getMessage ex;
+        let ex = unNest ex
+        let message = getMessage ex
         let status = getStatus ex
 
         let p = ProblemDetails()
@@ -52,27 +50,22 @@ type ErrorHandlingMiddleware(next : RequestDelegate) =
         p.Title <- message
         p
 
-    let jsonSettings = 
-        let js = JsonSerializerSettings()
-        js.ContractResolver <- CamelCasePropertyNamesContractResolver()
-        js
+    let jsonOptions =
+        let opts = JsonSerializerOptions()
+        opts.PropertyNamingPolicy <- JsonNamingPolicy.CamelCase
+        opts
 
     member __.Invoke(ctx : HttpContext) : Task =
         task {
             try
-                // It looks like we should be able to use "return" here, but if we don't 
-                // force an "await", the exceptions don't get caught.
-                let! _ =  next.Invoke(ctx) 
-                ()
+                do! next.Invoke(ctx)
             with
-            | _ as ex ->
+            | ex ->
                 Log.Logger.Warning(ex, "Error caught by middleware")
                 let p = ex |> toProblem
-                let json = JsonConvert.SerializeObject(p, jsonSettings)
+                let json = JsonSerializer.Serialize(p, jsonOptions)
 
                 ctx.Response.ContentType <- "application/json"
                 ctx.Response.StatusCode <- p.Status.Value
-                let! _ = ctx.Response.WriteAsync json
-                ()
-            return ()
-        } :> Task
+                do! ctx.Response.WriteAsync json
+        }

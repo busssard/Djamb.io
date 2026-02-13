@@ -39,8 +39,6 @@
     <ProjectReference Include="..\api.model\api.model.fsproj" />
     <ProjectReference Include="..\api.web\api.web.fsproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.2" />
-  </ItemGroup>
+  <!-- FSharp.Core provided by the .NET 8 SDK -->
 
 </Project>
