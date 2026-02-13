@@ -134,6 +134,9 @@ dotnet test api/tests/api.integrationTests/api.integrationTests.fsproj
 - **Assume the reader follows top-to-bottom** — each step should be runnable in sequence without jumping ahead or back. If step 5 depends on something from step 2, repeat the relevant info rather than saying "as configured in step 2".
 - **No jargon without context** — if a step says "apply tuning parameters", show exactly what to run. If it says "edit the config", show the exact commands and content.
 
+### Bash Scratchpad for Multi-Command Scripts
+- **Use a scratchpad file** (e.g., `/tmp/djambi_test.sh`) when combining multiple bash commands into a test or verification script. Write the script to the file with the Write tool, then execute it with `bash /tmp/djambi_test.sh`. This avoids needing individual approval for each command and makes multi-step workflows (start server, wait for health check, run curl tests, kill server) a single reviewable unit.
+
 ### Bug-Driven Testing Policy
 - **Every bug reported by the user must get a thorough regression test** before or alongside the fix
 - Tests should be resilient: not break on simple refactors, but also not just test one narrow case
