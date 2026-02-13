@@ -17,7 +17,8 @@ namespace Djambi.Api.Db.Model
             var connStr = config.GetValue<string>("Sql:ConnectionString");
 
             var optionsBuilder = new DbContextOptionsBuilder<DjambiDbContext>();
-            optionsBuilder.UseMySql(connStr);
+            var serverVersion = ServerVersion.AutoDetect(connStr);
+            optionsBuilder.UseMySql(connStr, serverVersion);
 
             return new DjambiDbContext(optionsBuilder.Options);
         }

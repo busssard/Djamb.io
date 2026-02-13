@@ -1,6 +1,6 @@
 ﻿namespace Djambi.Api.Db.Repositories
 
-open System.Data.Entity.Core
+open Djambi.Api.Common.Control
 open System.Linq
 open FSharp.Control.Tasks
 open Microsoft.EntityFrameworkCore
@@ -29,7 +29,7 @@ type GameRepository(context : DjambiDbContext) =
                         .Include(fun g -> g.CreatedByUser)
                         .SingleOrDefaultAsync(fun g -> g.GameId = gameId)
                 if g = null
-                then return raise <| ObjectNotFoundException("Game not found.")
+                then return raise <| NotFoundException("Game not found.")
                 else 
                     g.Players <- g.Players.OrderBy(fun p -> p.PlayerId).ToList()
                     return g |> toGame

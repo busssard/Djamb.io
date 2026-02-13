@@ -7,7 +7,7 @@ open FSharp.Control.Tasks
 open Djambi.Api.Db.Mappings
 open Microsoft.EntityFrameworkCore
 open System.Data
-open MySql.Data.MySqlClient
+open MySqlConnector
 
 type UserRepository(context : DjambiDbContext) =    
     interface IUserRepository with

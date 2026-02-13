@@ -1,7 +1,7 @@
 ﻿namespace Djambi.Api.Db.Repositories
 
 open System
-open System.Data.Entity.Core
+open Djambi.Api.Common.Control
 open FSharp.Control.Tasks
 open Microsoft.EntityFrameworkCore
 open Djambi.Api.Db.Interfaces
@@ -48,7 +48,7 @@ type PlayerRepository(context : DjambiDbContext) =
 
                 let! p = context.Players.SingleOrDefaultAsync(fun p -> p.Game.GameId = gameId && p.PlayerId = playerId)
                 if p = null
-                then raise <| ObjectNotFoundException("Player not found.")
+                then raise <| NotFoundException("Player not found.")
 
                 context.Players.Remove p |> ignore
                 let! _ = maybeSave commit
@@ -63,7 +63,7 @@ type PlayerRepository(context : DjambiDbContext) =
                 let! p = context.Players.SingleOrDefaultAsync(fun p -> p.Game.GameId = gameId && p.PlayerId = player.id)
                 if p = null                
                 // TODO: Better exception
-                then raise <| ObjectNotFoundException("Player not found.")
+                then raise <| NotFoundException("Player not found.")
 
                 p.PlayerStatusId <- player.status
                 p.ColorId <- player.colorId |> Option.map byte |> Option.toNullable

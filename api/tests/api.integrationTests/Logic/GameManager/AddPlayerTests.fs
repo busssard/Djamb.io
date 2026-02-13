@@ -1,7 +1,7 @@
 namespace Djambi.Api.IntegrationTests.Logic.GameManager
 
 open System
-open System.Data.Entity.Core
+open Djambi.Api.Common.Control
 open System.Threading.Tasks
 open FSharp.Control.Tasks
 open Xunit
@@ -49,7 +49,7 @@ type AddPlayerTests() =
             let session = session |> TestUtilities.setSessionPrivileges [Privilege.EditPendingGames]
 
             //Act/Assert
-            let! ex = Assert.ThrowsAsync<ObjectNotFoundException>(fun () -> 
+            let! ex = Assert.ThrowsAsync<NotFoundException>(fun () -> 
                 task {
                     return! host.Get<IPlayerManager>().addPlayer Int32.MinValue request session
                 } :> Task

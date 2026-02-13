@@ -2,7 +2,7 @@
 
 open System
 open System.Linq
-open System.Data.Entity.Core
+open Djambi.Api.Common.Control
 open FSharp.Control.Tasks
 open Microsoft.EntityFrameworkCore
 open Newtonsoft.Json
@@ -18,7 +18,7 @@ type SnapshotRepository(context : DjambiDbContext) =
                 let! s = context.Snapshots.FindAsync(snapshotId)
 
                 if s = null
-                then raise <| ObjectNotFoundException("Snapshot not found.")
+                then raise <| NotFoundException("Snapshot not found.")
 
                 return s |> toSnapshot
             }
@@ -34,7 +34,7 @@ type SnapshotRepository(context : DjambiDbContext) =
                 let! s = context.Snapshots.FindAsync(snapshotId)
 
                 if s = null
-                then raise <| ObjectNotFoundException("Snapshot not found.")
+                then raise <| NotFoundException("Snapshot not found.")
 
                 context.Snapshots.Remove(s) |> ignore
                 let! _ = context.SaveChangesAsync()
@@ -68,11 +68,11 @@ type SnapshotRepository(context : DjambiDbContext) =
                             fun s -> s.SnapshotId = snapshotId && s.Game.GameId = gameId)
                     
                 if s = null
-                then raise <| ObjectNotFoundException("Snapshot not found.")
+                then raise <| NotFoundException("Snapshot not found.")
 
                 let! gameSqlModel = context.Games.FindAsync(gameId)
                 if gameSqlModel = null
-                then raise <| ObjectNotFoundException("Game not found.")
+                then raise <| NotFoundException("Game not found.")
 
                 let snapshot = JsonConvert.DeserializeObject<SnapshotJson> s.SnapshotJson
 

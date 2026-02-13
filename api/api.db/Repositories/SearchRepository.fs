@@ -1,7 +1,7 @@
 ﻿namespace Djambi.Api.Db.Repositories
 
 open System
-open System.Data.Entity.Core
+open Djambi.Api.Common.Control
 open System.Linq
 open FSharp.Control.Tasks
 open Microsoft.EntityFrameworkCore
@@ -23,7 +23,7 @@ type SearchRepository(context : DjambiDbContext) =
 
                 if currentUser = null
                 // TODO: This should probably 500 not 404
-                then raise <| ObjectNotFoundException("User not found.")
+                then raise <| NotFoundException("User not found.")
                 
                 // Note: LINQ-to-SQL below
                 // Using wordy conditional building of IQueryable rather than higher-order-functions

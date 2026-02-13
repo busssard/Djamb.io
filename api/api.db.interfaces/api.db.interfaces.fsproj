@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Interfaces.fs" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\api.common\api.common.fsproj" />

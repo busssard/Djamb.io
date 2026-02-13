@@ -81,12 +81,11 @@ type Startup() =
 
         // Swagger
         services.AddSwaggerGen(fun opt -> configureSwagger opt) |> ignore
-        services.AddSwaggerGenNewtonsoftSupport() |> ignore
-
         // Entity Framework
-        services.AddDbContext<DjambiDbContext>(fun opt -> 
+        services.AddDbContext<DjambiDbContext>(fun opt ->
             let cnStr = __.Configuration.GetValue<string>("Sql:ConnectionString")
-            opt.UseMySql(cnStr) |> ignore
+            let serverVersion = ServerVersion.AutoDetect(cnStr)
+            opt.UseMySql(cnStr, serverVersion) |> ignore
             ()
         ) |> ignore
 

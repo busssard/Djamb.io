@@ -11,7 +11,6 @@ open Djambi.Api.Db.Mappings
 open Djambi.Api.Db.Model
 open Djambi.Api.Model
 open System.Data
-open System.Data.Entity.Core
 
 type EventRepository(context : DjambiDbContext,
                      gameRepo : IGameRepository,
@@ -101,7 +100,7 @@ type EventRepository(context : DjambiDbContext,
             task {
                 let! g = context.Games.FindAsync(gameId)
                 if g = null
-                then raise <| ObjectNotFoundException("Game not found.")
+                then raise <| NotFoundException("Game not found.")
 
                 use! transaction = context.Database.BeginTransactionAsync()
                 try

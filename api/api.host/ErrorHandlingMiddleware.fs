@@ -4,13 +4,12 @@ open System
 open System.ComponentModel
 open System.ComponentModel.DataAnnotations
 open System.Data
-open System.Data.Entity.Core
 open System.Security.Authentication
 open System.Threading.Tasks
 open FSharp.Control.Tasks
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc
-open MySql.Data.MySqlClient
+open MySqlConnector
 open Newtonsoft.Json
 open Serilog
 open Djambi.Api.Common.Control
@@ -28,7 +27,6 @@ type ErrorHandlingMiddleware(next : RequestDelegate) =
         | :? AuthenticationException -> 401
         | :? UnauthorizedAccessException -> 403
         | :? NotFoundException -> 404
-        | :? ObjectNotFoundException -> 404
         | :? DuplicateNameException -> 409
         | :? DjambiWebsocketException -> 500
         | _ -> 500

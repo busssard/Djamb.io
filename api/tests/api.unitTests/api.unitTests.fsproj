@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
@@ -9,6 +9,7 @@
     <Compile Include="Logic\Services\EncryptionServiceTests.fs" />
     <Compile Include="BoardModelExtensionTests.fs" />
     <Compile Include="Logic\Services\SessionServiceTests\OpenSessionTests.fs" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.0" />

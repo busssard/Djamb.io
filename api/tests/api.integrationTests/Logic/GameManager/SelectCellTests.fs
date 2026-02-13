@@ -1,7 +1,7 @@
 namespace Djambi.Api.IntegrationTests.Logic.GameManager
 
 open System
-open System.Data.Entity.Core
+open Djambi.Api.Common.Control
 open System.Threading.Tasks
 open FSharp.Control.Tasks
 open Xunit
@@ -123,7 +123,7 @@ type SelectCellTests() =
             let cellId = updatedGame.currentTurn.Value.selectionOptions.Head
 
             //Act/Assert
-            let! ex = Assert.ThrowsAsync<ObjectNotFoundException>(fun () ->
+            let! ex = Assert.ThrowsAsync<NotFoundException>(fun () ->
                 task {
                     return! host.Get<ITurnManager>().selectCell (Int32.MinValue, cellId) session
                 } :> Task

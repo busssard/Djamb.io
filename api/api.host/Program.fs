@@ -4,9 +4,12 @@ open System
 open System.IO
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Configuration
+open Microsoft.EntityFrameworkCore
+open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Options
 open Serilog
 open Serilog.Events
+open Djambi.Api.Db.Model
 open Djambi.Api.Model.Configuration
 
 let config = Config.config
@@ -61,10 +64,18 @@ let main _ =
             ) |> ignore
 
             builder.UseStartup<Startup>() |> ignore
-            builder.UseSerilog() |> ignore
+            builder.ConfigureServices(fun services ->
+                services.AddSerilog() |> ignore
+            ) |> ignore
             builder.Build()
 
-        let config = host.Services.GetService(typeof<IOptions<AppSettings>>) :?> IOptions<AppSettings> 
+        // Ensure database tables exist
+        use scope = host.Services.CreateScope()
+        let dbContext = scope.ServiceProvider.GetRequiredService<DjambiDbContext>()
+        Log.Logger.Information("Ensuring database is created...")
+        dbContext.Database.EnsureCreated() |> ignore
+
+        let config = host.Services.GetService(typeof<IOptions<AppSettings>>) :?> IOptions<AppSettings>
                     |> fun x -> x.Value
         Log.Logger.Information("Configuration: {@config}", config)
 

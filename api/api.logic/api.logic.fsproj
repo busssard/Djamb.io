@@ -29,10 +29,11 @@
     <Compile Include="Managers\SessionManager.fs" />
     <Compile Include="Managers\SnapshotManager.fs" />
     <Compile Include="Managers\UserManager.fs" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="3.1.6" />
-    <PackageReference Include="Serilog" Version="2.9.0" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>

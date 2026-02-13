@@ -14,9 +14,10 @@
     <Compile Include="EventModel.fs" />
     <Compile Include="SnapshotModel.fs" />
     <Compile Include="SearchModel.fs" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.9.0" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\api.common\api.common.fsproj" />
