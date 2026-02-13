@@ -65,7 +65,7 @@ print_urls() {
         echo -e "  ${BOLD}Frontend${RESET}:  ${GREEN}http://localhost:3000${RESET}"
         echo -e "  ${BOLD}API${RESET}:       ${GREEN}http://localhost:5100${RESET}"
         echo -e "  ${BOLD}Swagger${RESET}:   ${GREEN}http://localhost:5100/swagger${RESET}"
-        echo -e "  ${BOLD}Database${RESET}:  localhost:1434 ${DIM}(MSSQL)${RESET}"
+        echo -e "  ${BOLD}Database${RESET}:  localhost:3306 ${DIM}(MySQL)${RESET}"
     else
         echo -e "  ${BOLD}Frontend${RESET}:  ${GREEN}http://localhost:3000${RESET}"
         echo ""
@@ -114,7 +114,7 @@ show_help() {
     echo ""
     echo "Prerequisites:"
     echo "  Required:  Node.js >= 18, npm"
-    echo "  Full-stack: + dotnet SDK, Docker, docker-compose"
+    echo "  Full-stack: + dotnet SDK, Docker, docker compose"
 }
 
 # ── Process tracking for cleanup ─────────────────────────────────────────────
@@ -135,7 +135,7 @@ cleanup() {
 
     if [ "$DB_STARTED" = true ]; then
         print_info "Stopping database container"
-        docker-compose -f "$SCRIPT_DIR/docker-compose.yml" stop db 2>/dev/null
+        docker compose -f "$SCRIPT_DIR/docker-compose.yml" stop db 2>/dev/null
         print_ok "Database stopped"
     fi
 
@@ -219,16 +219,16 @@ else
     print_warn "Docker not found ${DIM}(needed only for --full-stack)${RESET}"
 fi
 
-# docker-compose (optional unless --full-stack)
-if command -v docker-compose &>/dev/null; then
-    print_ok "docker-compose available"
+# docker compose (optional unless --full-stack)
+if command -v docker compose &>/dev/null; then
+    print_ok "docker compose available"
 elif docker compose version &>/dev/null 2>&1; then
     print_ok "docker compose (plugin) available"
 elif [ "$FULL_STACK" = true ]; then
-    print_error "docker-compose not found ${DIM}(required for --full-stack)${RESET}"
+    print_error "docker compose not found ${DIM}(required for --full-stack)${RESET}"
     PREREQS_OK=false
 else
-    print_warn "docker-compose not found ${DIM}(needed only for --full-stack)${RESET}"
+    print_warn "docker compose not found ${DIM}(needed only for --full-stack)${RESET}"
 fi
 
 echo ""
@@ -252,14 +252,14 @@ if [ "$FULL_STACK" = true ]; then
     if ! check_port 5100 "API"; then
         PORTS_OK=false
     fi
-    if ! check_port 1434 "database"; then
+    if ! check_port 3306 "database"; then
         PORTS_OK=false
     fi
 fi
 
 if [ "$PORTS_OK" = true ]; then
     if [ "$FULL_STACK" = true ]; then
-        print_ok "Ports 3000, 5100, 1434 are free"
+        print_ok "Ports 3000, 5100, 3306 are free"
     else
         print_ok "Port 3000 is free"
     fi
@@ -303,12 +303,12 @@ echo ""
 if [ "$FULL_STACK" = true ]; then
 
     # ── 4a. Database ─────────────────────────────────────────────────────────
-    print_section "STEP" "Starting database (MSSQL via Docker)"
-    print_info "Running docker-compose up -d db"
+    print_section "STEP" "Starting database (MySQL via Docker)"
+    print_info "Running docker compose up -d db"
 
-    if docker-compose -f "$SCRIPT_DIR/docker-compose.yml" up -d db 2>&1 | tail -2; then
+    if docker compose -f "$SCRIPT_DIR/docker-compose.yml" up -d db 2>&1 | tail -2; then
         DB_STARTED=true
-        print_ok "Database container started on port 1434"
+        print_ok "Database container started on port 3306"
     else
         print_error "Failed to start database container"
         print_warn "Continuing without database — API may not function correctly"
@@ -320,7 +320,7 @@ if [ "$FULL_STACK" = true ]; then
     if [ "$DB_STARTED" = true ]; then
         print_info "Waiting for database to be ready..."
         for i in $(seq 1 30); do
-            if docker-compose -f "$SCRIPT_DIR/docker-compose.yml" exec -T db /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'GR3@Tpassword' -Q "SELECT 1" &>/dev/null; then
+            if docker compose -f "$SCRIPT_DIR/docker-compose.yml" exec -T db mysqladmin ping -h localhost -u root -pdevpassword &>/dev/null 2>&1; then
                 print_ok "Database is ready"
                 break
             fi
@@ -344,9 +344,9 @@ if [ "$FULL_STACK" = true ]; then
         export DJAMBI_Api__apiAddress="http://*:5100"
         export DJAMBI_Api__cookieDomain="localhost"
         export DJAMBI_Api__webAddress="http://localhost:3000"
-        export DJAMBI_Sql__connectionString="Data Source=localhost,1434;Initial Catalog=Apex2;User Id=SA;Password=GR3@Tpassword;"
+        export DJAMBI_Sql__connectionString="Server=localhost;Port=3306;Database=Apex2;Uid=root;Pwd=devpassword;"
 
-        dotnet run --project "$API_PROJECT" &
+        dotnet run --project "$API_PROJECT" --no-launch-profile &
         API_PID=$!
 
         # Wait for API to respond
