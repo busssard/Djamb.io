@@ -169,8 +169,11 @@ let main args =
             let registry = BotRegistry()
             let iRegistry = registry :> IBotRegistry
             iRegistry.register(RandomBot())
+            iRegistry.register(MinimaxBot(2))
             iRegistry
         ) |> ignore
+
+        builder.Services.AddHostedService<Djambi.Api.Host.BotRunner>() |> ignore
 
         // ── Web layer (Scoped) ───────────────────────────────────────────
         builder.Services.AddScoped<CookieProvider>() |> ignore

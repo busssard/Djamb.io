@@ -79,18 +79,17 @@ type GameStartService(playerServ : PlayerService,
         *)
         let dict = Enumerable.ToDictionary (playersWithAssignments, (fun p -> p.name))
 
-        let nonNeutralPlayers =
+        let allPlayers =
             players
-            |> List.filter (fun p -> p.kind <> PlayerKind.Neutral)
             |> List.shuffle
             |> Seq.mapi (fun i p -> (i, p))
 
-        for (i, p) in nonNeutralPlayers do
+        for (i, p) in allPlayers do
             dict.[p.name] <- { dict.[p.name] with startingTurnNumber = Some i }
 
         dict.Values
         |> Seq.map (fun p ->
-            let status =  if p.kind = PlayerKind.Neutral then PlayerStatus.AcceptsDraw else PlayerStatus.Alive
+            let status = PlayerStatus.Alive
             { p with status = status }
         )
         |> Seq.toList
