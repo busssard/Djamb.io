@@ -60,7 +60,7 @@
   - [x] Replace `@material-ui/core` → `@mui/material` imports across 43 files
   - [x] Replace `@material-ui/icons` → `@mui/icons-material` (5 files)
   - [x] Replace `@material-ui/lab` → `@mui/material` (Alert graduated)
-  - [x] Move `makeStyles`/`withStyles` to `@mui/styles` (legacy compat package)
+  - [x] Migrate `makeStyles`/`withStyles` → MUI v7 `sx` prop and `styled` API (removed `@mui/styles` entirely)
   - [x] Update theme: `createMuiTheme` → `createTheme`, `palette.type` → `palette.mode`
   - [x] Fix Grid API for MUI v7: `item`/`xs` → `size="grow"`
   - [x] Fix `ListItem button` → `ListItemButton`
@@ -185,23 +185,41 @@
 - [ ] Handle offline → online reconnection gracefully
 - [ ] Test with multiple concurrent players
 
-## Phase 7: Backend Modernization
-> Upgrade from EOL .NET 3.1 to .NET 8 LTS.
+## Phase 7: Backend Modernization — Targeted Rewrite
+> Strategy: **keep game logic** (`api.logic/`), **rewrite hosting/plumbing** layer with modern .NET 8 patterns.
+> The game logic (board rules, piece movement, turn management) is solid and well-tested. The hosting layer
+> (startup, middleware, DI, auth) uses outdated patterns from .NET Core 3.1 that are better rewritten than patched.
 
-- [ ] Update all `.fsproj` TargetFramework from `netcoreapp3.1` / `netstandard2.1` to `net8.0`
-- [ ] Update NuGet packages to .NET 8 compatible versions
-  - [ ] Pomelo.EntityFrameworkCore.MySql → latest
-  - [ ] Serilog → 4.x
-  - [ ] Swashbuckle → 6.x
-  - [ ] Newtonsoft.Json → 13.x (or migrate to System.Text.Json)
-- [ ] Update `Startup.fs` for .NET 8 minimal hosting (or keep traditional if simpler)
-- [ ] Update Dockerfile base images from `dotnet/core/sdk:3.1` → `dotnet/sdk:8.0`
-- [ ] Fix any F# language/library breaking changes
-- [ ] Run all backend tests and fix failures
-- [ ] Update `docker-compose.yml` for .NET 8
-- [ ] Refactor `GameManager` into separate managers (break up god object)
-- [ ] Fix token logging in SessionContextProvider
+### 7a. Compatibility fixes (done)
+- [x] Update all `.fsproj` TargetFramework from `netcoreapp3.1` / `netstandard2.1` to `net8.0`
+- [x] Upgrade api.db.model from netcoreapp3.1 to net8.0 with EF Core 8.0 and Pomelo 8.0.0
+- [x] Replace MySql.Data.MySqlClient → MySqlConnector namespace across all repositories
+- [x] Add ServerVersion.AutoDetect() to all UseMySql() calls
+- [x] Replace EF6 ObjectNotFoundException → custom NotFoundException (EF Core has no equivalent)
+- [x] Remove Swashbuckle NewtonsoftJson support (dropped in 6.5+)
+- [x] Replace builder.UseSerilog() → services.AddSerilog() (Serilog.AspNetCore 8.0 API)
+- [x] Add EnsureCreated() for auto database schema creation
+- [x] Switch Docker from MSSQL to MySQL 8.0 (matching codebase)
+- [x] Fix run_server.sh for MySQL health checks and --no-launch-profile
+- [x] Upgrade integration test packages to 8.0.0
+
+### 7b. Hosting layer rewrite (next)
+- [ ] Rewrite `Startup.fs` using .NET 8 minimal hosting (`WebApplication.CreateBuilder`)
+- [ ] Modernize auth: replace custom session cookie system with ASP.NET Core Identity or JWT
+- [ ] Replace `WebHostBuilder` with `WebApplicationBuilder` in Program.fs
+- [ ] Add proper CORS configuration (current setup doesn't cover all frontend origins)
+- [ ] Modernize middleware pipeline (error handling, logging, request/response)
+- [ ] Consider migrating Newtonsoft.Json → System.Text.Json
+- [ ] Fix token logging vulnerability in SessionContextProvider.fs
 - [ ] Add rate limiting middleware
+- [ ] Add health check endpoints
+- [ ] Update Dockerfile base images from `dotnet/core/sdk:3.1` → `dotnet/sdk:8.0`
+
+### 7c. Architecture improvements
+- [ ] Refactor `GameManager` into separate managers (break up god object)
+- [ ] Add proper API versioning
+- [ ] Add structured logging with correlation IDs
+- [ ] Define clear bot/AI player API interface (see Phase 10)
 
 ## Phase 8: CI/CD Modernization
 > Update GitHub Actions to use current tool versions.
@@ -228,18 +246,38 @@
 - [ ] Store chat history in database
 - [ ] Add chat notification integration
 
-## Phase 10: AI Player Integration
+## Phase 10: AI Player Integration & Bot Interface
 > Server-side AI using Cicero-style architecture. See CLAUDE.md for full design.
+> The bot interface is designed to support **multiple AI implementations** — from simple heuristics to Cicero-style agents — behind a common API contract.
 
+### 10a. Bot Interface (API contract)
+- [ ] Design `IBotPlayer` interface:
+  - Input: game state (board, pieces, players, turn history, social signals)
+  - Output: chosen move (piece, destination, optional social action)
+  - Metadata: bot name, version, capabilities (supports_chat, supports_diplomacy)
+- [ ] Define bot registration/discovery mechanism (config-based or plugin-based)
+- [ ] Add bot API endpoints:
+  - `POST /api/bots/register` — register a bot for a game
+  - `GET /api/bots` — list available bots
+  - `POST /api/bots/{id}/move` — request a move from a bot (or bot pushes via callback)
+- [ ] Define game state serialization format for bot consumption (JSON schema)
+- [ ] Add bot turn timeout handling (bot must respond within N seconds or forfeit turn)
+- [ ] Support both synchronous (HTTP request/response) and asynchronous (WebSocket) bot communication
+
+### 10b. Reference bot implementations
+- [ ] **Random bot**: Picks a random legal move (testing/baseline)
+- [ ] **Greedy bot**: Maximizes immediate material advantage (simple heuristic)
+- [ ] **Positional bot**: Values center control + piece safety (intermediate heuristic)
+- [ ] **Rule-based social bot**: Makes draw/concede decisions based on game state thresholds
+
+### 10c. Advanced AI (Cicero-style)
 - [ ] Define Djambi action space (all legal moves + social actions)
 - [ ] Build game state encoder (board → tensor with social signals)
-- [ ] Create AI service (Python, separate from F# API)
-- [ ] Implement AI player API integration using `Neutral` PlayerKind
-- [ ] Start with rule-based heuristic AI (playable but not smart)
-- [ ] Collect training data from games
-- [ ] Train base strategy model (supervised learning)
-- [ ] Add social reasoning (rule-based → learned)
+- [ ] Create AI service (Python, separate from F# API) implementing the bot interface
+- [ ] Start with supervised learning on game logs
+- [ ] Add social reasoning layer (interprets implicit signals, generates chat)
 - [ ] Self-play RL training infrastructure
+- [ ] Collect training data from human games
 
 ## Phase 11: Polish & Launch
 > Final production readiness.
@@ -259,14 +297,21 @@
 
 ## Current Focus
 
-**Active work**: Phase 3 complete (core dependency upgrades). Next: Phase 4 (PWA enablement) → Phase 5 (mobile responsive design).
+**Active work**: Phase 7b — backend hosting layer rewrite. The compatibility fixes (7a) are done and the backend compiles/runs on .NET 8 with MySQL. Next step is rewriting the hosting/plumbing layer with modern patterns and defining the bot interface (Phase 10a).
 
 **Completed milestones**:
 - Phase 0: Documentation restructured ✓
 - Phase 1: Critical useEffect bugs fixed across 9 components ✓
-- Phase 2: CRA → Vite migration ✓ (build: 474KB → 603KB with MUI v7 additions, 191KB gzip)
+- Phase 2: CRA → Vite migration ✓
 - Phase 3 (core): React 18 + MUI v7 + React Router 6 + Konva 9 ✓
+- Phase 3 (styles): Migrated all `@mui/styles` → MUI v7 `sx` prop/`styled` ✓
+- Phase 4 (core): PWA with vite-plugin-pwa, install prompt, offline support ✓
+- Phase 7a: Backend .NET 8 compatibility fixes ✓ (builds, runs, user creation + login works)
 
-Dev server runs on `http://localhost:3000` via `npm start` (Vite). Build passes TypeScript strict check + Vite production build.
+**What works end-to-end**:
+- `./run_server.sh --full-stack` starts MySQL (Docker) + API (.NET 8) + frontend (Vite)
+- User creation (`POST /api/users`) and login (`POST /api/sessions`) work
+- Frontend forms render correctly after MUI sx migration
+- Dev server on `http://localhost:3000`, API on `http://localhost:5100`
 
-The strategy is: fix bugs first, modernize the build system, then incrementally upgrade dependencies while keeping the app functional at every step. PWA enablement (Phase 4) is the key milestone — once the app is installable, all other improvements layer on top.
+**Strategy**: Keep the solid game logic (`api.logic/`), rewrite the hosting/plumbing layer with modern .NET 8 patterns, and design a bot interface that supports multiple AI implementations (from random/heuristic bots to Cicero-style agents).

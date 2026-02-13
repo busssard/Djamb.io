@@ -40,6 +40,86 @@ This is a **fork of an abandoned project** (last active development ~2020). The 
 7. **Prioritize PWA compatibility** — all new frontend work should consider offline-first, installability, and mobile responsiveness
 8. **Keep it simple** — don't over-engineer; this codebase needs modernization, not more abstraction layers
 
+## Development Environment
+
+### Node.js Requirement
+The frontend requires **Node.js 22+**. The system Node on this machine is v12 (too old for all modern tooling). Node 22 is installed at `~/.local/node/`. A `.nvmrc` file in `web2/` specifies the version.
+
+To run any Node tool, use the absolute path since the system PATH resolves to v12:
+```bash
+/home/ole/.local/node/bin/node <script>
+```
+
+For example:
+```bash
+# TypeScript check
+/home/ole/.local/node/bin/node node_modules/typescript/lib/tsc.js --noEmit
+
+# Vite build
+/home/ole/.local/node/bin/node node_modules/vite/bin/vite.js build
+
+# Run tests
+/home/ole/.local/node/bin/node node_modules/vitest/vitest.mjs run
+
+# ESLint
+/home/ole/.local/node/bin/node node_modules/eslint/bin/eslint.js .
+
+# Prettier
+/home/ole/.local/node/bin/node node_modules/prettier/bin/prettier.cjs --write 'src/**/*.{ts,tsx,css}'
+
+# npm install (must use npm from Node 22)
+/home/ole/.local/node/bin/node /home/ole/.local/node/lib/node_modules/npm/bin/npm-cli.js install
+```
+
+**Do NOT use `npx`** — it uses `#!/usr/bin/env node` which resolves to system Node v12.
+
+### Frontend Tech Stack (web2/)
+| Tool | Version | Config File |
+|------|---------|-------------|
+| React | 18 | — |
+| TypeScript | 5.7 | `tsconfig.json` (`jsx: "react-jsx"`, `moduleResolution: "bundler"`) |
+| Vite | 5 | `vite.config.ts` |
+| vite-plugin-pwa | 1.2 | `vite.config.ts` (Workbox generateSW) |
+| MUI | 7 | `@mui/material` + `@emotion/react` + `@emotion/styled` (uses `sx` prop, no `@mui/styles`) |
+| React Router | 6 | Route lazy loading with `React.lazy` + `Suspense` |
+| Redux | 4 | Not yet migrated to Redux Toolkit |
+| Vitest | 1.6 | `vite.config.ts` (`globals: true`, `environment: 'jsdom'`) |
+| ESLint | 9 | `eslint.config.mjs` (flat config) |
+| Prettier | 3 | `.prettierrc` (single quotes, trailing commas, 100 width) |
+| Konva | 9 | Canvas rendering for game board |
+
+### Frontend Commands (from web2/)
+```bash
+npm run build    # tsc --noEmit && vite build
+npm run dev      # vite dev server on port 3000
+npm test         # vitest run
+npm run lint     # eslint .
+npm run format   # prettier --write src/**
+```
+
+### Backend (.NET 8 / F#)
+The API is an F# ASP.NET Core project targeting `net8.0`. It uses Pomelo.EntityFrameworkCore.MySql 8.0 with MySQL 8.0 (via Docker). The backend compiles and runs but needs a targeted rewrite of the hosting/plumbing layer — the game logic (`api.logic/`) is solid and should be preserved.
+
+```bash
+# Start full stack (DB + API + frontend)
+./run_server.sh --full-stack
+
+# Start frontend only
+./run_server.sh
+
+# Build backend
+dotnet build api/api.host/api.host.fsproj
+
+# Run backend tests
+dotnet test api/tests/api.unitTests/api.unitTests.fsproj
+dotnet test api/tests/api.integrationTests/api.integrationTests.fsproj
+```
+
+### Known Issues
+- **App.test.tsx fails**: Test needs `ThemeProvider` wrapper — pre-existing, not blocking
+- **25 ESLint warnings**: Stale `eslint-disable` comments for rules removed in flat config — safe to clean up incrementally
+- **Backend needs rewrite**: Hosting/plumbing layer uses outdated patterns (manual `WebHostBuilder`, no minimal hosting). Game logic is sound. See `tasks.md` Phase 7.
+
 ## User Preferences & Workflow
 
 ### Git Commit Strategy
