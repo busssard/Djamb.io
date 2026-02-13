@@ -24,6 +24,7 @@ open Djambi.Api.Model.Configuration
 open Djambi.Api.Web
 open Djambi.Api.Web.Authentication
 open Djambi.Api.Web.Controllers
+open Djambi.Api.Logic.Bots
 open Djambi.Api.Enums
 
 // Bootstrap logger (before DI is available)
@@ -162,6 +163,14 @@ let main args =
         builder.Services.AddScoped<IGameManager, GameManager>() |> ignore
         builder.Services.AddScoped<IPlayerManager, GameManager>() |> ignore
         builder.Services.AddScoped<ITurnManager, GameManager>() |> ignore
+
+        // ── Bot players (Singleton) ────────────────────────────────────────
+        builder.Services.AddSingleton<IBotRegistry>(fun _ ->
+            let registry = BotRegistry()
+            let iRegistry = registry :> IBotRegistry
+            iRegistry.register(RandomBot())
+            iRegistry
+        ) |> ignore
 
         // ── Web layer (Scoped) ───────────────────────────────────────────
         builder.Services.AddScoped<CookieProvider>() |> ignore

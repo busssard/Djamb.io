@@ -29,6 +29,8 @@
     <Compile Include="Managers\SessionManager.fs" />
     <Compile Include="Managers\SnapshotManager.fs" />
     <Compile Include="Managers\UserManager.fs" />
+    <Compile Include="Bots\RandomBot.fs" />
+    <Compile Include="Bots\BotRegistry.fs" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>

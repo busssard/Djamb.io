@@ -15,6 +15,7 @@
     <Compile Include="Model\SessionWebModel.fs" />
     <Compile Include="Model\SearchWebModel.fs" />
     <Compile Include="Model\SnapshotWebModel.fs" />
+    <Compile Include="Model\BotWebModel.fs" />
     <Compile Include="Mappings\BoardMappings.fs" />
     <Compile Include="Mappings\PlayerMappings.fs" />
     <Compile Include="Mappings\TurnMappings.fs" />
@@ -38,6 +39,7 @@
     <Compile Include="Controllers\SnapshotController.fs" />
     <Compile Include="Controllers\TurnController.fs" />
     <Compile Include="Controllers\UserController.fs" />
+    <Compile Include="Controllers\BotController.fs" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
