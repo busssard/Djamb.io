@@ -91,7 +91,8 @@ let main args =
             ) |> ignore
 
         // ── Health checks ────────────────────────────────────────────────
-        builder.Services.AddHealthChecks() |> ignore
+        builder.Services.AddHealthChecks()
+            .AddDbContextCheck<DjambiDbContext>("database") |> ignore
 
         // ── Configuration binding ────────────────────────────────────────
         builder.Services.Configure<AppSettings>(builder.Configuration) |> ignore
