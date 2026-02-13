@@ -20,5 +20,8 @@ type CookieProvider(options : IOptions<ApiSettings>) =
         ctx.Response.Cookies.Append(cookieName, token, cookieOptions);
         ctx.Response.Headers.Add("Access-Control-Expose-Headers", StringValues("Set-Cookie"))
 
-    member x.AppendEmptyCookie (ctx : HttpContext) =
-        x.AppendCookie ctx ("", DateTime.MinValue)
+    member __.AppendEmptyCookie (ctx : HttpContext) =
+        let cookieOptions = CookieOptions()
+        cookieOptions.Domain <- options.Value.cookieDomain
+        cookieOptions.Path <- "/"
+        ctx.Response.Cookies.Delete(cookieName, cookieOptions)

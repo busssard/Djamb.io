@@ -22,6 +22,7 @@ open Djambi.Api.Logic.Managers
 open Djambi.Api.Logic.Services
 open Djambi.Api.Model.Configuration
 open Djambi.Api.Web
+open Djambi.Api.Web.Authentication
 open Djambi.Api.Web.Controllers
 open Djambi.Api.Enums
 
@@ -163,7 +164,9 @@ let main args =
 
         // ── Web layer (Scoped) ───────────────────────────────────────────
         builder.Services.AddScoped<CookieProvider>() |> ignore
-        builder.Services.AddScoped<SessionContextProvider>() |> ignore
+
+        // ── Authentication ───────────────────────────────────────────────
+        builder.Services.AddDjambiAuthentication() |> ignore
 
         // ── Build ────────────────────────────────────────────────────────
         let app = builder.Build()
@@ -184,6 +187,8 @@ let main args =
         app.UseMiddleware<ErrorHandlingMiddleware>() |> ignore
         app.UseRouting() |> ignore
         app.UseCors("ApiCorsPolicy") |> ignore
+        app.UseAuthentication() |> ignore
+        app.UseAuthorization() |> ignore
         app.UseWebSockets() |> ignore
 
         app.MapControllers() |> ignore
