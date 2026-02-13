@@ -179,6 +179,13 @@ if command -v node &>/dev/null; then
     NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1)
     if [ "$NODE_MAJOR" -ge 18 ] 2>/dev/null; then
         print_ok "Node.js v${NODE_VERSION} ${DIM}(>= 18 required)${RESET}"
+        # Check if version matches .nvmrc recommendation
+        if [ -f "$WEB_DIR/.nvmrc" ]; then
+            EXPECTED_NODE=$(cat "$WEB_DIR/.nvmrc" | tr -d '[:space:]')
+            if [ "$NODE_MAJOR" != "$EXPECTED_NODE" ]; then
+                print_warn "Node.js v${NODE_VERSION} works but v${EXPECTED_NODE}.x is recommended (see .nvmrc)"
+            fi
+        fi
     else
         print_error "Node.js v${NODE_VERSION} is too old ${DIM}(>= 18 required)${RESET}"
         PREREQS_OK=false
@@ -297,6 +304,29 @@ else
 fi
 
 echo ""
+
+# ── 3b. .NET dependencies (when full-stack) ─────────────────────────────────
+
+if [ "$FULL_STACK" = true ]; then
+    print_section "STEP" "Restoring .NET dependencies"
+
+    print_info "Running dotnet restore"
+    if dotnet restore "$SCRIPT_DIR/api/djambi.api.sln" --verbosity quiet 2>&1 | tail -3; then
+        print_ok ".NET packages restored"
+    else
+        print_error "dotnet restore failed"
+        exit 1
+    fi
+
+    print_info "Restoring .NET local tools"
+    if (cd "$SCRIPT_DIR/api" && dotnet tool restore 2>&1 | tail -3); then
+        print_ok ".NET tools restored"
+    else
+        print_warn "dotnet tool restore failed (Swagger CLI may not work)"
+    fi
+
+    echo ""
+fi
 
 # ── 4. Full-stack: Start database + API ─────────────────────────────────────
 
