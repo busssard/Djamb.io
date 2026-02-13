@@ -12,3 +12,7 @@ export const selectNavigation = (state: RootState) => state.navigation;
 export const selectNotifications = (state: RootState) => state.notifications;
 
 export const selectSession = (state: RootState) => state.session;
+
+export const selectBoards = (state: RootState) => state.boards;
+
+export const selectImages = (state: RootState) => state.images;
