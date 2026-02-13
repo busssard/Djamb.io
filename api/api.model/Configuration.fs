@@ -20,6 +20,7 @@ type ApiSettings = {
     allowedOrigins : string
     cookieDomain : string
     cookieName : string
+    secureCookies : bool
 }
 
 [<CLIMutable>]
@@ -59,6 +60,7 @@ module AppSettings =
             allowedOrigins = ""
             cookieDomain = ""
             cookieName = ""
+            secureCookies = false
         }
         log = {
             directory = ""

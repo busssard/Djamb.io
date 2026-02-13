@@ -12,9 +12,9 @@ open Djambi.Api.Logic.Interfaces
 type EncryptionService() =
     
     let saltBytes = 128(*bits*) / 8
-    let iterations = 1000;
+    let iterations = 600000
     let algorithmName = HashAlgorithmName.SHA256
-    let keySize = 8;
+    let keySize = 32
 
     interface IEncryptionService with
         member __.hash password =
@@ -42,10 +42,10 @@ type EncryptionService() =
             use alg = new Rfc2898DeriveBytes(
                         password,
                         salt,
-                        iterations,
+                        its,
                         algorithmName)
 
-            let keyToCheck = alg.GetBytes keySize
+            let keyToCheck = alg.GetBytes key.Length
             let verified = keyToCheck.SequenceEqual key
 
             {

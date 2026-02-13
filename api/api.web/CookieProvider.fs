@@ -14,8 +14,9 @@ type CookieProvider(options : IOptions<ApiSettings>) =
         let cookieOptions = CookieOptions()
         cookieOptions.Domain <- options.Value.cookieDomain
         cookieOptions.Path <- "/"
-        cookieOptions.Secure <- false
+        cookieOptions.Secure <- options.Value.secureCookies
         cookieOptions.HttpOnly <- true
+        cookieOptions.SameSite <- SameSiteMode.Lax
         cookieOptions.Expires <- DateTimeOffset(expiration) |> Nullable.ofValue
         ctx.Response.Cookies.Append(cookieName, token, cookieOptions);
         ctx.Response.Headers.Add("Access-Control-Expose-Headers", StringValues("Set-Cookie"))
