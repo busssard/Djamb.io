@@ -1,6 +1,5 @@
 import React, { FC } from 'react';
 import { Table, TableContainer, TableCell, TableRow, TableBody, TableHead } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { SearchGameDto } from '../../api-client';
 import * as Routes from '../../utilities/routes';
 import { navigateTo } from '../../controllers/navigationController';
@@ -9,16 +8,14 @@ interface Props {
   games: SearchGameDto[];
 }
 
-const GameSearchResultsTable: FC<Props> = ({ games }) => {
-  const classes = makeStyles({
-    row: {
-      background: '#000000',
-      '&:hover': {
-        background: '#555555',
-      },
-    },
-  })();
+const rowSx = {
+  background: '#000000',
+  '&:hover': {
+    background: '#555555',
+  },
+} as const;
 
+const GameSearchResultsTable: FC<Props> = ({ games }) => {
   return (
     <TableContainer>
       <Table>
@@ -32,7 +29,7 @@ const GameSearchResultsTable: FC<Props> = ({ games }) => {
         <TableBody>
           {games.map((g, i) => (
             <TableRow
-              className={classes.row}
+              sx={rowSx}
               key={i.toString()}
               onClick={() => navigateTo(Routes.game(g.id))}
             >

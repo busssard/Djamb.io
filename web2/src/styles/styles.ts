@@ -1,25 +1,19 @@
-import { Theme } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
+import { SxProps, Theme } from '@mui/material/styles';
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function useFormStyles(theme: Theme) {
-  const useStyles = makeStyles({
-    button: {
-      border: '1px',
-      borderStyle: 'solid',
-      padding: '10px',
-      width: '50%',
-      alignSelf: 'center',
-    },
-    control: {
-      padding: '10px',
-    },
-    label: {
-      color: theme.palette.text.secondary,
-    },
-  });
-  return useStyles();
-}
+export const formStyles = {
+  button: {
+    border: '1px solid',
+    padding: '10px',
+    width: '50%',
+    alignSelf: 'center',
+  } as SxProps<Theme>,
+  control: {
+    padding: '10px',
+  } as SxProps<Theme>,
+  label: {
+    color: 'text.secondary',
+  } as SxProps<Theme>,
+};
 
 const playerColors = new Map<number, string>([
   [0, 'blue'],

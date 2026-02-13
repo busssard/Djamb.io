@@ -4,10 +4,9 @@ import { Menu as MenuIcon } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { selectNavigation } from '../../hooks/selectors';
 import { toggleDrawer } from '../../controllers/navigationController';
-import { topBarStyles } from './styles';
+import { topBarButtonSx } from './styles';
 
 const MenuButton: FC = () => {
-  const classes = topBarStyles();
   const state = useSelector(selectNavigation);
   const isOpen = state.isDrawerOpen;
 
@@ -16,7 +15,7 @@ const MenuButton: FC = () => {
   };
 
   return (
-    <IconButton edge="start" className={classes.button} onClick={toggle}>
+    <IconButton edge="start" sx={topBarButtonSx} onClick={toggle}>
       <MenuIcon />
     </IconButton>
   );

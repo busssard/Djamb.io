@@ -1,24 +1,12 @@
 import React, { FC } from 'react';
-import clsx from 'clsx';
-import { makeStyles } from '@mui/styles';
-import { Drawer } from '@mui/material';
+import { Box, Drawer } from '@mui/material';
 import { useSelector } from 'react-redux';
 import GamelessSection from './GamelessSection/GamelessSection';
 import ActiveGameSection from './ActiveGameSection/ActiveGameSection';
 import { selectNavigation } from '../../hooks/selectors';
 import { toggleDrawer } from '../../controllers/navigationController';
 
-const useStyles = makeStyles({
-  list: {
-    width: 250,
-  },
-  fullList: {
-    width: 'auto',
-  },
-});
-
 const NavigationDrawer: FC = () => {
-  const classes = useStyles();
   const state = useSelector(selectNavigation);
   const isOpen = state.isDrawerOpen;
 
@@ -36,17 +24,15 @@ const NavigationDrawer: FC = () => {
   return (
     <div>
       <Drawer open={isOpen} onClose={close}>
-        <div
-          className={clsx(classes.list, {
-            [classes.fullList]: false,
-          })}
+        <Box
+          sx={{ width: 250 }}
           role="presentation"
           onClick={close}
           onKeyDown={close}
         >
           <GamelessSection />
           <ActiveGameSection />
-        </div>
+        </Box>
       </Drawer>
     </div>
   );

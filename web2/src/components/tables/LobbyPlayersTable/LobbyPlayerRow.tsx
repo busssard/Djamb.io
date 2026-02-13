@@ -6,8 +6,7 @@ import { GameDto, PlayerKind } from '../../../api-client';
 import { LobbyPlayerViewModel, LobbyPlayerActionType } from './viewModel';
 import { addPlayer, removePlayer } from '../../../controllers/gameController';
 import { selectSession } from '../../../hooks/selectors';
-import { useFormStyles } from '../../../styles/styles';
-import { theme } from '../../../styles/materialTheme';
+import { formStyles } from '../../../styles/styles';
 
 interface Props {
   player: LobbyPlayerViewModel;
@@ -43,8 +42,6 @@ const getActionLabel = (action: LobbyPlayerActionType | null) => {
 };
 
 const LobbyPlayerRow: FC<Props> = ({ player, game }) => {
-  const styles = useFormStyles(theme);
-
   const [guestName, setGuestName] = useState('');
   const { user } = useSelector(selectSession);
 
@@ -122,7 +119,7 @@ const LobbyPlayerRow: FC<Props> = ({ player, game }) => {
           <></>
         ) : (
           <Button
-            className={styles.button}
+            sx={formStyles.button}
             onClick={onClick}
             style={{ width: '100%' }}
             disabled={player.actionType === LobbyPlayerActionType.AddGuest && !guestName}

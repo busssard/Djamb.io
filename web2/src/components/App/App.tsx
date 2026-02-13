@@ -1,8 +1,7 @@
 import React, { FC, useEffect, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
-import { CircularProgress } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { CircularProgress, Box } from '@mui/material';
 import NavigationDrawer from '../NavigationDrawer/NavigationDrawer';
 import { loadConfig } from '../../controllers/configController';
 import * as RoutePaths from '../../utilities/routes';
@@ -32,13 +31,11 @@ const SignOutPage = React.lazy(() => import('../pages/SignOutPage'));
 const GameInfoPage = React.lazy(() => import('../pages/GameInfoPage'));
 const NotificationsPage = React.lazy(() => import('../pages/NotificationsPage'));
 
-const useStyles = makeStyles({
-  page: {
-    textAlign: 'center',
-    padding: '20px',
-    background: '#161616',
-  },
-});
+const pageSx = {
+  textAlign: 'center',
+  padding: '20px',
+  background: '#161616',
+} as const;
 
 const getGameId = (): number | null => {
   const url = window.location.href;
@@ -80,8 +77,6 @@ const App: FC = () => {
     }
   }, []);
 
-  const classes = useStyles();
-
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
@@ -89,7 +84,7 @@ const App: FC = () => {
         <NavigationDrawer />
         <LatestNotificationSnackbar />
         <TopBar />
-        <div className={classes.page}>
+        <Box sx={pageSx}>
           <Suspense fallback={<CircularProgress />}>
             <Routes>
               {/* Gameless pages */}
@@ -114,7 +109,7 @@ const App: FC = () => {
               <Route path="*" element={<NoMatchPage />} />
             </Routes>
           </Suspense>
-        </div>
+        </Box>
       </BrowserRouter>
     </ThemeProvider>
   );

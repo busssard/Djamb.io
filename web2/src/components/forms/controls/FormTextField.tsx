@@ -1,6 +1,6 @@
 import React, { FC, ChangeEvent } from 'react';
-import { FormControlLabel, TextField, useTheme } from '@mui/material';
-import { useFormStyles } from '../../../styles/styles';
+import { FormControlLabel, TextField } from '@mui/material';
+import { formStyles } from '../../../styles/styles';
 
 interface Props {
   value: string;
@@ -12,18 +12,15 @@ interface Props {
 }
 
 const FormTextField: FC<Props> = ({ value, label, onChanged, error, helperText, placeholder }) => {
-  const theme = useTheme();
-  const styles = useFormStyles(theme);
-
   return (
     <FormControlLabel
       value={value}
       label={label}
       labelPlacement="start"
-      className={styles.label}
+      sx={formStyles.label}
       control={
         <TextField
-          className={styles.control}
+          sx={formStyles.control}
           onChange={onChanged}
           error={error}
           helperText={helperText}

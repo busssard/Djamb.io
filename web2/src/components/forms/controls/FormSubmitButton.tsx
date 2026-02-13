@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
-import { Button, useTheme } from '@mui/material';
-import { useFormStyles } from '../../../styles/styles';
+import { Button } from '@mui/material';
+import { formStyles } from '../../../styles/styles';
 
 interface FormSubmitButtonProps {
   onClick: () => void;
@@ -8,11 +8,8 @@ interface FormSubmitButtonProps {
 }
 
 const FormSubmitButton: FC<FormSubmitButtonProps> = ({ onClick, text }) => {
-  const theme = useTheme();
-  const styles = useFormStyles(theme);
-
   return (
-    <Button onClick={onClick} className={styles.button} type="submit">
+    <Button onClick={onClick} sx={formStyles.button} type="submit">
       {text}
     </Button>
   );

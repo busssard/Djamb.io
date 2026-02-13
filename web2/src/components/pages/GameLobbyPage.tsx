@@ -8,8 +8,7 @@ import { loadGame, startGame } from '../../controllers/gameController';
 import { GameStatus } from '../../api-client';
 import LobbyPlayersTable from '../tables/LobbyPlayersTable/LobbyPlayersTable';
 import GameParametersTable from '../tables/GameParametersTable';
-import { theme } from '../../styles/materialTheme';
-import { useFormStyles } from '../../styles/styles';
+import { formStyles } from '../../styles/styles';
 import { navigateTo } from '../../controllers/navigationController';
 import * as Routes from '../../utilities/routes';
 
@@ -22,8 +21,6 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id, gameId]);
-
-  const styles = useFormStyles(theme);
 
   if (game === null) {
     return <></>;
@@ -54,7 +51,7 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
       <br />
       <br />
       <Container maxWidth="xs">
-        <Button className={styles.button} onClick={() => startGame(game.id)} disabled={!canStart}>
+        <Button sx={formStyles.button} onClick={() => startGame(game.id)} disabled={!canStart}>
           Start
         </Button>
         <br />

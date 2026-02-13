@@ -1,10 +1,8 @@
+import { styled } from '@mui/material/styles';
 import { TableCell } from '@mui/material';
-import { withStyles } from '@mui/styles';
 
-const FormTableCell = withStyles({
-  root: {
-    borderBottom: 'none',
-  },
-})(TableCell);
+const FormTableCell = styled(TableCell)({
+  borderBottom: 'none',
+});
 
 export default FormTableCell;

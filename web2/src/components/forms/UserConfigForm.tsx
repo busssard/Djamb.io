@@ -12,8 +12,7 @@ import { useSelector } from 'react-redux';
 import { setUserConfig } from '../../controllers/configController';
 import FormSubmitButton from './controls/FormSubmitButton';
 import { selectConfig } from '../../hooks/selectors';
-import { useFormStyles } from '../../styles/styles';
-import { theme } from '../../styles/materialTheme';
+import { formStyles } from '../../styles/styles';
 import FormTableCell from './controls/FormTableCell';
 
 const TableCell = FormTableCell;
@@ -21,8 +20,6 @@ const TableCell = FormTableCell;
 const UserConfigForm: FC = () => {
   const { user } = useSelector(selectConfig);
   const [state, setState] = useState(user);
-  const styles = useFormStyles(theme);
-
   const submit = () => setUserConfig(state);
 
   return (
@@ -34,7 +31,7 @@ const UserConfigForm: FC = () => {
               <TableCell>Log Redux</TableCell>
               <TableCell>
                 <Checkbox
-                  className={styles.control}
+                  sx={formStyles.control}
                   checked={state.logRedux}
                   onChange={(e) =>
                     setState({
@@ -49,7 +46,7 @@ const UserConfigForm: FC = () => {
               <TableCell>Show cell and piece IDs</TableCell>
               <TableCell>
                 <Checkbox
-                  className={styles.control}
+                  sx={formStyles.control}
                   checked={state.showCellAndPieceIds}
                   onChange={(e) =>
                     setState({
@@ -64,7 +61,7 @@ const UserConfigForm: FC = () => {
               <TableCell>Show board tooltips</TableCell>
               <TableCell>
                 <Checkbox
-                  className={styles.control}
+                  sx={formStyles.control}
                   checked={state.showBoardTooltips}
                   onChange={(e) =>
                     setState({
@@ -80,7 +77,7 @@ const UserConfigForm: FC = () => {
               <TableCell>
                 <TextField
                   type="number"
-                  className={styles.control}
+                  sx={formStyles.control}
                   value={state.notificationDisplaySeconds}
                   onChange={(e) =>
                     setState({

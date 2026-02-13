@@ -10,13 +10,12 @@ import {
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import NavigationItem from '../NavigationItem';
-import { sectionHeaderStyle } from '../styles';
+import { sectionHeaderStyles } from '../styles';
 import { GameStatus } from '../../../api-client';
 import * as Routes from '../../../utilities/routes';
 import { selectActiveGame } from '../../../hooks/selectors';
 
 const ActiveGameSection: FC = () => {
-  const headerStyle = sectionHeaderStyle();
   const activeGame = useSelector(selectActiveGame);
   const { game } = activeGame;
 
@@ -28,12 +27,12 @@ const ActiveGameSection: FC = () => {
     <>
       <Divider />
       <List>
-        <Typography variant="h5" className={headerStyle.h5}>
+        <Typography variant="h5" sx={sectionHeaderStyles.h5}>
           {`Game ${game.id}`}
         </Typography>
 
         {game.parameters.description ? (
-          <Typography variant="h6" className={headerStyle.h6}>
+          <Typography variant="h6" sx={sectionHeaderStyles.h6}>
             {game.parameters.description}
           </Typography>
         ) : undefined}

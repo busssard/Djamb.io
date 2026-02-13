@@ -1,40 +1,33 @@
 import React, { FC } from 'react';
-import { AppBar, Toolbar, Typography, Grid } from '@mui/material';
-import { Theme } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
+import { AppBar, Toolbar, Typography, Grid, Box } from '@mui/material';
 import MenuButton from './MenuButton';
 import NotificationsButton from './NotificationsButton';
 import InstallButton from './InstallButton';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  title: {
-    flexGrow: 1,
-    color: theme.palette.text.secondary,
-    position: 'absolute',
-    transform: 'translate(-50%, -50%)',
-    margin: 0,
-    top: '50%',
-    left: '50%',
-  },
-}));
+const rootSx = { flexGrow: 1 } as const;
+
+const titleSx = {
+  flexGrow: 1,
+  color: 'text.secondary',
+  position: 'absolute',
+  transform: 'translate(-50%, -50%)',
+  margin: 0,
+  top: '50%',
+  left: '50%',
+} as const;
 
 const TopBar: FC = () => {
-  const classes = useStyles();
-
   return (
-    <div className={classes.root}>
+    <Box sx={rootSx}>
       <AppBar position="static" color="inherit">
         <Toolbar>
-          <Grid container className={classes.root}>
+          <Grid container sx={rootSx}>
             <Grid size="grow" style={{ display: 'flex' }}>
               <MenuButton />
               <NotificationsButton />
             </Grid>
             <Grid size="grow">
-              <Typography variant="h6" className={classes.title}>
+              <Typography variant="h6" sx={titleSx}>
                 Djambi-N
               </Typography>
             </Grid>
@@ -44,7 +37,7 @@ const TopBar: FC = () => {
           </Grid>
         </Toolbar>
       </AppBar>
-    </div>
+    </Box>
   );
 };
 

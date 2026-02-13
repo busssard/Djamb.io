@@ -5,18 +5,17 @@ import { useSelector } from 'react-redux';
 import { selectNotifications } from '../../hooks/selectors';
 import { navigateTo } from '../../controllers/navigationController';
 import * as Routes from '../../utilities/routes';
-import { topBarStyles } from './styles';
+import { topBarButtonSx } from './styles';
 
 const NotificationsButton: FC = () => {
-  const classes = topBarStyles();
-  const { notifications } = useSelector(selectNotifications);
+  const notifications = useSelector(selectNotifications).notifications;
   const count = notifications.length;
   const disabled = count === 0;
 
   return (
     <IconButton
       edge="start"
-      className={classes.button}
+      sx={topBarButtonSx}
       onClick={() => navigateTo(Routes.notifications)}
       disabled={disabled}
     >
