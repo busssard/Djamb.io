@@ -9,7 +9,7 @@ const RedirectToSignInIfSignedOut: FC = () => {
   const isSignedOut = !isRestorePending && user === null;
 
   if (isSignedOut) {
-    navigateTo(Routes.signIn);
+    navigateTo(Routes.join);
   }
 
   return <></>;

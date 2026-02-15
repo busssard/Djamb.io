@@ -1,8 +1,7 @@
 import React, { FC } from 'react';
 import { List } from '@mui/material';
 import {
-  Input as SignInIcon,
-  PersonAdd as CreateAccountIcon,
+  PersonAdd as JoinIcon,
   Add as NewGameIcon,
   ExitToApp as SignOutIcon,
   Home as HomeIcon,
@@ -18,12 +17,7 @@ import * as Routes from '../../../utilities/routes';
 
 const getUnauthenticatedItems = () => (
   <>
-    <NavigationItem text="Sign in" icon={<SignInIcon />} path={Routes.signIn} />
-    <NavigationItem
-      text="Create account"
-      icon={<CreateAccountIcon />}
-      path={Routes.createAccount}
-    />
+    <NavigationItem text="Join" icon={<JoinIcon />} path={Routes.join} />
   </>
 );
 

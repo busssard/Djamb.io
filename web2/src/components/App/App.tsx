@@ -14,8 +14,7 @@ import { loadGame, blockGameLoading } from '../../controllers/gameController';
 
 // Lazy-loaded page components
 const NoMatchPage = React.lazy(() => import('../pages/NoMatchPage'));
-const CreateAccountPage = React.lazy(() => import('../pages/CreateAccountPage'));
-const SignInPage = React.lazy(() => import('../pages/SignInPage'));
+const QuickJoinPage = React.lazy(() => import('../pages/QuickJoinPage'));
 const UserConfigPage = React.lazy(() => import('../pages/UserConfigPage'));
 const RulesPage = React.lazy(() => import('../pages/RulesPage'));
 const GameDiplomacyPage = React.lazy(() => import('../pages/GameDiplomacyPage'));
@@ -89,9 +88,8 @@ const App: FC = () => {
             <Routes>
               {/* Gameless pages */}
               <Route path={RoutePaths.settings} element={<UserConfigPage />} />
-              <Route path={RoutePaths.signIn} element={<SignInPage />} />
+              <Route path={RoutePaths.join} element={<QuickJoinPage />} />
               <Route path={RoutePaths.signOut} element={<SignOutPage />} />
-              <Route path={RoutePaths.createAccount} element={<CreateAccountPage />} />
               <Route path={RoutePaths.rules} element={<RulesPage />} />
               <Route path={RoutePaths.home} element={<HomePage />} />
               <Route path={RoutePaths.notifications} element={<NotificationsPage />} />

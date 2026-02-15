@@ -1,4 +1,4 @@
-export const createAccount = '/create-account';
+export const join = '/join';
 
 export const home = '/home';
 
@@ -11,8 +11,6 @@ export const rules = '/rules';
 export const searchGames = '/search-games';
 
 export const settings = '/settings';
-
-export const signIn = '/sign-in';
 
 export const signOut = '/sign-out';
 

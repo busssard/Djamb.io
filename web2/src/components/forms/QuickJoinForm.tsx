@@ -1,24 +1,23 @@
 import React, { FC, useState } from 'react';
 import { FormControl, FormGroup } from '@mui/material';
-import { signIn } from '../../controllers/userController';
+import { quickJoin } from '../../controllers/userController';
 import FormTextField from './controls/FormTextField';
 import FormSubmitButton from './controls/FormSubmitButton';
-import FormPasswordField from './controls/FormPasswordField';
 
 type FormState = {
   username: string;
-  password: string;
+  email: string;
 };
 
 const defaultState: FormState = {
   username: '',
-  password: '',
+  email: '',
 };
 
-const SignInForm: FC = () => {
+const QuickJoinForm: FC = () => {
   const [state, setState] = useState(defaultState);
 
-  const submit = () => signIn(state);
+  const submit = () => quickJoin(state.username, state.email || undefined);
 
   return (
     <div>
@@ -34,22 +33,23 @@ const SignInForm: FC = () => {
               })
             }
           />
-          <FormPasswordField
-            label="Password"
-            value={state.password}
+          <FormTextField
+            label="Email (optional)"
+            value={state.email}
+            placeholder="For signing in on other devices"
             onChanged={(e) =>
               setState({
                 ...state,
-                password: e.target.value,
+                email: e.target.value,
               })
             }
           />
           <br />
-          <FormSubmitButton text="Submit" onClick={submit} />
+          <FormSubmitButton text="Join" onClick={submit} />
         </FormGroup>
       </FormControl>
     </div>
   );
 };
 
-export default SignInForm;
+export default QuickJoinForm;
