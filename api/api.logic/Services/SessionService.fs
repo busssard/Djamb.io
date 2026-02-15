@@ -11,11 +11,14 @@ open System.Security.Authentication
 
 type SessionService(encryptionService : IEncryptionService,
                     sessionRepo : ISessionRepository,
-                    userRepo : IUserRepository) =
+                    userRepo : IUserRepository,
+                    magicLinkRepo : IMagicLinkRepository,
+                    emailService : IEmailService) =
 
     let maxFailedLoginAttempts = 5
     let accountLockTimeout = TimeSpan.FromHours(1.0)
     let sessionTimeout = TimeSpan.FromHours(1.0)
+    let magicLinkTimeout = TimeSpan.FromMinutes(15.0)
 
     interface ISessionService with
         member __.openSession request = 
@@ -95,6 +98,46 @@ type SessionService(encryptionService : IEncryptionService,
                         expiresOn = DateTime.UtcNow.Add(sessionTimeout)
                     }
                 return! sessionRepo.createSession request
+            }
+
+        member __.requestMagicLink email baseUrl =
+            task {
+                // Always return success to prevent email enumeration
+                match! userRepo.getUserByEmail email with
+                | None -> return ()
+                | Some user ->
+                    let token = Guid.NewGuid().ToString("N")
+                    let expiresOn = DateTime.UtcNow.Add(magicLinkTimeout)
+                    let! _ = magicLinkRepo.createToken user.id email token expiresOn
+                    let link = sprintf "%s/auth/verify/%s" baseUrl token
+                    do! emailService.sendMagicLink email link
+            }
+
+        member __.verifyMagicLink token =
+            task {
+                match! magicLinkRepo.getByToken token with
+                | None ->
+                    return raise <| AuthenticationException("Invalid or expired link.")
+                | Some magicLink ->
+                    if magicLink.usedOn.IsSome then
+                        return raise <| AuthenticationException("This link has already been used.")
+                    if DateTime.UtcNow > magicLink.expiresOn then
+                        return raise <| AuthenticationException("This link has expired.")
+
+                    do! magicLinkRepo.markUsed magicLink.id
+
+                    // Delete any existing session and create a new one
+                    match! sessionRepo.getSession (SessionQuery.byUserId magicLink.userId) with
+                    | Some existing -> do! sessionRepo.deleteSession existing.token
+                    | None -> ()
+
+                    let request : CreateSessionRequest =
+                        {
+                            userId = magicLink.userId
+                            token = Guid.NewGuid().ToString()
+                            expiresOn = DateTime.UtcNow.Add(sessionTimeout)
+                        }
+                    return! sessionRepo.createSession request
             }
 
         member __.closeSession session =

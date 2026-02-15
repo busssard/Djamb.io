@@ -12,6 +12,7 @@
     <Compile Include="Mappings\SessionMappings.fs" />
     <Compile Include="Mappings\GameMappings.fs" />
     <Compile Include="Mappings\SearchMappings.fs" />
+    <Compile Include="Repositories\MagicLinkRepository.fs" />
     <Compile Include="Repositories\EventRepository.fs" />
     <Compile Include="Repositories\GameRepository.fs" />
     <Compile Include="Repositories\PlayerRepository.fs" />

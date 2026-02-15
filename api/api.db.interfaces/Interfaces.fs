@@ -37,6 +37,11 @@ type ISnapshotRepository =
     abstract member createSnapshot : request:InternalCreateSnapshotRequest -> Task<int>
     abstract member loadSnapshot : gameId:int * snapshotId:int -> Task<unit>
 
+type IMagicLinkRepository =
+    abstract member createToken : userId:int -> email:string -> token:string -> expiresOn:DateTime -> Task<MagicLinkToken>
+    abstract member getByToken : token:string -> Task<Option<MagicLinkToken>>
+    abstract member markUsed : tokenId:int -> Task<unit>
+
 type IUserRepository =
     abstract member getUser : userId:int -> Task<Option<UserDetails>>
     abstract member getUserByName : name:string -> Task<Option<UserDetails>>

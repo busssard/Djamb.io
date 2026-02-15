@@ -1,6 +1,7 @@
 namespace Djambi.Api.Web.Controllers
 
 open System.Threading.Tasks
+open FSharp.Control.Tasks
 open Microsoft.AspNetCore.Authorization
 open Microsoft.AspNetCore.Mvc
 open Djambi.Api.Logic.Interfaces
@@ -13,7 +14,8 @@ open Djambi.Api.Web.Mappings
 [<AllowAnonymous>]
 [<Route("api/sessions")>]
 type SessionController(manager : ISessionManager,
-                       cookieProvider : CookieProvider) =
+                       cookieProvider : CookieProvider,
+                       sessionService : ISessionService) =
     inherit ControllerBase()
 
     [<HttpPost>]
@@ -50,4 +52,26 @@ type SessionController(manager : ISessionManager,
             | None -> ()
 
             return NoContentResult() :> IActionResult
+        }
+
+    [<HttpPost("magic-link")>]
+    [<ProducesResponseType(200)>]
+    member __.RequestMagicLink([<FromBody>] request : MagicLinkRequestDto) : Task<IActionResult> =
+        let ctx = base.HttpContext
+        task {
+            let baseUrl = sprintf "%s://%s" (ctx.Request.Scheme) (ctx.Request.Host.ToString())
+            do! sessionService.requestMagicLink request.email baseUrl
+            // Always return OK to prevent email enumeration
+            return OkResult() :> IActionResult
+        }
+
+    [<HttpPost("magic-link/verify")>]
+    [<ProducesResponseType(200, Type = typeof<SessionDto>)>]
+    member __.VerifyMagicLink([<FromBody>] request : MagicLinkVerifyDto) : Task<IActionResult> =
+        let ctx = base.HttpContext
+        task {
+            let! session = sessionService.verifyMagicLink request.token
+            let dto = session |> toSessionDto
+            cookieProvider.AppendCookie ctx (session.token, session.expiresOn)
+            return OkObjectResult(dto) :> IActionResult
         }

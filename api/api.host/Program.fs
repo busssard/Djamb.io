@@ -135,11 +135,13 @@ let main args =
         builder.Services.AddScoped<IGameRepository, GameRepository>() |> ignore
         builder.Services.AddScoped<IPlayerRepository, PlayerRepository>() |> ignore
         builder.Services.AddScoped<ISearchRepository, SearchRepository>() |> ignore
+        builder.Services.AddScoped<IMagicLinkRepository, MagicLinkRepository>() |> ignore
         builder.Services.AddScoped<ISessionRepository, SessionRepository>() |> ignore
         builder.Services.AddScoped<ISnapshotRepository, SnapshotRepository>() |> ignore
         builder.Services.AddScoped<IUserRepository, UserRepository>() |> ignore
 
         // ── Logic layer (Scoped) ─────────────────────────────────────────
+        builder.Services.AddScoped<IEmailService, ConsoleEmailService>() |> ignore
         builder.Services.AddScoped<IEncryptionService, EncryptionService>() |> ignore
         builder.Services.AddScoped<EventService>() |> ignore
         builder.Services.AddScoped<GameCrudService>() |> ignore

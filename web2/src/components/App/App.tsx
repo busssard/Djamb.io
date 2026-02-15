@@ -30,6 +30,8 @@ const SignOutPage = React.lazy(() => import('../pages/SignOutPage'));
 const GameInfoPage = React.lazy(() => import('../pages/GameInfoPage'));
 const NotificationsPage = React.lazy(() => import('../pages/NotificationsPage'));
 const JoinByInvitePage = React.lazy(() => import('../pages/JoinByInvitePage'));
+const MagicLinkPage = React.lazy(() => import('../pages/MagicLinkPage'));
+const MagicLinkVerifyPage = React.lazy(() => import('../pages/MagicLinkVerifyPage'));
 
 const pageSx = {
   textAlign: 'center',
@@ -91,6 +93,8 @@ const App: FC = () => {
               <Route path={RoutePaths.settings} element={<UserConfigPage />} />
               <Route path={RoutePaths.join} element={<QuickJoinPage />} />
               <Route path={RoutePaths.inviteTemplate} element={<JoinByInvitePage />} />
+              <Route path={RoutePaths.magicLink} element={<MagicLinkPage />} />
+              <Route path={RoutePaths.magicLinkVerifyTemplate} element={<MagicLinkVerifyPage />} />
               <Route path={RoutePaths.signOut} element={<SignOutPage />} />
               <Route path={RoutePaths.rules} element={<RulesPage />} />
               <Route path={RoutePaths.home} element={<HomePage />} />

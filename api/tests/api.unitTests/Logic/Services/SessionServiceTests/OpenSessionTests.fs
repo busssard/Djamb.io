@@ -16,7 +16,9 @@ let ``throws if user does not exist``() =
     let encryption = A.Fake<IEncryptionService>()
     let sessionRepo = A.Fake<ISessionRepository>()
     let userRepo = A.Fake<IUserRepository>()
-    let service = SessionService(encryption, sessionRepo, userRepo) :> ISessionService
+    let magicLinkRepo = A.Fake<IMagicLinkRepository>()
+    let emailService = A.Fake<IEmailService>()
+    let service = SessionService(encryption, sessionRepo, userRepo, magicLinkRepo, emailService) :> ISessionService
 
     let request : LoginRequest = {
         username = "aUsername"
@@ -40,7 +42,9 @@ let ``throws if account locked``() =
     let encryption = A.Fake<IEncryptionService>()
     let sessionRepo = A.Fake<ISessionRepository>()
     let userRepo = A.Fake<IUserRepository>()
-    let service = SessionService(encryption, sessionRepo, userRepo) :> ISessionService
+    let magicLinkRepo = A.Fake<IMagicLinkRepository>()
+    let emailService = A.Fake<IEmailService>()
+    let service = SessionService(encryption, sessionRepo, userRepo, magicLinkRepo, emailService) :> ISessionService
 
     let request : LoginRequest = {
         username = "aUsername"
@@ -74,7 +78,9 @@ let ``throws if invalid password``() =
     let encryption = A.Fake<IEncryptionService>()
     let sessionRepo = A.Fake<ISessionRepository>()
     let userRepo = A.Fake<IUserRepository>()
-    let service = SessionService(encryption, sessionRepo, userRepo) :> ISessionService
+    let magicLinkRepo = A.Fake<IMagicLinkRepository>()
+    let emailService = A.Fake<IEmailService>()
+    let service = SessionService(encryption, sessionRepo, userRepo, magicLinkRepo, emailService) :> ISessionService
 
     let request : LoginRequest = {
         username = "aUsername"
@@ -111,7 +117,9 @@ let ``creates session``() =
     let encryption = A.Fake<IEncryptionService>()
     let sessionRepo = A.Fake<ISessionRepository>()
     let userRepo = A.Fake<IUserRepository>()
-    let service = SessionService(encryption, sessionRepo, userRepo) :> ISessionService
+    let magicLinkRepo = A.Fake<IMagicLinkRepository>()
+    let emailService = A.Fake<IEmailService>()
+    let service = SessionService(encryption, sessionRepo, userRepo, magicLinkRepo, emailService) :> ISessionService
 
     let request : LoginRequest = {
         username = "aUsername"

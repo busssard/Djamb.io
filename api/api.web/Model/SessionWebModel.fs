@@ -29,3 +29,15 @@ type LoginRequestDto = {
     [<StringLength(20, MinimumLength = 6)>]
     password : string
 }
+
+[<CLIMutable>]
+type MagicLinkRequestDto = {
+    [<Required>]
+    email : string
+}
+
+[<CLIMutable>]
+type MagicLinkVerifyDto = {
+    [<Required>]
+    token : string
+}

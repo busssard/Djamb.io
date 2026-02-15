@@ -18,8 +18,13 @@ type INotificationService =
 type ISessionService =
     abstract member openSession : request:LoginRequest -> Task<Session>
     abstract member createSessionForUser : userId:int -> Task<Session>
+    abstract member requestMagicLink : email:string -> baseUrl:string -> Task<unit>
+    abstract member verifyMagicLink : token:string -> Task<Session>
     abstract member closeSession : session:Session -> Task<unit>
     abstract member getAndRenewSession : token:string -> Task<Option<Session>>
+
+type IEmailService =
+    abstract member sendMagicLink : email:string -> link:string -> Task<unit>
 
 type IEncryptionService =
     abstract member hash : password:string -> string

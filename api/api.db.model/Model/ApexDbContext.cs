@@ -11,6 +11,7 @@ namespace Djambi.Api.Db.Model
         public DbSet<EventSqlModel> Events { get; set; }
         public DbSet<EventKindSqlModel> EventKinds { get; set; }
         public DbSet<GameSqlModel> Games { get; set; }
+        public DbSet<MagicLinkSqlModel> MagicLinks { get; set; }
         public DbSet<GameStatusSqlModel> GameStatuses { get; set; }
         public DbSet<NeutralPlayerNameSqlModel> NeutralPlayerNames { get; set; }
         public DbSet<PlayerKindSqlModel> PlayerKinds { get; set; }

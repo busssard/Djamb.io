@@ -5,6 +5,10 @@ export const home = '/home';
 export const invite = (code: string): string => `/invite/${code}`;
 export const inviteTemplate = '/invite/:code';
 
+export const magicLink = '/magic-link';
+
+export const magicLinkVerifyTemplate = '/auth/verify/:token';
+
 export const newGame = '/new-game';
 
 export const notifications = '/notifications';
