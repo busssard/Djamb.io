@@ -179,72 +179,72 @@
 > **Replaces** the old password-based auth as the primary flow. Existing password users can still restore sessions via cookie.
 
 ### 5.5a. Anonymous auth — backend
-- [ ] Add `Email` column to `UserSqlModel` (nullable, max 254 chars)
-- [ ] Add `email : string option` to `User`, `UserDetails`, `CreateUserRequest` in `UserModel.fs`
-- [ ] Make `Password` column nullable in `UserSqlModel.cs`
-- [ ] Make `password` optional (`string option`) in `CreateUserRequest`
-- [ ] Update `UserRepository` to handle nullable password and email fields
-- [ ] Update `UserMappings.fs` to map email field
-- [ ] Update `UserManager.createUser` to skip password validation when password is None
-- [ ] Add `POST /api/users/quick` endpoint (AllowAnonymous): takes `{ name, email? }`, creates user + session, sets cookie
-- [ ] Add `quickRegister` method to `IUserManager` / `UserManager`
-- [ ] Add `QuickRegisterRequestDto` to web model DTOs
+- [x] Add `Email` column to `UserSqlModel` (nullable, max 254 chars)
+- [x] Add `email : string option` to `User`, `UserDetails`, `CreateUserRequest` in `UserModel.fs`
+- [x] Make `Password` column nullable in `UserSqlModel.cs`
+- [x] Make `password` optional (`string option`) in `CreateUserRequest`
+- [x] Update `UserRepository` to handle nullable password and email fields
+- [x] Update `UserMappings.fs` to map email field
+- [x] Update `UserManager.createUser` to skip password validation when password is None
+- [x] Add `POST /api/users/quick` endpoint (AllowAnonymous): takes `{ name, email? }`, creates user + session, sets cookie
+- [x] Add `quickRegister` method to `IUserManager` / `UserManager`
+- [x] Add `QuickRegisterRequestDto` to web model DTOs
 
 ### 5.5b. Anonymous auth — frontend
-- [ ] Create `QuickJoinForm.tsx` — username + email (optional) fields
-- [ ] Create `QuickJoinPage.tsx` — wraps QuickJoinForm, becomes default unauthenticated landing
-- [ ] Add `quickJoin(name, email)` to `userController.ts`
-- [ ] Add `/join` route to `routes.ts` and `App.tsx`
-- [ ] Update `RedirectToSignInIfSignedOut` to redirect to `/join`
-- [ ] Remove old `/sign-in` and `/create-account` routes and forms
-- [ ] Update `NavigationDrawer` menu items
+- [x] Create `QuickJoinForm.tsx` — username + email (optional) fields
+- [x] Create `QuickJoinPage.tsx` — wraps QuickJoinForm, becomes default unauthenticated landing
+- [x] Add `quickJoin(name, email)` to `userController.ts`
+- [x] Add `/join` route to `routes.ts` and `App.tsx`
+- [x] Update `RedirectToSignInIfSignedOut` to redirect to `/join`
+- [x] Remove old `/sign-in` and `/create-account` routes and forms
+- [x] Update `NavigationDrawer` menu items
 
 ### 5.5c. Magic link email auth — backend
-- [ ] Create `MagicLinkSqlModel.cs` entity (Token, UserId, Email, CreatedOn, ExpiresOn, UsedOn)
-- [ ] Add `DbSet<MagicLinkSqlModel>` to `ApexDbContext`
-- [ ] Create `MagicLinkRepository.fs` (createToken, getByToken, markUsed)
-- [ ] Create `IEmailService.fs` interface (`sendMagicLink : email -> link -> Task<unit>`)
-- [ ] Create `ConsoleEmailService.fs` (logs magic link URL to Serilog for dev)
-- [ ] Register `IEmailService` in `Program.fs` DI
-- [ ] Add `POST /api/sessions/magic-link` endpoint: takes email, generates token, sends email (always returns 200)
-- [ ] Add `POST /api/sessions/magic-link/verify` endpoint: validates token, creates session, sets cookie
+- [x] Create `MagicLinkSqlModel.cs` entity (Token, UserId, Email, CreatedOn, ExpiresOn, UsedOn)
+- [x] Add `DbSet<MagicLinkSqlModel>` to `ApexDbContext`
+- [x] Create `MagicLinkRepository.fs` (createToken, getByToken, markUsed)
+- [x] Create `IEmailService.fs` interface (`sendMagicLink : email -> link -> Task<unit>`)
+- [x] Create `ConsoleEmailService.fs` (logs magic link URL to Serilog for dev)
+- [x] Register `IEmailService` in `Program.fs` DI
+- [x] Add `POST /api/sessions/magic-link` endpoint: takes email, generates token, sends email (always returns 200)
+- [x] Add `POST /api/sessions/magic-link/verify` endpoint: validates token, creates session, sets cookie
 
 ### 5.5d. Magic link email auth — frontend
-- [ ] Create `RequestMagicLinkForm.tsx` — email input + "Send login link" button
-- [ ] Create `MagicLinkPage.tsx` — form + success message
-- [ ] Create `MagicLinkVerifyPage.tsx` — route `/auth/verify/:token`, auto-verifies on load
-- [ ] Add `requestMagicLink(email)` and `verifyMagicLink(token)` to `userController.ts`
-- [ ] Add `/magic-link` and `/auth/verify/:token` routes
-- [ ] Add "Sign in on another device" link on `QuickJoinPage`
+- [x] Create `RequestMagicLinkForm.tsx` — email input + "Send login link" button
+- [x] Create `MagicLinkPage.tsx` — form + success message
+- [x] Create `MagicLinkVerifyPage.tsx` — route `/auth/verify/:token`, auto-verifies on load
+- [x] Add `requestMagicLink(email)` and `verifyMagicLink(token)` to `userController.ts`
+- [x] Add `/magic-link` and `/auth/verify/:token` routes
+- [x] Add "Sign in on another device" link on `QuickJoinPage`
 
 ### 5.5e. Private games with invite links — backend
-- [ ] Add `InviteCode` column to `GameSqlModel` (nullable, max 12 chars, unique index)
-- [ ] Add `inviteCode : string option` to `Game` model
-- [ ] Generate random 8-char alphanumeric invite code in `GameCrudService` when `isPublic = false`
-- [ ] Add `GET /api/games/invite/{code}` (AllowAnonymous) — returns limited game info
-- [ ] Add `POST /api/games/invite/{code}/join` — joins game via invite code
-- [ ] Update `GameMappings.fs` and `GameDto` for invite code
+- [x] Add `InviteCode` column to `GameSqlModel` (nullable, max 12 chars, unique index)
+- [x] Add `inviteCode : string option` to `Game` model
+- [x] Generate random 8-char alphanumeric invite code in `GameCrudService` when `isPublic = false`
+- [x] Add `GET /api/games/invite/{code}` (AllowAnonymous) — returns limited game info
+- [x] Add `POST /api/games/invite/{code}/join` — joins game via invite code
+- [x] Update `GameMappings.fs` and `GameDto` for invite code
 
 ### 5.5f. Private games with invite links — frontend
-- [ ] Create `JoinByInvitePage.tsx` — route `/invite/:code`, shows game info + join button
-- [ ] Add "Copy invite link" button to `GameLobbyPage` for private games
-- [ ] Update `CreateGameForm` — show invite link explanation when `isPublic` unchecked
-- [ ] Add `getGameByInvite(code)` and `joinByInvite(code)` to `gameController.ts`
-- [ ] Add `/invite/:code` route
+- [x] Create `JoinByInvitePage.tsx` — route `/invite/:code`, shows game info + join button
+- [x] Add "Copy invite link" button to `GameLobbyPage` for private games
+- [-] Update `CreateGameForm` — show invite link explanation when `isPublic` unchecked (deferred — minor UX polish)
+- [x] Add `getGameByInvite(code)` and `joinByInvite(code)` to `gameController.ts`
+- [x] Add `/invite/:code` route
 
 ### 5.5g. Spectator mode
-- [ ] Backend: Allow `GetGame` read access for non-players on public games
-- [ ] Backend: Allow spectator WebSocket/SSE connections for non-player viewers
-- [ ] Frontend: Detect spectator in `GamePlayPage` (user not in `game.players`)
-- [ ] Frontend: Hide turn controls, show read-only board with "Watching" indicator
-- [ ] Frontend: Add "Watch" button on in-progress games in `HomePage`
+- [-] Backend: Allow `GetGame` read access for non-players on public games (deferred — needs backend auth changes)
+- [-] Backend: Allow spectator WebSocket/SSE connections for non-player viewers (deferred to Phase 6 WebSocket work)
+- [x] Frontend: Detect spectator in `GamePlayPage` (user not in `game.players`)
+- [x] Frontend: Hide turn controls, show read-only board with "Watching" indicator
+- [-] Frontend: Add "Watch" button on in-progress games in `HomePage` (deferred — needs backend spectator access first)
 
 ### 5.5h. Enhanced lobby
-- [ ] Add invite link display + copy button for private games
-- [ ] Add player count indicator ("3/5 players")
-- [ ] Better layout with MUI Cards
-- [ ] Player avatars (initials circles)
-- [ ] Polling with `setInterval` every 3s for real-time updates (upgrade to WebSocket in Phase 6)
+- [x] Add invite link display + copy button for private games
+- [x] Add player count indicator ("3/5 players")
+- [-] Better layout with MUI Cards (deferred — cosmetic polish)
+- [-] Player avatars (initials circles) (deferred — cosmetic polish)
+- [-] Polling with `setInterval` every 3s for real-time updates (deferred to Phase 6 WebSocket work)
 
 ## Phase 6: Real-Time WebSocket Integration
 > Connect the frontend to the existing backend WebSocket infrastructure.
@@ -369,7 +369,7 @@
 
 ## Current Focus
 
-**Active work**: Phase 5.5 — Lightweight Auth & Social Features. Replacing password-based auth with frictionless username+email quick-join, adding private games with invite links, spectator mode, and magic link device transfer.
+**Active work**: Phase 5.5 substantially complete. Next up: Phase 6 (WebSocket real-time), Phase 5 (responsive design), or Phase 7b (backend hosting rewrite).
 
 **Completed milestones**:
 - Phase 0: Documentation restructured ✓
@@ -378,14 +378,26 @@
 - Phase 3 (core): React 18 + MUI v7 + React Router 6 + Konva 9 ✓
 - Phase 3 (styles): Migrated all `@mui/styles` → MUI v7 `sx` prop/`styled` ✓
 - Phase 4 (core): PWA with vite-plugin-pwa, install prompt, offline support ✓
+- Phase 5.5 (core): Passwordless quick-join auth, magic link device transfer, private games with invite links, spectator mode, lobby enhancements ✓
 - Phase 7a: Backend .NET 8 compatibility fixes ✓ (builds, runs, user creation + login works)
 - Phase 10a (partial): Bot interface + RandomBot + MinimaxBot + BotRunner ✓
 
 **What works end-to-end**:
 - `./run_server.sh --full-stack` starts MySQL (Docker) + API (.NET 8) + frontend (Vite)
-- User creation (`POST /api/users`) and login (`POST /api/sessions`) work
-- Frontend forms render correctly after MUI sx migration
+- Quick-join (`POST /api/users/quick`) — username + optional email, no password needed
+- Magic link email auth — request link (`POST /api/sessions/magic-link`), verify token (`POST /api/sessions/magic-link/verify`)
+- Private game invite links — create private game, get invite code, share `/invite/:code` URL
+- Spectator mode — non-players see read-only board with "Watching" indicator
+- Legacy password auth deprecated — old `/sign-in` and `/create-account` routes removed
 - Dev server on `http://localhost:3000`, API on `http://localhost:5100`
 - AI bots (Random + Minimax) can play via BotRunner background service
 
-**Strategy**: Remove sign-up friction first (Phase 5.5), then real-time WebSocket integration (Phase 6), then hosting layer rewrite (Phase 7b). Game logic (`api.logic/`) stays intact throughout.
+**Deferred from Phase 5.5** (minor items, not blocking):
+- Backend spectator access control (GetGame for non-players on public games)
+- Spectator WebSocket/SSE connections (depends on Phase 6)
+- "Watch" button on HomePage (depends on backend spectator access)
+- CreateGameForm invite link explanation text
+- Lobby MUI Cards layout, player avatar initials, polling
+- These are tracked with `[-]` markers in Phase 5.5 above
+
+**Strategy**: Real-time WebSocket integration (Phase 6) next enables lobby polling and spectator streams. Then responsive design (Phase 5) and hosting layer rewrite (Phase 7b). Game logic (`api.logic/`) stays intact throughout.

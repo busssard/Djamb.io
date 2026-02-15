@@ -2,15 +2,15 @@
 
 All technical details about the Djamb.io codebase. For project vision and Claude guidelines, see `CLAUDE.md`. For task tracking, see `tasks.md`.
 
-## Tech Stack (Current — Pre-Modernization)
+## Tech Stack
 
 | Layer | Technology | Version | Status |
 |-------|-----------|---------|--------|
-| Backend | F# / ASP.NET Core | 3.1 | **EOL** (Dec 2022) |
-| ORM | Entity Framework Core | 3.1 | EOL |
-| Frontend | TypeScript / React / Redux / Material-UI / Konva.js | React 16.13, TS 3.9, MUI 4, CRA 3.4 | **Severely outdated** |
+| Backend | F# / ASP.NET Core | .NET 8.0 | **Current LTS** |
+| ORM | Entity Framework Core + Pomelo MySQL | 8.0 | Current |
+| Frontend | TypeScript / React / Redux / MUI / Konva.js | React 18, TS 5.7, MUI 7, Vite 5 | **Current** |
 | Frontend (legacy) | TypeScript / React / Redux / Webpack (`web/`) | — | To be removed |
-| Database | MySQL 5.7+ (prod: AWS RDS, local: MSSQL via Docker) | — | OK |
+| Database | MySQL 8.0 (local: Docker, prod: AWS RDS) | — | OK |
 | Infrastructure | AWS (EB, S3, CloudFront, ECR, RDS) | — | OK |
 | CI/CD | GitHub Actions | Node 10.x in workflows | **Outdated** |
 | Build orchestration | FAKE (F# Make) | — | OK |
@@ -81,8 +81,13 @@ Controllers (HTTP) → Managers (orchestration) → Services (business logic) �
 | Route | Controller | Operations |
 |-------|-----------|------------|
 | `/api/users` | UserController | Create, get, get current, delete |
-| `/api/sessions` | SessionController | Login (POST), logout (DELETE) |
+| `/api/users/quick` | UserController | Quick-register (POST, AllowAnonymous): `{ name, email? }` → creates user + session, sets cookie |
+| `/api/sessions` | SessionController | Login (POST), logout (DELETE), restore (GET) |
+| `/api/sessions/magic-link` | SessionController | Request magic link (POST, AllowAnonymous): `{ email }` → sends login email (always 200) |
+| `/api/sessions/magic-link/verify` | SessionController | Verify magic link (POST, AllowAnonymous): `{ token }` → creates session, sets cookie |
 | `/api/games` | GameController | Create, get, update parameters, start |
+| `/api/games/invite/{code}` | GameController | Get game by invite code (GET, AllowAnonymous) |
+| `/api/games/invite/{code}/join` | GameController | Join game via invite code (POST, requires auth) |
 | `/api/players` | PlayerController | Join, leave, manage players |
 | `/api/turns` | TurnController | Select cell, commit turn, reset turn |
 | `/api/events` | EventController | Game event history |
@@ -95,21 +100,52 @@ Controllers (HTTP) → Managers (orchestration) → Services (business logic) �
 
 ## Frontend Architecture (`web2/`)
 
-- **React 16** with function components and hooks (no class components)
+- **React 18** with function components and hooks (no class components)
 - **Redux** (old-style, NOT Redux Toolkit) — 8 slices with manual action types/creators/reducers
-- **Konva.js** for canvas-based hex board rendering
-- **Material-UI v4** with makeStyles hook, dark theme
-- **API client** auto-generated from OpenAPI spec (`web2/src/api-client/`)
+- **Konva.js 9** for canvas-based hex board rendering
+- **MUI v7** with `sx` prop and `styled` API, dark theme
+- **Vite 5** build system with `vite-plugin-pwa` for PWA support
+- **React Router 6** with lazy-loaded routes (`React.lazy` + `Suspense`)
+- **API client** auto-generated from OpenAPI spec (`web2/src/api-client/`) — new endpoints use raw `fetch()` instead
 - **Runtime config** via `web2/public/env.json`
-- **Create React App v3.4.3** (hidden webpack config, not ejected)
 
 ### Redux State Slices
 `activeGame`, `apiClient`, `boards`, `config`, `images`, `navigation`, `notifications`, `session`
 
-### PWA Infrastructure (Exists but Disabled)
-- `web2/public/manifest.json` — properly configured for standalone PWA
-- `web2/src/serviceWorker.ts` — CRA boilerplate, currently **disabled** (`serviceWorker.unregister()` in index.tsx)
-- Missing: 512x512 icon, screenshots, proper caching strategy
+### Frontend Routes
+
+| Route | Page Component | Auth Required | Description |
+|-------|---------------|---------------|-------------|
+| `/join` | QuickJoinPage | No | Default landing — username + optional email quick-join form |
+| `/magic-link` | MagicLinkPage | No | Request magic link email for device transfer |
+| `/auth/verify/:token` | MagicLinkVerifyPage | No | Auto-verifies magic link token, creates session |
+| `/invite/:code` | JoinByInvitePage | No | Shows game info from invite code, join button (or quick-join form) |
+| `/home` | HomePage | Yes | Dashboard — active games, search |
+| `/new-game` | CreateGamePage | Yes | Create a new game |
+| `/search-games` | SearchGamesPage | Yes | Search for public games |
+| `/settings` | UserConfigPage | Yes | User settings |
+| `/notifications` | NotificationsPage | Yes | Notifications list |
+| `/rules` | RulesPage | No | Game rules |
+| `/sign-out` | SignOutPage | Yes | Sign out |
+| `/games/:gameId` | GamePage | Yes | Game overview/redirect |
+| `/games/:gameId/play` | GamePlayPage | Yes | Game board (also serves spectator mode) |
+| `/games/:gameId/lobby` | GameLobbyPage | Yes | Pre-game lobby with invite link for private games |
+| `/games/:gameId/info` | GameInfoPage | Yes | Game info |
+| `/games/:gameId/diplomacy` | GameDiplomacyPage | Yes | Diplomacy (stub — `JSON.stringify(game)`) |
+| `/games/:gameId/outcome` | GameOutcomePage | Yes | Game results |
+| `/games/:gameId/snapshots` | GameSnapshotsPage | Yes | Game state snapshots |
+
+### PWA Infrastructure
+- `vite-plugin-pwa` with Workbox `generateSW` strategy
+- Cache-first for static assets, network-first for API calls
+- Install prompt via `beforeinstallprompt` event in TopBar
+- Offline fallback page at `public/offline.html`
+- Full manifest with multiple icon sizes and maskable icon
+
+### Spectator Mode
+- Spectators are detected in `GamePlayPage.tsx` — user not found in `game.players` list
+- Board renders in read-only mode (no cell selection), "Watching" indicator shown
+- No backend changes yet — spectator access control and WebSocket streaming deferred to Phase 6
 
 ### Diplomacy Page (Stub)
 - `web2/src/components/pages/GameDiplomacyPage.tsx` — placeholder, renders `JSON.stringify(game)`
@@ -119,12 +155,13 @@ Controllers (HTTP) → Managers (orchestration) → Services (business logic) �
 ## Data Models
 
 ### Core Entities (EF Core, `api.db.model/Model/`)
-- **User** — Account with encrypted password (PBKDF2), privilege level
+- **User** — Account with optional password (PBKDF2) and optional email (max 254 chars), privilege level. Password is nullable to support quick-join (passwordless) auth.
 - **Session** — Auth sessions with token, stored in DB (not JWT)
-- **Game** — Game instance with status, parameters, board region count
+- **Game** — Game instance with status, parameters, board region count, optional invite code (8-char alphanumeric for private games)
 - **Player** — Player in a game (user or neutral AI), with status and color
 - **Event** — Game events with effects (moves, eliminations, etc.) — event-sourced
 - **Snapshot** — Point-in-time game state captures
+- **MagicLink** — One-time login tokens for device transfer. Fields: Token (GUID), UserId (FK), Email, CreatedOn, ExpiresOn (15 min TTL), UsedOn (nullable). Used by magic link email auth flow.
 - **NeutralPlayerName** — Names for AI players
 
 ### Key Enums (`api/api.enums/Enums.fs`)
@@ -183,11 +220,41 @@ DJAMBI_WebServer__WebRoot=/path/to/web/dist
 
 ## Authentication & Security
 
+### Auth Flows
+
+**Quick-join (primary, passwordless)**:
+1. User visits `/join` → enters username + optional email
+2. Frontend calls `POST /api/users/quick` with `{ name, email? }`
+3. Backend creates user (no password), creates session, sets `DjambiSession` HTTP-only cookie
+4. User is immediately signed in and redirected to `/home`
+
+**Magic link (device transfer)**:
+1. User visits `/magic-link` → enters email address
+2. Frontend calls `POST /api/sessions/magic-link` with `{ email }`
+3. Backend finds user by email, generates a one-time token (GUID, 15-min expiry), sends email with link
+4. Endpoint always returns 200 (prevents email enumeration)
+5. User clicks link → opens `/auth/verify/:token`
+6. Frontend calls `POST /api/sessions/magic-link/verify` with `{ token }`
+7. Backend validates token (not expired, not used), marks it used, creates session, sets cookie
+8. In dev mode, `ConsoleEmailService` logs the magic link URL to Serilog instead of sending email
+
+**Legacy password auth**:
+- `POST /api/sessions` (login) and `POST /api/users` (create account) still work
+- Old `/sign-in` and `/create-account` frontend routes have been removed
+- Existing password users can restore sessions via cookie (`GET /api/sessions`)
+
 ### Session-Based Auth
-- Login: `POST /api/sessions` → creates session in DB, returns HTTP-only cookie (`DjambiSession`)
-- Logout: `DELETE /api/sessions`
+- Sessions stored in DB with token + expiry, returned as HTTP-only cookie (`DjambiSession`)
 - Every request validated via `SessionContextProvider` middleware
 - Cookie: HTTP-only, Secure, SameSite, configurable domain
+- `createSessionForUser` method handles cleaning up old sessions before creating new ones
+
+### Private Games & Invite Links
+- When a game is created with `isPublic = false`, an 8-char alphanumeric invite code is generated
+- Invite codes use unambiguous characters (`ABCDEFGHJKLMNPQRSTUVWXYZ23456789` — no 0/O/1/I/L)
+- `GET /api/games/invite/{code}` (AllowAnonymous) returns game info for the invite page
+- `POST /api/games/invite/{code}/join` (requires auth) adds the current user as a player
+- Frontend route `/invite/:code` shows game info + join button (or quick-join form if not authenticated)
 
 ### Authorization
 - Privilege-based system in `api.logic/Security.fs`
@@ -197,6 +264,7 @@ DJAMBI_WebServer__WebRoot=/path/to/web/dist
 - **Token logging**: `SessionContextProvider.fs` logs full session tokens — security risk
 - **No rate limiting** on login/API endpoints
 - **No CSRF tokens** (relies on SameSite cookies)
+- **Magic link tokens in URL**: Token is in the URL path, could leak via referrer headers. Consider using POST-based verification form instead.
 
 ### Middleware Pipeline
 `LoggingMiddleware` (Serilog) → `ErrorHandlingMiddleware` (global exception handling) → routing → CORS → WebSockets
@@ -259,8 +327,8 @@ DJAMBI_WebServer__WebRoot=/path/to/web/dist
 8. **F# compilation order** — `.fsproj` files list sources top-to-bottom; order matters
 9. **Integration tests need env var** — `DJAMBI_Sql__UseSqliteForTesting=true`
 10. **FAKE needs tool restore** — `dotnet tool restore` in `api/` first
-11. **useEffect infinite loops** — `HomePage.tsx` and `GamePlayPage.tsx` have useEffect without dependency arrays — known bugs
-12. **Service worker disabled** — PWA infrastructure exists but `serviceWorker.unregister()` is called in index.tsx
+11. **New endpoints use raw fetch** — Auto-generated API client (`web2/src/api-client/`) is not editable. New endpoints (quick-register, magic-link, invite) use raw `fetch()` in controllers
+12. **Passwordless auth is default** — Old sign-in/create-account pages removed. Quick-join at `/join` is the only entry point. Password users restore via cookie only
 
 ## File Structure
 
@@ -281,8 +349,8 @@ Djamb.io/
 │   ├── src/components/           # React components
 │   │   ├── App/                  # Root + routing
 │   │   ├── Canvas/               # Konva.js board rendering
-│   │   ├── forms/                # Login, create game, settings
-│   │   ├── pages/                # 11 page components
+│   │   ├── forms/                # QuickJoin, RequestMagicLink, CreateGame, UserConfig
+│   │   ├── pages/                # 17 page components (QuickJoin, MagicLink, MagicLinkVerify, JoinByInvite, etc.)
 │   │   ├── tables/               # Game search, event logs
 │   │   ├── TopBar/               # Header
 │   │   ├── NavigationDrawer/     # Sidebar with game sections
@@ -313,9 +381,9 @@ Djamb.io/
 **Strengths**: Excellent architecture (layered DI, event sourcing, privilege-based security), clean F# idioms, good integration test coverage
 **Weaknesses**: .NET 3.1 EOL, GameManager god object, frozen dependencies, token logging vulnerability
 
-### Frontend: 4/10
-**Strengths**: All functional components with hooks, strict TypeScript, solid Konva.js board rendering, good separation of concerns
-**Weaknesses**: React 16 / CRA 3.4 (2020-era), useEffect infinite loop bugs, <10% test coverage, old-style Redux, MUI v4 deprecated, PWA disabled
+### Frontend: 7/10
+**Strengths**: All functional components with hooks, strict TypeScript 5.7, React 18, MUI v7 with sx prop, Vite 5 build, solid Konva.js board rendering, good separation of concerns, PWA enabled with offline support, lazy-loaded routes, frictionless auth flow
+**Weaknesses**: <10% test coverage, old-style Redux (not Redux Toolkit), some pre-existing ESLint warnings (stale disable comments)
 
 ### Infrastructure: 5/10
 **Strengths**: Multi-stage Docker builds, proper CI/CD triggers, environment-based config
@@ -330,10 +398,7 @@ Djamb.io/
 - API design and endpoint structure
 
 ### What Needs Replacement
-- Build system: CRA → Vite
-- React: 16 → 18+
 - Redux: hand-rolled → Redux Toolkit (or Zustand)
-- Material-UI: v4 → MUI v5+
-- .NET: 3.1 → 8 LTS
 - Node in CI: 10 → 20 LTS
 - Testing: needs comprehensive expansion
+- Backend hosting layer: manual WebHostBuilder → minimal hosting (Phase 7b)
