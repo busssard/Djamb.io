@@ -1,4 +1,4 @@
-﻿module Djambi.Api.UnitTests.Logic.Services.SessionServiceTests.OpenSessionTests
+module Djambi.Api.UnitTests.Logic.Services.SessionServiceTests.OpenSessionTests
 
 open FSharp.Control.Tasks
 open FakeItEasy
@@ -32,40 +32,41 @@ let ``throws if user does not exist``() =
         } :> Task
 
     task {
-        return! Assert.ThrowsAsync<AuthenticationException>(fun () -> openSession())            
+        return! Assert.ThrowsAsync<AuthenticationException>(fun () -> openSession())
     }
-    
+
 [<Fact>]
 let ``throws if account locked``() =
     let encryption = A.Fake<IEncryptionService>()
     let sessionRepo = A.Fake<ISessionRepository>()
     let userRepo = A.Fake<IUserRepository>()
     let service = SessionService(encryption, sessionRepo, userRepo) :> ISessionService
-    
+
     let request : LoginRequest = {
         username = "aUsername"
         password = "aPassword"
     }
-    
+
     let user : UserDetails = {
         id = 1
         name = "aUsername"
+        email = None
         privileges = []
-        password = "aPassword"
+        password = Some "aPassword"
         failedLoginAttempts = 5
         lastFailedLoginAttemptOn = Some(DateTime.UtcNow)
     }
-    
+
     A.CallTo(fun () -> userRepo.getUserByName request.username)
         .Returns(Some user) |> ignore
-    
+
     let openSession() =
         task {
             return! service.openSession request
         } :> Task
-    
+
     task {
-        return! Assert.ThrowsAsync<AuthenticationException>(fun () -> openSession())            
+        return! Assert.ThrowsAsync<AuthenticationException>(fun () -> openSession())
     }
 
 [<Fact>]
@@ -83,8 +84,9 @@ let ``throws if invalid password``() =
     let user : UserDetails = {
         id = 1
         name = "aUsername"
+        email = None
         privileges = []
-        password = "aPassword"
+        password = Some "aPassword"
         failedLoginAttempts = 0
         lastFailedLoginAttemptOn = None
     }
@@ -101,7 +103,7 @@ let ``throws if invalid password``() =
         } :> Task
 
     task {
-        return! Assert.ThrowsAsync<AuthenticationException>(fun () -> openSession())            
+        return! Assert.ThrowsAsync<AuthenticationException>(fun () -> openSession())
     }
 
 [<Fact>]
@@ -119,8 +121,9 @@ let ``creates session``() =
     let user : UserDetails = {
         id = 1
         name = "aUsername"
+        email = None
         privileges = []
-        password = "aPassword"
+        password = Some "aPassword"
         failedLoginAttempts = 0
         lastFailedLoginAttemptOn = None
     }

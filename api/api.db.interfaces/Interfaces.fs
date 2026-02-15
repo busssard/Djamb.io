@@ -39,6 +39,7 @@ type ISnapshotRepository =
 type IUserRepository =
     abstract member getUser : userId:int -> Task<Option<UserDetails>>
     abstract member getUserByName : name:string -> Task<Option<UserDetails>>
+    abstract member getUserByEmail : email:string -> Task<Option<UserDetails>>
     abstract member createUser : request:CreateUserRequest -> Task<UserDetails>
     abstract member deleteUser : id:int -> Task<unit>
     abstract member updateFailedLoginAttempts : request:UpdateFailedLoginsRequest -> Task<unit>

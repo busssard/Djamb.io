@@ -16,8 +16,10 @@ namespace Djambi.Api.Db.Model
         [StringLength(20)]
         public string Name { get; set; }
 
-        [Required]
         public string Password { get; set; }
+
+        [StringLength(254)]
+        public string Email { get; set; }
 
         [Required]
         public DateTime CreatedOn { get; set; }

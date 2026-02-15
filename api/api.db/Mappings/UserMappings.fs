@@ -23,15 +23,17 @@ module UserMappings =
         {
             id = source.UserId
             name = source.Name
-            password = source.Password
+            email = source.Email |> Option.ofObj
+            password = source.Password |> Option.ofObj
             failedLoginAttempts = int source.FailedLoginAttempts
             lastFailedLoginAttemptOn = source.LastFailedLoginAttemptOn |> Option.ofNullable
             privileges = source.UserPrivileges |> mapUserPrivileges
-        }    
+        }
 
     let toUser (source : UserSqlModel) : User =
         {
             id = source.UserId
             name = source.Name
+            email = source.Email |> Option.ofObj
             privileges = source.UserPrivileges |> mapUserPrivileges
         } 

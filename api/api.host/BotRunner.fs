@@ -25,6 +25,7 @@ type BotRunner(scopeFactory : IServiceScopeFactory,
                 {
                     id = game.createdBy.userId
                     name = "BotRunner"
+                    email = None
                     privileges = [Privilege.OpenParticipation; Privilege.ViewGames]
                 }
             token = "bot-internal"

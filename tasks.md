@@ -174,6 +174,78 @@
   - [ ] Test at 1440px+ (desktop)
   - [ ] Test touch interactions on actual mobile device or emulator
 
+## Phase 5.5: Lightweight Auth & Social Features
+> Remove sign-up friction. Let players jump in with just a username, share game links with friends, and watch games in progress.
+> **Replaces** the old password-based auth as the primary flow. Existing password users can still restore sessions via cookie.
+
+### 5.5a. Anonymous auth — backend
+- [ ] Add `Email` column to `UserSqlModel` (nullable, max 254 chars)
+- [ ] Add `email : string option` to `User`, `UserDetails`, `CreateUserRequest` in `UserModel.fs`
+- [ ] Make `Password` column nullable in `UserSqlModel.cs`
+- [ ] Make `password` optional (`string option`) in `CreateUserRequest`
+- [ ] Update `UserRepository` to handle nullable password and email fields
+- [ ] Update `UserMappings.fs` to map email field
+- [ ] Update `UserManager.createUser` to skip password validation when password is None
+- [ ] Add `POST /api/users/quick` endpoint (AllowAnonymous): takes `{ name, email? }`, creates user + session, sets cookie
+- [ ] Add `quickRegister` method to `IUserManager` / `UserManager`
+- [ ] Add `QuickRegisterRequestDto` to web model DTOs
+
+### 5.5b. Anonymous auth — frontend
+- [ ] Create `QuickJoinForm.tsx` — username + email (optional) fields
+- [ ] Create `QuickJoinPage.tsx` — wraps QuickJoinForm, becomes default unauthenticated landing
+- [ ] Add `quickJoin(name, email)` to `userController.ts`
+- [ ] Add `/join` route to `routes.ts` and `App.tsx`
+- [ ] Update `RedirectToSignInIfSignedOut` to redirect to `/join`
+- [ ] Remove old `/sign-in` and `/create-account` routes and forms
+- [ ] Update `NavigationDrawer` menu items
+
+### 5.5c. Magic link email auth — backend
+- [ ] Create `MagicLinkSqlModel.cs` entity (Token, UserId, Email, CreatedOn, ExpiresOn, UsedOn)
+- [ ] Add `DbSet<MagicLinkSqlModel>` to `ApexDbContext`
+- [ ] Create `MagicLinkRepository.fs` (createToken, getByToken, markUsed)
+- [ ] Create `IEmailService.fs` interface (`sendMagicLink : email -> link -> Task<unit>`)
+- [ ] Create `ConsoleEmailService.fs` (logs magic link URL to Serilog for dev)
+- [ ] Register `IEmailService` in `Program.fs` DI
+- [ ] Add `POST /api/sessions/magic-link` endpoint: takes email, generates token, sends email (always returns 200)
+- [ ] Add `POST /api/sessions/magic-link/verify` endpoint: validates token, creates session, sets cookie
+
+### 5.5d. Magic link email auth — frontend
+- [ ] Create `RequestMagicLinkForm.tsx` — email input + "Send login link" button
+- [ ] Create `MagicLinkPage.tsx` — form + success message
+- [ ] Create `MagicLinkVerifyPage.tsx` — route `/auth/verify/:token`, auto-verifies on load
+- [ ] Add `requestMagicLink(email)` and `verifyMagicLink(token)` to `userController.ts`
+- [ ] Add `/magic-link` and `/auth/verify/:token` routes
+- [ ] Add "Sign in on another device" link on `QuickJoinPage`
+
+### 5.5e. Private games with invite links — backend
+- [ ] Add `InviteCode` column to `GameSqlModel` (nullable, max 12 chars, unique index)
+- [ ] Add `inviteCode : string option` to `Game` model
+- [ ] Generate random 8-char alphanumeric invite code in `GameCrudService` when `isPublic = false`
+- [ ] Add `GET /api/games/invite/{code}` (AllowAnonymous) — returns limited game info
+- [ ] Add `POST /api/games/invite/{code}/join` — joins game via invite code
+- [ ] Update `GameMappings.fs` and `GameDto` for invite code
+
+### 5.5f. Private games with invite links — frontend
+- [ ] Create `JoinByInvitePage.tsx` — route `/invite/:code`, shows game info + join button
+- [ ] Add "Copy invite link" button to `GameLobbyPage` for private games
+- [ ] Update `CreateGameForm` — show invite link explanation when `isPublic` unchecked
+- [ ] Add `getGameByInvite(code)` and `joinByInvite(code)` to `gameController.ts`
+- [ ] Add `/invite/:code` route
+
+### 5.5g. Spectator mode
+- [ ] Backend: Allow `GetGame` read access for non-players on public games
+- [ ] Backend: Allow spectator WebSocket/SSE connections for non-player viewers
+- [ ] Frontend: Detect spectator in `GamePlayPage` (user not in `game.players`)
+- [ ] Frontend: Hide turn controls, show read-only board with "Watching" indicator
+- [ ] Frontend: Add "Watch" button on in-progress games in `HomePage`
+
+### 5.5h. Enhanced lobby
+- [ ] Add invite link display + copy button for private games
+- [ ] Add player count indicator ("3/5 players")
+- [ ] Better layout with MUI Cards
+- [ ] Player avatars (initials circles)
+- [ ] Polling with `setInterval` every 3s for real-time updates (upgrade to WebSocket in Phase 6)
+
 ## Phase 6: Real-Time WebSocket Integration
 > Connect the frontend to the existing backend WebSocket infrastructure.
 
@@ -297,7 +369,7 @@
 
 ## Current Focus
 
-**Active work**: Phase 7b — backend hosting layer rewrite. The compatibility fixes (7a) are done and the backend compiles/runs on .NET 8 with MySQL. Next step is rewriting the hosting/plumbing layer with modern patterns and defining the bot interface (Phase 10a).
+**Active work**: Phase 5.5 — Lightweight Auth & Social Features. Replacing password-based auth with frictionless username+email quick-join, adding private games with invite links, spectator mode, and magic link device transfer.
 
 **Completed milestones**:
 - Phase 0: Documentation restructured ✓
@@ -307,11 +379,13 @@
 - Phase 3 (styles): Migrated all `@mui/styles` → MUI v7 `sx` prop/`styled` ✓
 - Phase 4 (core): PWA with vite-plugin-pwa, install prompt, offline support ✓
 - Phase 7a: Backend .NET 8 compatibility fixes ✓ (builds, runs, user creation + login works)
+- Phase 10a (partial): Bot interface + RandomBot + MinimaxBot + BotRunner ✓
 
 **What works end-to-end**:
 - `./run_server.sh --full-stack` starts MySQL (Docker) + API (.NET 8) + frontend (Vite)
 - User creation (`POST /api/users`) and login (`POST /api/sessions`) work
 - Frontend forms render correctly after MUI sx migration
 - Dev server on `http://localhost:3000`, API on `http://localhost:5100`
+- AI bots (Random + Minimax) can play via BotRunner background service
 
-**Strategy**: Keep the solid game logic (`api.logic/`), rewrite the hosting/plumbing layer with modern .NET 8 patterns, and design a bot interface that supports multiple AI implementations (from random/heuristic bots to Cicero-style agents).
+**Strategy**: Remove sign-up friction first (Phase 5.5), then real-time WebSocket integration (Phase 6), then hosting layer rewrite (Phase 7b). Game logic (`api.logic/`) stays intact throughout.

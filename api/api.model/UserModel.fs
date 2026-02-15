@@ -8,6 +8,7 @@ type User =
     {
         id : int
         name : string
+        email : string option
         privileges : Privilege list
     }
 
@@ -19,8 +20,9 @@ type UserDetails =
     {
         id : int
         name : string
+        email : string option
         privileges : Privilege list
-        password : string
+        password : string option
         failedLoginAttempts : int
         lastFailedLoginAttemptOn : DateTime option
     }
@@ -30,13 +32,15 @@ module UserDetails =
         {
             id = user.id
             name = user.name
+            email = user.email
             privileges = user.privileges
         }
 
 type CreateUserRequest =
     {
         name : string
-        password : string
+        password : string option
+        email : string option
     }
 
 type CreationSource =

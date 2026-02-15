@@ -23,13 +23,14 @@ let randomAlphanumericString (length : int) : string =
 let getCreateUserRequest() : CreateUserRequest =
     {
         name = "Test_" + (randomAlphanumericString 15)
-        password = randomAlphanumericString 20
+        password = Some (randomAlphanumericString 20)
+        email = None
     }
 
 let getLoginRequest(userRequest : CreateUserRequest) : LoginRequest =
     {
         username = userRequest.name
-        password = userRequest.password
+        password = userRequest.password.Value
     }
 
 let getGameParameters() : GameParameters =

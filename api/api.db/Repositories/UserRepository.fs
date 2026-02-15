@@ -25,11 +25,19 @@ type UserRepository(context : DjambiDbContext) =
                 | _ as user -> return user |> toUserDetails |> Some
             }
 
+        member __.getUserByEmail email =
+            task {
+                match! context.Users.SingleOrDefaultAsync(fun x -> email.ToLower() = x.Email.ToLower()) with
+                | null -> return None
+                | _ as user -> return user |> toUserDetails |> Some
+            }
+
         member __.createUser request =
             task {
                 let u = UserSqlModel()
                 u.Name <- request.name
-                u.Password <- request.password
+                u.Password <- request.password |> Option.toObj
+                u.Email <- request.email |> Option.toObj
                 u.FailedLoginAttempts <- 0uy
                 u.LastFailedLoginAttemptOn <- Nullable<DateTime>()
                 u.CreatedOn <- DateTime.UtcNow
