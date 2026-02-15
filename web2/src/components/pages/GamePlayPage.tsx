@@ -67,6 +67,8 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
     ? boardsState.emptyBoardViews.get(game.parameters.regionCount)
     : undefined;
   const user = session?.user;
+  const isSpectator =
+    game && user ? !game.players?.some((p) => p.userId === user.id) : false;
 
   const filledBoard =
     emptyBoard && game && user ? fillEmptyBoardView(emptyBoard, game, user) : undefined;
@@ -88,12 +90,12 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
 
   const handleSelectCell = useCallback(
     (cell: CellView) => {
-      if (game) {
+      if (game && !isSpectator) {
         selectCell(game.id, cell.id);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [game?.id],
+    [game?.id, isSpectator],
   );
 
   const handleCommit = useCallback(() => {
@@ -133,6 +135,7 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
             : currentPlayer
               ? `${currentPlayer.name}'s turn${isMyTurn ? ' (You)' : ''}`
               : 'Waiting...'}
+          {isSpectator && ' — Watching'}
         </Typography>
         {turn?.requiredSelectionKind && isMyTurn && (
           <Typography variant="body2" color="text.secondary">
