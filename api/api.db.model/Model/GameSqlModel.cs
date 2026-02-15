@@ -38,6 +38,9 @@ namespace Djambi.Api.Db.Model
         [Required]
         public bool IsPublic { get; set; }
 
+        [StringLength(12)]
+        public string InviteCode { get; set; }
+
         // Nullable
         public string TurnCycleJson { get; set; }
 

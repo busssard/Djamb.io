@@ -34,6 +34,7 @@ type IEventManager =
 
 type IGameManager =
     abstract member getGame : gameId:int -> session:Session -> Task<Game>
+    abstract member getGameByInviteCode : code:string -> Task<Option<Game>>
     abstract member createGame : parameters:GameParameters -> session:Session -> Task<Game>
     abstract member updateGameParameters : gameId:int -> parameters:GameParameters -> session:Session -> Task<StateAndEventResponse>
     abstract member startGame : gameId:int -> session:Session -> Task<StateAndEventResponse>

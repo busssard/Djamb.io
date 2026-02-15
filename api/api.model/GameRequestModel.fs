@@ -158,4 +158,5 @@ type CreateGameRequest =
     {
         parameters : GameParameters
         createdByUserId : int
+        inviteCode : string option
     }

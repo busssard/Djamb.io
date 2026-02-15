@@ -118,4 +118,5 @@ type Game =
         pieces : Piece list
         turnCycle : int list
         currentTurn : Turn option
+        inviteCode : string option
     }

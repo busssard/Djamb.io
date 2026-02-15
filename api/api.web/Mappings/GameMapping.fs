@@ -40,6 +40,7 @@ module GameMapping =
             pieces = source.pieces |> List.map toPieceDto
             players = source.players |> List.map toPlayerDto
             status = source.status
-            turnCycle = source.turnCycle        
+            turnCycle = source.turnCycle
+            inviteCode = source.inviteCode |> Option.toObj
         }
         

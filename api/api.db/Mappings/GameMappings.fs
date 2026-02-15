@@ -69,6 +69,7 @@ module GameMappings =
             pieces = source.PiecesJson |> JsonConvert.DeserializeObject<list<Piece>>
             turnCycle = source.TurnCycleJson |> JsonConvert.DeserializeObject<list<int>>
             currentTurn = source.CurrentTurnJson |> JsonConvert.DeserializeObject<Option<Turn>>
+            inviteCode = source.InviteCode |> Option.ofObj
         }
 
     let toGameSqlModel (source : CreateGameRequest) : GameSqlModel =
@@ -84,5 +85,6 @@ module GameMappings =
         x.CurrentTurnJson <- JsonConvert.SerializeObject None
         x.TurnCycleJson <- JsonConvert.SerializeObject []
         x.PiecesJson <- JsonConvert.SerializeObject []
+        x.InviteCode <- source.inviteCode |> Option.toObj
         x
     

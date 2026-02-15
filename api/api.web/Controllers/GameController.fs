@@ -4,6 +4,8 @@ open System.Threading.Tasks
 open Microsoft.AspNetCore.Authorization
 open Microsoft.AspNetCore.Mvc
 open Djambi.Api.Logic.Interfaces
+open Djambi.Api.Model
+open Djambi.Api.Enums
 open Djambi.Api.Web.Authentication
 open Djambi.Api.Web.Mappings
 open Djambi.Api.Web.Model
@@ -11,7 +13,8 @@ open Djambi.Api.Web.Model
 [<ApiController>]
 [<Authorize>]
 [<Route("api/games")>]
-type GameController(manager : IGameManager) =
+type GameController(manager : IGameManager,
+                    playerManager : IPlayerManager) =
     inherit ControllerBase()
 
     [<HttpGet("{gameId}")>]
@@ -58,4 +61,38 @@ type GameController(manager : IGameManager) =
             let! response = manager.startGame gameId session
             let dto = response |> toStateAndEventResponseDto
             return OkObjectResult(dto) :> IActionResult
+        }
+
+    [<AllowAnonymous>]
+    [<HttpGet("invite/{code}")>]
+    [<ProducesResponseType(200, Type = typeof<GameDto>)>]
+    [<ProducesResponseType(404)>]
+    member __.GetGameByInvite(code : string) : Task<IActionResult> =
+        task {
+            match! manager.getGameByInviteCode code with
+            | None -> return NotFoundResult() :> IActionResult
+            | Some game ->
+                let dto = game |> toGameDto
+                return OkObjectResult(dto) :> IActionResult
+        }
+
+    [<HttpPost("invite/{code}/join")>]
+    [<ProducesResponseType(200, Type = typeof<StateAndEventResponseDto>)>]
+    [<ProducesResponseType(404)>]
+    member __.JoinByInvite(code : string) : Task<IActionResult> =
+        let ctx = base.HttpContext
+        task {
+            let session = ctx.GetSession()
+            match! manager.getGameByInviteCode code with
+            | None -> return NotFoundResult() :> IActionResult
+            | Some game ->
+                let playerRequest : CreatePlayerRequest =
+                    {
+                        kind = PlayerKind.User
+                        userId = Some session.user.id
+                        name = Some session.user.name
+                    }
+                let! response = playerManager.addPlayer game.id playerRequest session
+                let dto = response |> toStateAndEventResponseDto
+                return OkObjectResult(dto) :> IActionResult
         }

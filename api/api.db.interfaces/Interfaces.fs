@@ -10,7 +10,8 @@ type IEventRepository =
 
 type IGameRepository =
     abstract member getGame : gameId:int -> Task<Game>
-    abstract member createGame : request:CreateGameRequest * ?commit:bool -> Task<int>   
+    abstract member getGameByInviteCode : code:string -> Task<Option<Game>>
+    abstract member createGame : request:CreateGameRequest * ?commit:bool -> Task<int>
     abstract member updateGame : game:Game * ?commit:bool -> Task<unit>
     abstract member getNeutralPlayerNames : unit -> Task<list<string>>
     abstract member createGameAndAddPlayer : gameRequest:CreateGameRequest * playerRequest:CreatePlayerRequest -> Task<int>

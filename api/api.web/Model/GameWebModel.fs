@@ -109,4 +109,7 @@ type GameDto = {
 
     // Nullable
     currentTurn : TurnDto
+
+    // Nullable — only set for private games
+    inviteCode : string
 }

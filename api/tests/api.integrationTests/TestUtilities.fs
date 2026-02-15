@@ -45,6 +45,7 @@ let getCreateGameRequest (userId : int) : CreateGameRequest =
     {
         parameters = getGameParameters()
         createdByUserId = userId
+        inviteCode = None
     }
 
 let getCreatePlayerRequest : CreatePlayerRequest =
@@ -127,6 +128,7 @@ let defaultGame : Game =
         pieces = []
         turnCycle = []
         currentTurn = None
+        inviteCode = None
     }
 
 let setSessionUserId (userId : int) (session : Session) : Session=

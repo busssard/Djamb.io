@@ -113,6 +113,9 @@ type GameManager(eventRepo : IEventRepository,
                 else return raise <| NotFoundException("Game not found.")
             }
 
+        member x.getGameByInviteCode code =
+            gameRepo.getGameByInviteCode code
+
         member x.createGame parameters session =
             gameCrudServ.createGame parameters session
 

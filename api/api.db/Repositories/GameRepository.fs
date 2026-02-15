@@ -23,16 +23,30 @@ type GameRepository(context : DjambiDbContext) =
     interface IGameRepository with
         member __.getGame gameId =
             task {
-                let! g = 
+                let! g =
                     context.Games
                         .Include(fun g -> g.Players)
                         .Include(fun g -> g.CreatedByUser)
                         .SingleOrDefaultAsync(fun g -> g.GameId = gameId)
                 if g = null
                 then return raise <| NotFoundException("Game not found.")
-                else 
+                else
                     g.Players <- g.Players.OrderBy(fun p -> p.PlayerId).ToList()
                     return g |> toGame
+            }
+
+        member __.getGameByInviteCode code =
+            task {
+                let! g =
+                    context.Games
+                        .Include(fun g -> g.Players)
+                        .Include(fun g -> g.CreatedByUser)
+                        .SingleOrDefaultAsync(fun g -> g.InviteCode = code)
+                match g with
+                | null -> return None
+                | _ ->
+                    g.Players <- g.Players.OrderBy(fun p -> p.PlayerId).ToList()
+                    return Some (g |> toGame)
             }
             
         member __.createGame(request, ?commit) =
