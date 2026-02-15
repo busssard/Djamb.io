@@ -1,4 +1,4 @@
-﻿module Djambi.Api.UnitTets.Logic.Managers.UserManagerTests.CreateUserTests
+module Djambi.Api.UnitTets.Logic.Managers.UserManagerTests.CreateUserTests
 
 open System
 open System.Threading.Tasks
@@ -15,11 +15,13 @@ open Djambi.Api.Enums
 let ``throws if logged in and no EditUsers privilege``() =
     let encryption = A.Fake<IEncryptionService>()
     let userRepo = A.Fake<IUserRepository>()
-    let manager = UserManager(encryption, userRepo) :> IUserManager
+    let sessionService = A.Fake<ISessionService>()
+    let manager = UserManager(encryption, userRepo, sessionService) :> IUserManager
 
     let request : CreateUserRequest = {
         name = ""
-        password = ""
+        password = Some ""
+        email = None
     }
 
     let session : Session = {
@@ -27,6 +29,7 @@ let ``throws if logged in and no EditUsers privilege``() =
         user = {
             id = 1
             name = ""
+            email = None
             privileges = [ ]
         }
         token = ""
@@ -34,9 +37,9 @@ let ``throws if logged in and no EditUsers privilege``() =
         expiresOn = DateTime.UtcNow.AddDays(1.0)
     }
 
-    let createUser() = 
+    let createUser() =
         task {
-            return! manager.createUser request (Some session)    
+            return! manager.createUser request (Some session)
         } :> Task
 
     task {
@@ -47,16 +50,19 @@ let ``throws if logged in and no EditUsers privilege``() =
 let ``works if logged in and EditUsers privilege``() =
     let encryption = A.Fake<IEncryptionService>()
     let userRepo = A.Fake<IUserRepository>()
-    let manager = UserManager(encryption, userRepo) :> IUserManager
+    let sessionService = A.Fake<ISessionService>()
+    let manager = UserManager(encryption, userRepo, sessionService) :> IUserManager
 
     let request : CreateUserRequest = {
         name = "someName"
-        password = "somePassword"
+        password = Some "somePassword"
+        email = None
     }
 
     let userDetails = {
         id = 1
         name = request.name
+        email = None
         privileges = []
         password = request.password
         failedLoginAttempts = 0
@@ -68,6 +74,7 @@ let ``works if logged in and EditUsers privilege``() =
         user = {
             id = 1
             name = ""
+            email = None
             privileges = [ Privilege.EditUsers ]
         }
         token = ""
@@ -88,16 +95,19 @@ let ``works if logged in and EditUsers privilege``() =
 let ``works if not logged in``() =
     let encryption = A.Fake<IEncryptionService>()
     let userRepo = A.Fake<IUserRepository>()
-    let manager = UserManager(encryption, userRepo) :> IUserManager
+    let sessionService = A.Fake<ISessionService>()
+    let manager = UserManager(encryption, userRepo, sessionService) :> IUserManager
 
     let request : CreateUserRequest = {
         name = "someName"
-        password = "somePassword"
+        password = Some "somePassword"
+        email = None
     }
 
     let userDetails = {
         id = 1
         name = request.name
+        email = None
         privileges = []
         password = request.password
         failedLoginAttempts = 0

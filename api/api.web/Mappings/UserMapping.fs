@@ -9,7 +9,8 @@ module UserMapping =
     let toCreateUserRequest (source : CreateUserRequestDto) : CreateUserRequest =
         {
             name = source.name
-            password = source.password
+            password = Some source.password
+            email = None
         }
 
     let toUserDto (source : User) : UserDto =
@@ -18,6 +19,12 @@ module UserMapping =
             name = source.name
             privileges = source.privileges
         }
+
+    let toQuickRegisterArgs (source : QuickRegisterRequestDto) : string * string option =
+        let email =
+            if System.String.IsNullOrWhiteSpace(source.email) then None
+            else Some source.email
+        (source.name, email)
 
     let toCreationSourceDto (source : CreationSource) : CreationSourceDto =
         {

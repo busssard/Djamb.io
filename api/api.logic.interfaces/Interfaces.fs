@@ -17,6 +17,7 @@ type INotificationService =
 
 type ISessionService =
     abstract member openSession : request:LoginRequest -> Task<Session>
+    abstract member createSessionForUser : userId:int -> Task<Session>
     abstract member closeSession : session:Session -> Task<unit>
     abstract member getAndRenewSession : token:string -> Task<Option<Session>>
 
@@ -62,6 +63,7 @@ type ITurnManager =
 
 type IUserManager =
     abstract member createUser : request:CreateUserRequest -> sessionOption:Session option -> Task<User>
+    abstract member quickRegister : name:string -> email:string option -> Task<Session>
     abstract member deleteUser : userId:int -> session:Session -> Task<unit>
     abstract member getUser : userId:int -> session:Session -> Task<User>
     abstract member getCurrentUser : session:Session -> Task<User>

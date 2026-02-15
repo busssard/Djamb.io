@@ -4,6 +4,7 @@ open System.Threading.Tasks
 open Microsoft.AspNetCore.Authorization
 open Microsoft.AspNetCore.Mvc
 open Djambi.Api.Logic.Interfaces
+open Djambi.Api.Web
 open Djambi.Api.Web.Authentication
 open Djambi.Api.Web.Mappings
 open Djambi.Api.Web.Model
@@ -11,7 +12,8 @@ open Djambi.Api.Web.Model
 [<ApiController>]
 [<Authorize>]
 [<Route("api/users")>]
-type UserController(manager : IUserManager) =
+type UserController(manager : IUserManager,
+                    cookieProvider : CookieProvider) =
     inherit ControllerBase()
 
     [<AllowAnonymous>]
@@ -24,6 +26,19 @@ type UserController(manager : IUserManager) =
             let request = request |> toCreateUserRequest
             let! user = manager.createUser request sessionOption
             let dto = user |> toUserDto
+            return OkObjectResult(dto) :> IActionResult
+        }
+
+    [<AllowAnonymous>]
+    [<HttpPost("quick")>]
+    [<ProducesResponseType(200, Type = typeof<SessionDto>)>]
+    member __.QuickRegister([<FromBody>] request : QuickRegisterRequestDto) : Task<IActionResult> =
+        let ctx = base.HttpContext
+        task {
+            let (name, email) = request |> toQuickRegisterArgs
+            let! session = manager.quickRegister name email
+            let dto = session |> toSessionDto
+            cookieProvider.AppendCookie ctx (session.token, session.expiresOn)
             return OkObjectResult(dto) :> IActionResult
         }
 

@@ -27,6 +27,16 @@ type CreateUserRequestDto = {
     password : string
 }
 
+[<CLIMutable>]
+type QuickRegisterRequestDto = {
+    [<Required>]
+    [<RegularExpression("[a-zA-Z0-9\-_]+")>]
+    [<StringLength(20, MinimumLength = 1)>]
+    name : string
+
+    email : string
+}
+
 type CreationSourceDto = {
     [<Required>]
     userId : int

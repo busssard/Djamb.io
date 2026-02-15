@@ -11,24 +11,40 @@ open Djambi.Api.Logic.Interfaces
 open Djambi.Api.Model
 
 type UserManager(encyptionService: IEncryptionService,
-                 userRepo : IUserRepository) =
+                 userRepo : IUserRepository,
+                 sessionService : ISessionService) =
     interface IUserManager with
         member __.createUser request sessionOption =
             match sessionOption with
-            | Some s when not (s.user.has Privilege.EditUsers) -> 
+            | Some s when not (s.user.has Privilege.EditUsers) ->
                 raise <| UnauthorizedAccessException("Cannot create user if logged in.")
-            | _ ->                 
+            | _ ->
                 task {
-                    if request.password.Contains(request.name)
-                    then raise <| ValidationException("Password cannot contain username.")
-                    elif request.name.Contains(request.password)
-                    then raise <| ValidationException("Username cannot contain password.")
-
-                    let hash = encyptionService.hash request.password
-                    let request = { request with password = hash }
+                    let request =
+                        match request.password with
+                        | Some password ->
+                            if password.Contains(request.name)
+                            then raise <| ValidationException("Password cannot contain username.")
+                            elif request.name.Contains(password)
+                            then raise <| ValidationException("Username cannot contain password.")
+                            let hash = encyptionService.hash password
+                            { request with password = Some hash }
+                        | None -> request
                     let! user = userRepo.createUser request
                     return user |> UserDetails.hideDetails
                 }
+
+        member __.quickRegister name email =
+            task {
+                let request : CreateUserRequest =
+                    {
+                        name = name
+                        password = None
+                        email = email
+                    }
+                let! user = userRepo.createUser request
+                return! sessionService.createSessionForUser user.id
+            }
 
         member __.deleteUser userId session =
             Security.ensureSelfOrHas Privilege.EditUsers session userId

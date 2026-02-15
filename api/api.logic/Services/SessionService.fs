@@ -30,20 +30,26 @@ type SessionService(encryptionService : IEncryptionService,
                 else ()
 
             let errorIfInvalidPassword (user : UserDetails) =
-                let result = encryptionService.check (user.password, request.password)
-                if result.verified
-                then Task.FromResult ()
-                else
-                    let attempts =
-                        if isWithinLockTimeoutPeriod user
-                        then user.failedLoginAttempts + 1
-                        else 1
+                match user.password with
+                | None ->
+                    // Passwordless user — cannot log in via password
+                    raise <| AuthenticationException("This account uses email sign-in. Use the magic link option.")
+                    Task.FromResult ()
+                | Some hash ->
+                    let result = encryptionService.check (hash, request.password)
+                    if result.verified
+                    then Task.FromResult ()
+                    else
+                        let attempts =
+                            if isWithinLockTimeoutPeriod user
+                            then user.failedLoginAttempts + 1
+                            else 1
 
-                    let request = UpdateFailedLoginsRequest.increment (user.id, attempts)
-                    task {
-                        let! _ = userRepo.updateFailedLoginAttempts request
-                        raise <| AuthenticationException("Incorrect password.")
-                    }
+                        let request = UpdateFailedLoginsRequest.increment (user.id, attempts)
+                        task {
+                            let! _ = userRepo.updateFailedLoginAttempts request
+                            raise <| AuthenticationException("Incorrect password.")
+                        }
 
             let deleteSessionForUser (userId : int) : Task<unit> =            
                 task {
@@ -75,7 +81,23 @@ type SessionService(encryptionService : IEncryptionService,
                     return session
             }
 
-        member __.closeSession session = 
+        member __.createSessionForUser userId =
+            task {
+                // Delete any existing session for this user
+                match! sessionRepo.getSession (SessionQuery.byUserId userId) with
+                | Some existing -> do! sessionRepo.deleteSession existing.token
+                | None -> ()
+
+                let request : CreateSessionRequest =
+                    {
+                        userId = userId
+                        token = Guid.NewGuid().ToString()
+                        expiresOn = DateTime.UtcNow.Add(sessionTimeout)
+                    }
+                return! sessionRepo.createSession request
+            }
+
+        member __.closeSession session =
             sessionRepo.deleteSession session.token
 
         member __.getAndRenewSession token =
