@@ -29,6 +29,7 @@ const SearchGamesPage = React.lazy(() => import('../pages/SearchGamesPage'));
 const SignOutPage = React.lazy(() => import('../pages/SignOutPage'));
 const GameInfoPage = React.lazy(() => import('../pages/GameInfoPage'));
 const NotificationsPage = React.lazy(() => import('../pages/NotificationsPage'));
+const JoinByInvitePage = React.lazy(() => import('../pages/JoinByInvitePage'));
 
 const pageSx = {
   textAlign: 'center',
@@ -89,6 +90,7 @@ const App: FC = () => {
               {/* Gameless pages */}
               <Route path={RoutePaths.settings} element={<UserConfigPage />} />
               <Route path={RoutePaths.join} element={<QuickJoinPage />} />
+              <Route path={RoutePaths.inviteTemplate} element={<JoinByInvitePage />} />
               <Route path={RoutePaths.signOut} element={<SignOutPage />} />
               <Route path={RoutePaths.rules} element={<RulesPage />} />
               <Route path={RoutePaths.home} element={<HomePage />} />

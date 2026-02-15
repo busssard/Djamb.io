@@ -49,3 +49,46 @@ export async function startGame(gameId: number): Promise<void> {
   store.dispatch(action);
   navigateTo(Routes.gamePlay(gameId));
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getGameByInvite(code: string): Promise<any> {
+  const state = store.getState();
+  const apiUrl = state.config.environment.apiUrl;
+
+  const response = await fetch(`${apiUrl}/api/games/invite/${code}`, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(response.status === 404 ? 'Game not found' : 'Failed to load game');
+  }
+
+  return response.json();
+}
+
+export async function joinByInvite(code: string): Promise<void> {
+  const state = store.getState();
+  const apiUrl = state.config.environment.apiUrl;
+
+  const response = await fetch(`${apiUrl}/api/games/invite/${code}/join`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = `Failed to join game (${response.status})`;
+    try {
+      const problem = JSON.parse(text);
+      if (problem.title) message = problem.title;
+    } catch {
+      // use default
+    }
+    throw new Error(message);
+  }
+
+  const data = await response.json();
+  const action = gameUpdated(data);
+  store.dispatch(action);
+}

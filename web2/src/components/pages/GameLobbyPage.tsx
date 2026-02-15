@@ -1,6 +1,6 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Typography, Container, Button } from '@mui/material';
+import { Typography, Container, Button, Paper, Snackbar } from '@mui/material';
 import RedirectToSignInIfSignedOut from '../routing/RedirectToSignInIfSignedOut';
 import { GamePageProps } from './GamePage';
 import { selectActiveGame } from '../../hooks/selectors';
@@ -14,12 +14,12 @@ import * as Routes from '../../utilities/routes';
 
 const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
   const { game } = useSelector(selectActiveGame);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (game?.id !== gameId) {
       loadGame(gameId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game?.id, gameId]);
 
   if (game === null) {
@@ -32,11 +32,45 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
   }
 
   const canStart = game.players.length >= 2;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const inviteCode = (game as any).inviteCode as string | null;
+  const inviteUrl = inviteCode ? `${window.location.origin}/invite/${inviteCode}` : null;
+
+  const copyInviteLink = () => {
+    if (inviteUrl) {
+      navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+    }
+  };
 
   return (
     <div>
       <RedirectToSignInIfSignedOut />
-      <Typography variant="h4">{`Game ${gameId} lobby page`}</Typography>
+      <Typography variant="h4">{`Game ${gameId} lobby`}</Typography>
+
+      {inviteUrl && (
+        <Paper sx={{ p: 2, mt: 2, mb: 2, maxWidth: 500, mx: 'auto' }}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Invite friends with this link:
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ fontFamily: 'monospace', mt: 0.5, wordBreak: 'break-all' }}
+          >
+            {inviteUrl}
+          </Typography>
+          <Button size="small" onClick={copyInviteLink} sx={{ mt: 1 }}>
+            Copy Link
+          </Button>
+          <Snackbar
+            open={copied}
+            autoHideDuration={2000}
+            onClose={() => setCopied(false)}
+            message="Link copied!"
+          />
+        </Paper>
+      )}
+
       <br />
       <Container maxWidth="xs">
         <Typography variant="h5">Settings</Typography>
@@ -45,7 +79,9 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
       <br />
       <br />
       <Container maxWidth="sm">
-        <Typography variant="h5">Players</Typography>
+        <Typography variant="h5">
+          {`Players (${game.players.length}/${game.parameters.regionCount})`}
+        </Typography>
         <LobbyPlayersTable />
       </Container>
       <br />
@@ -59,7 +95,7 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
         {canStart ? (
           <></>
         ) : (
-          <Typography variant="caption">Cannot start until more players to join.</Typography>
+          <Typography variant="caption">Cannot start until more players join.</Typography>
         )}
       </Container>
     </div>

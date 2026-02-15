@@ -2,6 +2,9 @@ export const join = '/join';
 
 export const home = '/home';
 
+export const invite = (code: string): string => `/invite/${code}`;
+export const inviteTemplate = '/invite/:code';
+
 export const newGame = '/new-game';
 
 export const notifications = '/notifications';
