@@ -22,7 +22,7 @@ export function getBoardPieceScale(board: BoardView): number {
   const size = getBoardPolygonBaseSize(board.regionCount);
   const sizeAvg = (size.x + size.y) / 2;
   const reduced = Math.sqrt(Math.max(1, sizeAvg));
-  return reduced / (board.cellCountPerSide * 2);
+  return reduced / (board.cellCountPerSide * 1.6);
 }
 
 function getTotalMargin(data: CanvasTranformData): number {

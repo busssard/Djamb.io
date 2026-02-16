@@ -3,7 +3,7 @@ import { PieceImageInfo } from '../model/images';
 import { store } from '../redux';
 import { pieceImageLoadedAction } from '../redux/images/actionFactory';
 import { pieceColors } from '../styles/styles';
-import { replaceColor } from '../utilities/images';
+import { replaceColor, addOutline, canvasToImage } from '../utilities/images';
 
 const minPlayerColorId = 0;
 const maxPlayerColorId = 7;
@@ -31,27 +31,46 @@ function getPieceImagePath(kind: PieceKind): string {
   }
 }
 
-function createPieceImage(kind: PieceKind, colorId: number | null): HTMLImageElement {
+function createPieceImage(kind: PieceKind, colorId: number | null): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let image = new (window as any).Image() as HTMLImageElement;
+  const image = new (window as any).Image() as HTMLImageElement;
   image.src = getPieceImagePath(kind);
   image.onload = () => {
-    // Corpse is a neutral grey icon — no color replacement needed.
-    // Other pieces have the placeholder red swapped for the player color.
+    // Pipeline: color replace → outline → convert to Image
+    // All intermediate steps use HTMLCanvasElement to avoid async Image loads.
+    let canvas: HTMLCanvasElement;
+
     if (kind !== PieceKind.Corpse) {
-      image = replaceColor(image, pieceColors.placeholder, pieceColors.getPlayer(colorId));
+      canvas = replaceColor(image, pieceColors.placeholder, pieceColors.getPlayer(colorId));
+    } else {
+      // Corpse has no team color — start from the raw image
+      const c = document.createElement('canvas');
+      c.width = image.width;
+      c.height = image.height;
+      c.getContext('2d')!.drawImage(image, 0, 0);
+      canvas = c;
     }
 
-    const info: PieceImageInfo = {
-      kind,
-      playerColorId: colorId,
-      image,
+    // Add white outline for visibility on the dark board
+    canvas = addOutline(canvas, 2, 'white');
+
+    // Final conversion to HTMLImageElement for Konva
+    const finalImage = canvasToImage(canvas);
+    const dispatch = () => {
+      const info: PieceImageInfo = {
+        kind,
+        playerColorId: colorId,
+        image: finalImage,
+      };
+      store.dispatch(pieceImageLoadedAction(info));
     };
 
-    const action = pieceImageLoadedAction(info);
-    store.dispatch(action);
+    if (finalImage.complete) {
+      dispatch();
+    } else {
+      finalImage.onload = dispatch;
+    }
   };
-  return image;
 }
 
 function createPieceImageForEachPlayerColor(kind: PieceKind): void {

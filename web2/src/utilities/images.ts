@@ -4,7 +4,7 @@ export function getPieceImageKey(kind: PieceKind, colorId: number | null): strin
   return colorId !== null ? `${kind}${colorId}` : `${kind}Neutral`;
 }
 
-function imageToCanvas(image: HTMLImageElement): HTMLCanvasElement {
+function imageToCanvas(image: HTMLImageElement | HTMLCanvasElement): HTMLCanvasElement {
   const c = document.createElement('canvas');
   c.width = image.width;
   c.height = image.height;
@@ -16,7 +16,7 @@ function imageToCanvas(image: HTMLImageElement): HTMLCanvasElement {
   return c;
 }
 
-function canvasToImage(canvas: HTMLCanvasElement): HTMLImageElement {
+export function canvasToImage(canvas: HTMLCanvasElement): HTMLImageElement {
   const i = new Image();
   i.src = canvas.toDataURL('image/png');
   return i;
@@ -32,12 +32,6 @@ interface RgbColor {
 // regarding colorname conversions
 
 function colorStringToRgb(color: string): RgbColor {
-  // Returns the color as an array of [r, g, b, a] -- all range from 0 - 255
-  // color must be a valid canvas fillStyle. This will cover most anything
-  // you'd want to use.
-  // Examples:
-  // colorToRGBA('red')  # [255, 0, 0, 255]
-  // colorToRGBA('#f00') # [255, 0, 0, 255]
   const cvs = document.createElement('canvas');
   cvs.height = 1;
   cvs.width = 1;
@@ -105,19 +99,19 @@ function hslToRgb(h: number, s: number, l: number): RgbColor {
 /**
  * Replace all pixels matching oldColor's hue with newColor,
  * preserving the original pixel's lightness and saturation ratio.
- * This handles anti-aliased edges and shading gracefully.
+ * Works on canvas to avoid intermediate Image load issues.
  */
 export function replaceColor(
-  image: HTMLImageElement,
+  source: HTMLImageElement | HTMLCanvasElement,
   oldColor: string,
   newColor: string,
-): HTMLImageElement {
-  const c = imageToCanvas(image);
+): HTMLCanvasElement {
+  const c = imageToCanvas(source);
   const ctx = c.getContext('2d');
   if (!ctx) {
     throw Error('Could not get canvas 2D context.');
   }
-  const imageData = ctx.getImageData(0, 0, image.width, image.height);
+  const imageData = ctx.getImageData(0, 0, c.width, c.height);
   const d = imageData.data;
 
   const oldRgb = colorStringToRgb(oldColor);
@@ -136,7 +130,7 @@ export function replaceColor(
 
     const pxHsl = rgbToHsl(r, g, b);
 
-    // Check if this pixel is "red-ish": hue within 30 degrees of old color's hue,
+    // Check if this pixel's hue is close to the old color's hue,
     // and has meaningful saturation (not grey/black/white)
     const hueDiff = Math.abs(pxHsl.h - oldHsl.h);
     const hueClose = hueDiff < 30 || hueDiff > 330; // wraps around 360
@@ -151,5 +145,54 @@ export function replaceColor(
   }
 
   ctx.putImageData(imageData, 0, 0);
-  return canvasToImage(c);
+  return c;
+}
+
+/**
+ * Add an outline around non-transparent pixels by drawing the image
+ * at offsets in a circle, filling with the outline color, then drawing
+ * the original on top. Works on canvas directly.
+ */
+export function addOutline(
+  source: HTMLImageElement | HTMLCanvasElement,
+  thickness: number = 2,
+  color: string = 'white',
+): HTMLCanvasElement {
+  const pad = thickness;
+  const w = source.width + pad * 2;
+  const h = source.height + pad * 2;
+
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext('2d');
+  if (!ctx) throw Error('Could not get canvas 2D context.');
+
+  // Collect offsets within a circle of the given thickness
+  const offsets: [number, number][] = [];
+  for (let dx = -thickness; dx <= thickness; dx++) {
+    for (let dy = -thickness; dy <= thickness; dy++) {
+      if (dx === 0 && dy === 0) continue;
+      if (dx * dx + dy * dy <= thickness * thickness) {
+        offsets.push([dx, dy]);
+      }
+    }
+  }
+
+  // Draw the image at each offset to build the outline silhouette
+  ctx.globalCompositeOperation = 'source-over';
+  for (const [dx, dy] of offsets) {
+    ctx.drawImage(source, pad + dx, pad + dy);
+  }
+
+  // Fill all drawn pixels with the outline color
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, w, h);
+
+  // Draw original image on top
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.drawImage(source, pad, pad);
+
+  return c;
 }
