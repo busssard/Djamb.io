@@ -8,7 +8,7 @@ const RulesPage: FC = () => {
       <br />
       <Typography variant="body1">
         {'The rules are not currently embedded in the app, but can be found on the '}
-        <Link href="https://github.com/JamesFaix/Djambi-N/wiki/Rules">wiki</Link>.
+        <Link href="https://en.wikipedia.org/wiki/Djambi">Wikipedia article</Link>.
       </Typography>
     </div>
   );

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# run_server.sh — Djambi-N local development server
+# run_server.sh — Djamb.io local development server
 #
 # Usage:
 #   ./run_server.sh                  Start frontend dev server (default)
@@ -101,7 +101,7 @@ version_ge() {
 }
 
 show_help() {
-    echo "Djambi-N Local Dev Server"
+    echo "Djamb.io Local Dev Server"
     echo ""
     echo "Usage: ./run_server.sh [OPTIONS]"
     echo ""
@@ -165,7 +165,7 @@ done
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
-print_header "Djambi-N Dev Server"
+print_header "Djamb.io Dev Server"
 
 # ── 1. Prerequisite checks ──────────────────────────────────────────────────
 

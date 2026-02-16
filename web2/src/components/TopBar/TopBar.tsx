@@ -28,7 +28,7 @@ const TopBar: FC = () => {
             </Grid>
             <Grid size="grow">
               <Typography variant="h6" sx={titleSx}>
-                Djambi-N
+                Djamb.io
               </Typography>
             </Grid>
             <Grid size="grow" style={{ display: 'flex', justifyContent: 'flex-end' }}>
