@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useRef, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { Box, Button, Typography, Paper, Stack, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material';
 import RedirectToSignInIfSignedOut from '../routing/RedirectToSignInIfSignedOut';
 import CanvasBoard from '../Canvas/CanvasBoard';
 import { GamePageProps } from './GamePage';
@@ -9,6 +9,7 @@ import { loadGame } from '../../controllers/gameController';
 import { loadBoard } from '../../controllers/boardController';
 import { preloadAllPieceImages } from '../../controllers/imageController';
 import { selectCell, commitTurn, resetTurn } from '../../controllers/turnController';
+import { SelectionKind } from '../../api-client';
 import { fillEmptyBoardView } from '../../board/boardViewFactory';
 import { getScale, getSize, transformBoardView, CanvasTranformData } from '../../board/canvasTransformService';
 import { CellView } from '../../board/model';
@@ -94,19 +95,28 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
     : undefined;
 
   const handleSelectCell = useCallback(
-    (cell: CellView) => {
-      if (game && !isSpectator) {
-        selectCell(game.id, cell.id);
+    async (cell: CellView) => {
+      if (!game || isSpectator) return;
+      const turn = game.currentTurn;
+
+      // If we're in Move selection and click a cell that's not in selectionOptions,
+      // check if it's one of our own pieces — if so, reset and re-select
+      if (
+        turn?.requiredSelectionKind === SelectionKind.Move &&
+        turn.selectionOptions &&
+        !turn.selectionOptions.includes(cell.id) &&
+        cell.piece
+      ) {
+        await resetTurn(game.id);
+        await selectCell(game.id, cell.id);
+        return;
       }
+
+      selectCell(game.id, cell.id);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [game?.id, isSpectator],
+    [game?.id, game?.currentTurn, isSpectator],
   );
-
-  const handleCommit = useCallback(() => {
-    if (game) commitTurn(game.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game?.id]);
 
   const handleReset = useCallback(() => {
     if (game) resetTurn(game.id);
@@ -119,6 +129,14 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
       ? game.players?.find((p) => p.id === game.turnCycle![0])
       : undefined;
   const isMyTurn = currentPlayer && user && currentPlayer.userId === user.id;
+
+  // Auto-commit when turn reaches AwaitingCommit
+  useEffect(() => {
+    if (game && isMyTurn && turn?.status === TurnStatus.AwaitingCommit) {
+      commitTurn(game.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game?.id, isMyTurn, turn?.status]);
 
   if (!game || !filledBoard || !canvasStyle || imagesState.pieces.size === 0) {
     return (
@@ -168,20 +186,11 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
         />
       </Box>
 
-      {isMyTurn && game.status === GameStatus.InProgress && (
+      {isMyTurn && game.status === GameStatus.InProgress && turn?.selections && turn.selections.length > 0 && (
         <Paper sx={{ p: 1, mt: 1 }} elevation={1}>
-          <Stack direction="row" spacing={1}>
-            {turn?.status === TurnStatus.AwaitingCommit && (
-              <Button variant="contained" color="primary" onClick={handleCommit}>
-                Commit Turn
-              </Button>
-            )}
-            {turn?.selections && turn.selections.length > 0 && (
-              <Button variant="outlined" onClick={handleReset}>
-                Reset Turn
-              </Button>
-            )}
-          </Stack>
+          <Button variant="outlined" onClick={handleReset}>
+            Reset Turn
+          </Button>
         </Paper>
       )}
     </Box>
