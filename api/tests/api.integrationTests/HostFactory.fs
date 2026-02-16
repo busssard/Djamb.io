@@ -2,6 +2,7 @@
 
 open System
 open Microsoft.EntityFrameworkCore
+open Pomelo.EntityFrameworkCore.MySql.Infrastructure
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
@@ -45,7 +46,7 @@ let createHost() =
                         opt.UseSqlite("Filename=Test.db") |> ignore
                     else
                         let cnStr = settings.GetValue<string>("ConnectionString")
-                        let serverVersion = ServerVersion.AutoDetect(cnStr)
+                        let serverVersion = MySqlServerVersion(Version(8, 0, 0))
                         opt.UseMySql(cnStr, serverVersion) |> ignore
                 ) |> ignore
 
@@ -78,11 +79,10 @@ let createHost() =
                 services.AddTransient<ISessionManager, SessionManager>() |> ignore
                 services.AddTransient<ISnapshotManager, SnapshotManager>() |> ignore
                 services.AddTransient<IUserManager, UserManager>() |> ignore
-                // TODO: Break up game manager
-                services.AddTransient<IEventManager, GameManager>() |> ignore
+                services.AddTransient<IEventManager, EventManager>() |> ignore
                 services.AddTransient<IGameManager, GameManager>() |> ignore
-                services.AddTransient<IPlayerManager, GameManager>() |> ignore
-                services.AddTransient<ITurnManager, GameManager>() |> ignore
+                services.AddTransient<IPlayerManager, PlayerManager>() |> ignore
+                services.AddTransient<ITurnManager, TurnManager>() |> ignore
 
                 ()
             )
