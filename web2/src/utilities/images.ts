@@ -57,6 +57,56 @@ function colorStringToRgb(color: string): RgbColor {
   };
 }
 
+// Convert RGB to HSL. Returns h in [0,360), s and l in [0,1].
+function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const l = (max + min) / 2;
+
+  if (max === min) return { h: 0, s: 0, l };
+
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === rn) h = ((gn - bn) / d + (gn < bn ? 6 : 0)) * 60;
+  else if (max === gn) h = ((bn - rn) / d + 2) * 60;
+  else h = ((rn - gn) / d + 4) * 60;
+
+  return { h, s, l };
+}
+
+// Convert HSL back to RGB. h in [0,360), s and l in [0,1].
+function hslToRgb(h: number, s: number, l: number): RgbColor {
+  if (s === 0) {
+    const v = Math.round(l * 255);
+    return { r: v, g: v, b: v };
+  }
+  const hue2rgb = (p: number, q: number, t: number) => {
+    let tn = t;
+    if (tn < 0) tn += 1;
+    if (tn > 1) tn -= 1;
+    if (tn < 1 / 6) return p + (q - p) * 6 * tn;
+    if (tn < 1 / 2) return q;
+    if (tn < 2 / 3) return p + (q - p) * (2 / 3 - tn) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return {
+    r: Math.round(hue2rgb(p, q, h / 360 + 1 / 3) * 255),
+    g: Math.round(hue2rgb(p, q, h / 360) * 255),
+    b: Math.round(hue2rgb(p, q, h / 360 - 1 / 3) * 255),
+  };
+}
+
+/**
+ * Replace all pixels matching oldColor's hue with newColor,
+ * preserving the original pixel's lightness and saturation ratio.
+ * This handles anti-aliased edges and shading gracefully.
+ */
 export function replaceColor(
   image: HTMLImageElement,
   oldColor: string,
@@ -72,17 +122,34 @@ export function replaceColor(
 
   const oldRgb = colorStringToRgb(oldColor);
   const newRgb = colorStringToRgb(newColor);
+  const oldHsl = rgbToHsl(oldRgb.r, oldRgb.g, oldRgb.b);
+  const newHsl = rgbToHsl(newRgb.r, newRgb.g, newRgb.b);
 
   for (let i = 0; i < d.length; i += 4) {
-    // 4 for RGBA
-    if (d[i] === oldRgb.r && d[i + 1] === oldRgb.g && d[i + 2] === oldRgb.b) {
-      d[i] = newRgb.r;
-      d[i + 1] = newRgb.g;
-      d[i + 2] = newRgb.b;
+    const r = d[i];
+    const g = d[i + 1];
+    const b = d[i + 2];
+    const a = d[i + 3];
+
+    // Skip fully transparent pixels
+    if (a === 0) continue;
+
+    const pxHsl = rgbToHsl(r, g, b);
+
+    // Check if this pixel is "red-ish": hue within 30 degrees of old color's hue,
+    // and has meaningful saturation (not grey/black/white)
+    const hueDiff = Math.abs(pxHsl.h - oldHsl.h);
+    const hueClose = hueDiff < 30 || hueDiff > 330; // wraps around 360
+
+    if (hueClose && pxHsl.s > 0.2) {
+      // Replace hue with new color's hue, scale saturation, preserve lightness
+      const result = hslToRgb(newHsl.h, newHsl.s * (pxHsl.s / oldHsl.s), pxHsl.l);
+      d[i] = Math.min(255, Math.max(0, result.r));
+      d[i + 1] = Math.min(255, Math.max(0, result.g));
+      d[i + 2] = Math.min(255, Math.max(0, result.b));
     }
   }
 
   ctx.putImageData(imageData, 0, 0);
-  const i = canvasToImage(c);
-  return i;
+  return canvasToImage(c);
 }

@@ -36,7 +36,11 @@ function createPieceImage(kind: PieceKind, colorId: number | null): HTMLImageEle
   let image = new (window as any).Image() as HTMLImageElement;
   image.src = getPieceImagePath(kind);
   image.onload = () => {
-    image = replaceColor(image, pieceColors.placeholder, pieceColors.getPlayer(colorId));
+    // Corpse is a neutral grey icon — no color replacement needed.
+    // Other pieces have the placeholder red swapped for the player color.
+    if (kind !== PieceKind.Corpse) {
+      image = replaceColor(image, pieceColors.placeholder, pieceColors.getPlayer(colorId));
+    }
 
     const info: PieceImageInfo = {
       kind,
