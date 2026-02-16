@@ -49,7 +49,7 @@ let main args =
 
         // ── Serilog ──────────────────────────────────────────────────────
         builder.Host.UseSerilog(fun ctx _ loggerConfig ->
-            let template = "{Timestamp:yyyy/MM/dd-HH:mm:ss.fff} {Level:u3} {Message:lj}{NewLine}{Properties}{NewLine}{Exception}"
+            let template = "{Timestamp:yyyy/MM/dd-HH:mm:ss.fff} {Level:u3} {Message:lj}{NewLine}{Exception}"
             let levelConfig = ctx.Configuration.GetSection("Log:Levels")
 
             let mutable cfg =
@@ -151,7 +151,7 @@ let main args =
         builder.Services.AddScoped<GameCrudService>() |> ignore
         builder.Services.AddScoped<GameStartService>() |> ignore
         builder.Services.AddScoped<IndirectEffectsService>() |> ignore
-        builder.Services.AddScoped<INotificationService, NotificationService>() |> ignore
+        builder.Services.AddSingleton<INotificationService, NotificationService>() |> ignore
         builder.Services.AddScoped<PlayerService>() |> ignore
         builder.Services.AddScoped<PlayerStatusChangeService>() |> ignore
         builder.Services.AddScoped<ISessionService, SessionService>() |> ignore

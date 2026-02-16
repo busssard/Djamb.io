@@ -63,7 +63,17 @@ type NotificationController(service : INotificationService) =
             let subscriber = new WebsocketSubscriber(userId, socket, Serilog.Log.Logger)
             service.add subscriber
 
+            // Keep connection alive by reading until client disconnects
             let buffer : byte[] = Array.zeroCreate 4096
-            let! _ = socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None)
-            ()
+            let mutable keepAlive = true
+            while keepAlive do
+                let! result = socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None)
+                if result.MessageType = Net.WebSockets.WebSocketMessageType.Close then
+                    keepAlive <- false
+
+            service.remove userId
+            if socket.State = Net.WebSockets.WebSocketState.Open
+               || socket.State = Net.WebSockets.WebSocketState.CloseReceived then
+                do! socket.CloseAsync(
+                    Net.WebSockets.WebSocketCloseStatus.NormalClosure, "", CancellationToken.None)
         }
