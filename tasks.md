@@ -22,7 +22,7 @@
 - [x] Fix `useEffect` infinite loop in `web2/src/components/pages/GameDiplomacyPage.tsx` — added deps
 - [x] Audit all `useEffect` calls — fixed 9 files total (GamePage, GameInfoPage, GameSnapshotsPage, GameLobbyPage, GameOutcomePage, CanvasCellsLayer)
 - [x] Fix CanvasCellsLayer animation leak — added `[]` deps + cleanup `return () => { a.stop(); }`
-- [ ] Fix session token logging vulnerability in `api/api.web/SessionContextProvider.fs` (line 25 — logs full token)
+- [x] Fix session token logging vulnerability — removed {Properties} from Serilog template (Phase 7b)
 
 ## Phase 2: Frontend Modernization — Build System
 > Migrate from Create React App 3.4 to Vite. This unblocks all other frontend upgrades.
@@ -246,6 +246,112 @@
 - [-] Player avatars (initials circles) (deferred — cosmetic polish)
 - [-] Polling with `setInterval` every 3s for real-time updates (deferred to Phase 6 WebSocket work)
 
+## Phase 5.6: Quick Wins — CI/CD, Tests & Cleanup
+> Low-hanging fruit fixes: CI workflow bugs, outdated runtimes, test gaps, docs polish.
+
+### CI/CD Fixes
+- [ ] Fix broken workflow path filter typo: `reset-client-generator` → `rest-client-generator` in `.github/workflows/check-for-api-contract-changes.yml`
+- [ ] Upgrade Node version in GitHub Actions workflows: 10.x → 20.x, `actions/setup-node@v1` → `v4`
+- [ ] Replace deprecated AWS ECR login: `aws ecr get-login --no-include-email` → `get-login-password | docker login` in `api-deploy.yml`
+- [ ] Upgrade Java setup in contract-check workflow: Java 9.0.4 + `actions/setup-java@v1` → LTS JDK + `v4`
+
+### Test Gaps
+- [ ] Add board geometry transform tests in `web2/src/board/point.test.ts` and `polygon.test.ts` (noted TODOs)
+- [ ] Add GameManager auth/permission edge case tests (placeholder TODOs in integration test files)
+
+### Docs & Cleanup
+- [ ] Fix readme.md typo: "guidlines" → "guidelines"
+
+## Phase 5.7: Frontend Redesign — Dark Gaming Theme & Lobby
+> Modern dark gaming aesthetic (chess.com / boardgamearena.com style). Card-based layouts, proper lobby, spectator improvements.
+
+### 5.7a. Design system — dark gaming theme
+- [ ] Rewrite `web2/src/styles/materialTheme.ts` — gaming palette: background #0a0a0f, paper #12121a, primary cyan #00bcd4, secondary gold #ffd740
+- [ ] Add custom `gaming` palette tokens: cardBg, cardBorder, cardHoverBorder, glow effects, status dot colors
+- [ ] Add MUI component overrides: Paper, Card (hover glow), Button (gradient), AppBar, Chip
+- [ ] Update `web2/src/index.css` — body gradient, scrollbar styling, selection color
+- [ ] Create `web2/src/components/shared/GameCard.tsx` — game display card with status badge, player count, action button
+- [ ] Create `web2/src/components/shared/StatusBadge.tsx` — colored dot + status text
+- [ ] Create `web2/src/components/shared/SectionHeader.tsx` — section title with count badge + action
+- [ ] Create `web2/src/components/shared/FilterBar.tsx` — chip-based filter row + search input
+
+### 5.7b. Landing page (QuickJoinPage)
+- [ ] Redesign hero section with themed logo (glow effect), heading, subtitle
+- [ ] Style join form card with gradient background, themed inputs
+- [ ] Theme feature highlights grid with new palette
+- [ ] Style sign-in link for returning users
+
+### 5.7c. Lobby (HomePage)
+- [ ] Rewrite HomePage as card-based game browser
+- [ ] Add "Your Active Games" section at top (games where user is a player)
+- [ ] Add prominent "Create Game" button
+- [ ] Add filter bar: All | Open | Live + text search
+- [ ] Add "Public Games" card grid — Pending games show "Join", InProgress show "Watch"
+- [ ] Parallel data fetch: my games + all public games via `searchGames()`
+
+### 5.7d. Spectator improvements
+- [ ] Add "Watch" button on InProgress game cards in lobby
+- [ ] Improve spectator UI in GamePlayPage (styled badge, better indicator)
+
+### 5.7e. Navigation & chrome
+- [ ] Theme TopBar with gaming palette
+- [ ] Theme NavigationDrawer with gaming palette
+
+## Phase 5.8: Full-Stack Game Chat System
+> In-game chat with separated player and spectator channels. Backend F# + frontend React.
+
+### 5.8a. Chat backend — enum & model
+- [ ] Add `ChatChannel` enum to `api/api.enums/Enums.fs` (Player=1, Spectator=2, All=3)
+- [ ] Create `api/api.model/ChatModel.fs` — `ChatMessage`, `CreateChatMessageRequest`, `ChatMessagesQuery`
+- [ ] Update `api/api.model/api.model.fsproj` — add ChatModel.fs
+
+### 5.8b. Chat backend — database
+- [ ] Create `api/api.db.model/Model/ChatMessageSqlModel.cs` — EF entity
+- [ ] Add `DbSet<ChatMessageSqlModel>` to `ApexDbContext.cs`
+
+### 5.8c. Chat backend — repository
+- [ ] Add `IChatMessageRepository` to `api/api.db.interfaces/Interfaces.fs`
+- [ ] Create `api/api.db/Mappings/ChatMappings.fs` — SQL↔domain mappings
+- [ ] Create `api/api.db/Repositories/ChatMessageRepository.fs` — createMessage, getMessages
+- [ ] Update `api/api.db/api.db.fsproj` — add new files
+
+### 5.8d. Chat backend — manager
+- [ ] Add `IChatMessageManager` to `api/api.logic.interfaces/Interfaces.fs`
+- [ ] Create `api/api.logic/Managers/ChatMessageManager.fs` — sendMessage (validates text, checks player membership, enforces channel perms), getMessages (filters by role)
+- [ ] Update `api/api.logic/api.logic.fsproj` — add ChatMessageManager.fs
+
+### 5.8e. Chat backend — controller & DTOs
+- [ ] Create `api/api.web/Model/ChatWebModel.fs` — SendChatMessageDto, ChatMessageDto, ChatMessagesQueryDto
+- [ ] Create `api/api.web/Mappings/ChatWebMappings.fs` — DTO↔domain mappings
+- [ ] Create `api/api.web/Controllers/ChatController.fs` — POST send + POST query endpoints
+- [ ] Update `api/api.web/api.web.fsproj` — add new files
+
+### 5.8f. Chat backend — DI & wiring
+- [ ] Register `IChatMessageRepository` and `IChatMessageManager` in `api/api.host/Program.fs`
+
+### 5.8g. Chat frontend — Redux module
+- [ ] Create `web2/src/model/chat.ts` — ChatChannel enum, ChatMessage type
+- [ ] Create `web2/src/redux/chat/` — state, actionTypes, actions, actionFactory, reducer
+- [ ] Add chat slice to `web2/src/redux/root.ts`
+- [ ] Add `selectChat` to `web2/src/hooks/selectors.ts`
+
+### 5.8h. Chat frontend — controller & polling
+- [ ] Create `web2/src/controllers/chatController.ts` — sendMessage, loadMessages, startPolling (2.5s), stopPolling
+
+### 5.8i. Chat frontend — UI components
+- [ ] Create `web2/src/components/chat/ChatPanel.tsx` — main container with tabs, messages, input
+- [ ] Create `web2/src/components/chat/ChannelTabs.tsx` — Players | Spectators | All (filtered by role)
+- [ ] Create `web2/src/components/chat/MessageList.tsx` — auto-scrolling list with player colors
+- [ ] Create `web2/src/components/chat/MessageInput.tsx` — text field + send button
+
+### 5.8j. Chat frontend — integration
+- [ ] Add ChatPanel to GamePlayPage — side panel (desktop) / bottom drawer (mobile)
+- [ ] Replace GameDiplomacyPage stub with full-page chat view
+
+### 5.8k. Chat tests
+- [ ] Backend: ChatMessageManager tests (channel permissions, text validation, role filtering)
+- [ ] Frontend: chat reducer tests (MessagesLoaded, MessageSent, ClearChat, SetActiveChannel)
+
 ## Phase 6: Real-Time WebSocket Integration
 > Connect the frontend to the existing backend WebSocket infrastructure.
 
@@ -275,23 +381,70 @@
 - [x] Fix run_server.sh for MySQL health checks and --no-launch-profile
 - [x] Upgrade integration test packages to 8.0.0
 
-### 7b. Hosting layer rewrite (next)
-- [ ] Rewrite `Startup.fs` using .NET 8 minimal hosting (`WebApplication.CreateBuilder`)
-- [ ] Modernize auth: replace custom session cookie system with ASP.NET Core Identity or JWT
-- [ ] Replace `WebHostBuilder` with `WebApplicationBuilder` in Program.fs
-- [ ] Add proper CORS configuration (current setup doesn't cover all frontend origins)
-- [ ] Modernize middleware pipeline (error handling, logging, request/response)
-- [ ] Consider migrating Newtonsoft.Json → System.Text.Json
-- [ ] Fix token logging vulnerability in SessionContextProvider.fs
-- [ ] Add rate limiting middleware
-- [ ] Add health check endpoints
-- [ ] Update Dockerfile base images from `dotnet/core/sdk:3.1` → `dotnet/sdk:8.0`
+### 7b. Full backend modernization (done)
+- [x] Switch from EnsureCreated() to EF Core Migrations for schema management
+- [x] Reset migration baseline to capture all Phase 5.5 additions (Email, MagicLink, InviteCode)
+- [x] Add missing database indexes (Session.Token, MagicLink.Token, Game.InviteCode, User.Email)
+- [x] Update design-time factory (optional config files, hardcoded MySQL version to avoid live DB requirement)
+- [x] Update Dockerfile base images from `dotnet/core/sdk:3.1` → `dotnet/sdk:8.0`
+- [x] Remove FSharp.Core 4.7.2 pin from all 9 fsproj files (SDK provides 8.x)
+- [x] Remove TaskBuilder.fs 2.1.0 dependency + 46 `open FSharp.Control.Tasks` imports (native task CE)
+- [x] Fix NotificationService DI lifetime: Scoped → Singleton (ConcurrentDictionary must persist)
+- [x] Fix WebSocket handler: add read loop to keep connection alive (was single ReceiveAsync then exit)
+- [x] Fix BotRunner: proper cancellation tokens, SemaphoreSlim overlap prevention, 5s polling, clean shutdown
+- [x] Remove {Properties} from Serilog template (was leaking session tokens)
+- [x] Remove hardcoded database password from api.db.model/appsettings.json
+- [x] Add startup config validation (fail fast on missing ConnectionString)
+- [x] Scope Swagger UI to Development environment only
+- [x] Decompose GameManager god object into EventManager + PlayerManager + TurnManager + GameManager
+- [x] Add shared EventProcessing module for event pipeline logic
+- [x] Add correlation IDs (X-Correlation-Id header propagation + Serilog enrichment)
+- [x] Update test packages (Test.Sdk 17.11, xunit 2.9, FakeItEasy 8.3)
+- [x] Update integration test HostFactory for decomposed managers
+- [x] Disable legacy web/ workflows (web-deploy.yml, web-quality-gates.yml)
+- [x] Remove legacy web/ service from docker-compose.yml
 
-### 7c. Architecture improvements
-- [ ] Refactor `GameManager` into separate managers (break up god object)
+### 7c. Architecture improvements (remaining)
+- [ ] Modernize auth: replace custom session cookie system with ASP.NET Core Identity or JWT
 - [ ] Add proper API versioning
-- [ ] Add structured logging with correlation IDs
+- [ ] Consider migrating Newtonsoft.Json → System.Text.Json
+- [ ] Add rate limiting middleware
 - [ ] Define clear bot/AI player API interface (see Phase 10)
+
+## Phase 7.5: Database Migration Governance
+> Schema version policy, preflight checks, rollback plan. Important as features evolve.
+
+- [ ] Document migration workflow: create → review → test against staging DB → apply
+- [ ] Add preflight check script that validates pending migrations before apply
+- [ ] Add rollback documentation (how to revert a migration)
+- [ ] Add backup verification step before production migrations
+- [ ] Consider adding `dotnet ef migrations script` to CI for reviewable SQL output
+
+## Phase 7.6: Security Hardening Program
+> Partially addressed in Phase 7b. Remaining items form a standalone epic.
+
+- [ ] Add secret scanning to CI (prevent committing keys/passwords)
+- [ ] Dependency vulnerability scanning (Dependabot or `dotnet list package --vulnerable`)
+- [ ] CSRF hardening for cookie-based auth
+- [ ] Session abuse protection (rate limiting on session creation, IP-based throttling)
+- [ ] Threat model document for auth flows (quick-join, magic link, cookie sessions)
+
+## Phase 7.7: Performance & Scale Testing
+> Load/soak testing before WebSocket rollout. Slot before Phase 6.
+
+- [ ] Set up load testing tool (k6, artillery, or similar)
+- [ ] Define concurrent game target (e.g., 50 simultaneous games)
+- [ ] Test WebSocket fanout performance (N subscribers per game)
+- [ ] Profile database hotspots under load
+- [ ] Soak test BotRunner with many concurrent bot games
+
+## Phase 7.8: Product Analytics Foundation
+> Event taxonomy and funnel metrics. Slot before Phase 11 (launch).
+
+- [ ] Define event taxonomy (join, create-game, start-game, complete-game, install-pwa)
+- [ ] Add funnel metrics (visit → join → create → play → complete)
+- [ ] Evaluate analytics approach (self-hosted vs. service, privacy considerations)
+- [ ] Feature flags infrastructure (for gradual rollout of AI players, chat, etc.)
 
 ## Phase 8: CI/CD Modernization
 > Update GitHub Actions to use current tool versions.
@@ -303,7 +456,7 @@
 - [ ] Add web2 Dockerfile for Docker Compose parity
 - [ ] Add manual approval gate to `sql-migration.yml`
 - [ ] Add type checking (`tsc --noEmit`) to web2 quality gates
-- [ ] Update `docker-compose.yml` to include web2 instead of legacy web
+- [x] Update `docker-compose.yml` — remove legacy web service, add depends_on for db
 
 ## Phase 9: Diplomacy & Chat System
 > Build the social communication layer that Djambi needs.
@@ -369,7 +522,18 @@
 
 ## Current Focus
 
-**Active work**: Phase 5.5 substantially complete. Next up: Phase 6 (WebSocket real-time), Phase 5 (responsive design), or Phase 7b (backend hosting rewrite).
+**Active work**: Phase 5.6 (quick wins) → Phase 5.7 (frontend redesign) → Phase 5.8 (chat system).
+
+**Execution order**:
+1. Phase 5.6: CI/CD fixes + docs typo (quick batch commit)
+2. Phase 5.7a: Design system — dark gaming theme (foundation for everything)
+3. Phase 5.7b: Landing page redesign
+4. Phase 5.7c: Lobby rewrite with game cards
+5. Phase 5.7d-e: Spectator + navigation polish
+6. Phase 5.6 tests: Board geometry + GameManager auth tests (alongside frontend work)
+7. Phase 5.8a-f: Chat backend (F# endpoints, DB, permissions)
+8. Phase 5.8g-j: Chat frontend (Redux, UI, integration)
+9. Phase 5.8k: Chat tests
 
 **Completed milestones**:
 - Phase 0: Documentation restructured ✓
@@ -380,6 +544,7 @@
 - Phase 4 (core): PWA with vite-plugin-pwa, install prompt, offline support ✓
 - Phase 5.5 (core): Passwordless quick-join auth, magic link device transfer, private games with invite links, spectator mode, lobby enhancements ✓
 - Phase 7a: Backend .NET 8 compatibility fixes ✓ (builds, runs, user creation + login works)
+- Phase 7b: Backend full modernization ✓ (EF migrations, Dockerfile .NET 8, TaskBuilder removal, critical bug fixes, GameManager decomposition, correlation IDs, config hardening, test infrastructure)
 - Phase 10a (partial): Bot interface + RandomBot + MinimaxBot + BotRunner ✓
 
 **What works end-to-end**:
@@ -395,9 +560,7 @@
 **Deferred from Phase 5.5** (minor items, not blocking):
 - Backend spectator access control (GetGame for non-players on public games)
 - Spectator WebSocket/SSE connections (depends on Phase 6)
-- "Watch" button on HomePage (depends on backend spectator access)
 - CreateGameForm invite link explanation text
-- Lobby MUI Cards layout, player avatar initials, polling
 - These are tracked with `[-]` markers in Phase 5.5 above
 
-**Strategy**: Real-time WebSocket integration (Phase 6) next enables lobby polling and spectator streams. Then responsive design (Phase 5) and hosting layer rewrite (Phase 7b). Game logic (`api.logic/`) stays intact throughout.
+**Strategy**: Design system + lobby + chat first (Phases 5.6-5.8), then responsive design (Phase 5), WebSocket real-time (Phase 6), backend rewrite (Phase 7b). Game logic (`api.logic/`) stays intact throughout.

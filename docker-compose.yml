@@ -18,15 +18,11 @@ services:
     environment:
       - DJAMBI_Api__apiAddress=http://*:5100
       - DJAMBI_Api__cookieDomain=localhost
-      - DJAMBI_Api__webAddress=http://localhost:8080
+      - DJAMBI_Api__allowedOrigins=http://localhost:3000
       - DJAMBI_Log__directory=
       - "DJAMBI_Sql__connectionString=Server=db;Port=3306;Database=Apex2;Uid=root;Pwd=devpassword;"
-  web:
-    build:
-      context: .
-      dockerfile: web/Dockerfile
-    ports:
-      - "8080:8080"
+    depends_on:
+      - db
 
 volumes:
   djambi-mysql-data:
