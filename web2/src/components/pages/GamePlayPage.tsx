@@ -10,7 +10,7 @@ import { loadBoard } from '../../controllers/boardController';
 import { preloadAllPieceImages } from '../../controllers/imageController';
 import { selectCell, commitTurn, resetTurn } from '../../controllers/turnController';
 import { fillEmptyBoardView } from '../../board/boardViewFactory';
-import { getScale, getSize } from '../../board/canvasTransformService';
+import { getScale, getSize, transformBoardView, CanvasTranformData } from '../../board/canvasTransformService';
 import { CellView } from '../../board/model';
 import { GameStatus, TurnStatus } from '../../api-client';
 import { navigateTo } from '../../controllers/navigationController';
@@ -70,20 +70,25 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
   const isSpectator =
     game && user ? !game.players?.some((p) => p.userId === user.id) : false;
 
-  const filledBoard =
-    emptyBoard && game && user ? fillEmptyBoardView(emptyBoard, game, user) : undefined;
+  const transformData: CanvasTranformData | undefined = game
+    ? {
+        containerSize,
+        canvasMargin: 10,
+        contentPadding: 5,
+        regionCount: game.parameters.regionCount,
+        zoomLevel: 0,
+      }
+    : undefined;
 
-  const canvasStyle = game
+  const filledBoard =
+    emptyBoard && game && user && transformData
+      ? transformBoardView(fillEmptyBoardView(emptyBoard, game, user), transformData)
+      : undefined;
+
+  const canvasStyle = transformData
     ? (() => {
-        const data = {
-          containerSize,
-          canvasMargin: 10,
-          contentPadding: 5,
-          regionCount: game.parameters.regionCount,
-          zoomLevel: 0,
-        };
-        const scale = getScale(data);
-        const size = getSize(data);
+        const scale = getScale(transformData);
+        const size = getSize(transformData);
         return { width: size.x, height: size.y, scale };
       })()
     : undefined;

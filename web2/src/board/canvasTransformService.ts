@@ -2,6 +2,7 @@ import * as MathJs from 'mathjs';
 import { Point, BoardView } from './model';
 import * as Transform from './transform';
 import * as Pt from './point';
+import * as Pl from './polygon';
 import * as Rectangle from './rectangle';
 import * as RegularPolygon from './regularPolygon';
 
@@ -120,4 +121,16 @@ export function getBoardViewTransform(data: CanvasTranformData): MathJs.Matrix {
     getTransformToCenterBoardInCanvas(data),
     getTransformToScaleBoard(data),
   ]);
+}
+
+export function transformBoardView(board: BoardView, data: CanvasTranformData): BoardView {
+  const matrix = getBoardViewTransform(data);
+  return {
+    ...board,
+    polygon: Pl.transform(board.polygon, matrix),
+    cells: board.cells.map((c) => ({
+      ...c,
+      polygon: Pl.transform(c.polygon, matrix),
+    })),
+  };
 }
