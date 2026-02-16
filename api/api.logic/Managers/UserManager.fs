@@ -35,14 +35,24 @@ type UserManager(encyptionService: IEncryptionService,
 
         member __.quickRegister name email =
             task {
-                let request : CreateUserRequest =
-                    {
-                        name = name
-                        password = None
-                        email = email
-                    }
-                let! user = userRepo.createUser request
-                return! sessionService.createSessionForUser user.id
+                // Check if user already exists
+                match! userRepo.getUserByName name with
+                | Some existing when existing.password.IsNone ->
+                    // Passwordless user exists — sign them back in
+                    return! sessionService.createSessionForUser existing.id
+                | Some _ ->
+                    // User exists but has a password — can't quick-join
+                    return raise <| ValidationException("User name taken.")
+                | None ->
+                    // New user — create and sign in
+                    let request : CreateUserRequest =
+                        {
+                            name = name
+                            password = None
+                            email = email
+                        }
+                    let! user = userRepo.createUser request
+                    return! sessionService.createSessionForUser user.id
             }
 
         member __.deleteUser userId session =

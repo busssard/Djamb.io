@@ -16,7 +16,7 @@ type SessionService(encryptionService : IEncryptionService,
 
     let maxFailedLoginAttempts = 5
     let accountLockTimeout = TimeSpan.FromHours(1.0)
-    let sessionTimeout = TimeSpan.FromHours(1.0)
+    let sessionTimeout = TimeSpan.FromDays(7.0)
     let magicLinkTimeout = TimeSpan.FromMinutes(15.0)
 
     interface ISessionService with
