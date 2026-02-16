@@ -26,6 +26,10 @@
     <Compile Include="Services\PlayerStatusChangeService.fs" />
     <Compile Include="Managers\SearchManager.fs" />
     <Compile Include="Managers\BoardManager.fs" />
+    <Compile Include="Managers\EventProcessing.fs" />
+    <Compile Include="Managers\EventManager.fs" />
+    <Compile Include="Managers\PlayerManager.fs" />
+    <Compile Include="Managers\TurnManager.fs" />
     <Compile Include="Managers\GameManager.fs" />
     <Compile Include="Managers\SessionManager.fs" />
     <Compile Include="Managers\SnapshotManager.fs" />

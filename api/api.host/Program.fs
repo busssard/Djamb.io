@@ -165,11 +165,10 @@ let main args =
         builder.Services.AddScoped<ISessionManager, SessionManager>() |> ignore
         builder.Services.AddScoped<ISnapshotManager, SnapshotManager>() |> ignore
         builder.Services.AddScoped<IUserManager, UserManager>() |> ignore
-        // TODO: Break up GameManager into separate managers
-        builder.Services.AddScoped<IEventManager, GameManager>() |> ignore
+        builder.Services.AddScoped<IEventManager, EventManager>() |> ignore
         builder.Services.AddScoped<IGameManager, GameManager>() |> ignore
-        builder.Services.AddScoped<IPlayerManager, GameManager>() |> ignore
-        builder.Services.AddScoped<ITurnManager, GameManager>() |> ignore
+        builder.Services.AddScoped<IPlayerManager, PlayerManager>() |> ignore
+        builder.Services.AddScoped<ITurnManager, TurnManager>() |> ignore
 
         // ── Bot players (Singleton) ────────────────────────────────────────
         builder.Services.AddSingleton<IBotRegistry>(fun _ ->
