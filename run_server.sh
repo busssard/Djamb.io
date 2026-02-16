@@ -362,7 +362,28 @@ if [ "$FULL_STACK" = true ]; then
         echo ""
     fi
 
-    # ── 4b. API Server ───────────────────────────────────────────────────────
+    # ── 4b. Check if database needs migration reset ─────────────────────────
+    # If tables exist but no __EFMigrationsHistory, the DB was created by the
+    # old EnsureCreated() and needs a reset for EF Core migrations to work.
+    if [ "$DB_STARTED" = true ] || check_port 3306 "database" 2>/dev/null; then
+        HAS_TABLES=$(docker compose -f "$SCRIPT_DIR/docker-compose.yml" exec -T db \
+            mysql -u root -pdevpassword -N -e \
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Apex2' AND TABLE_NAME != '__EFMigrationsHistory';" 2>/dev/null | tr -d '[:space:]')
+        HAS_HISTORY=$(docker compose -f "$SCRIPT_DIR/docker-compose.yml" exec -T db \
+            mysql -u root -pdevpassword -N -e \
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='Apex2' AND TABLE_NAME = '__EFMigrationsHistory';" 2>/dev/null | tr -d '[:space:]')
+
+        if [ "$HAS_TABLES" -gt 0 ] 2>/dev/null && [ "$HAS_HISTORY" = "0" ] 2>/dev/null; then
+            print_warn "Database has tables but no migration history (legacy EnsureCreated schema)"
+            print_info "Resetting database so EF Core migrations can apply cleanly..."
+            docker compose -f "$SCRIPT_DIR/docker-compose.yml" exec -T db \
+                mysql -u root -pdevpassword -e "DROP DATABASE IF EXISTS Apex2; CREATE DATABASE Apex2;" 2>/dev/null
+            print_ok "Database reset for migration transition"
+            echo ""
+        fi
+    fi
+
+    # ── 4c. API Server ───────────────────────────────────────────────────────
     print_section "STEP" "Starting API server (.NET)"
     print_info "Building and running api.host"
 
@@ -371,7 +392,9 @@ if [ "$FULL_STACK" = true ]; then
         print_warn "Continuing without API"
     else
         # Set required environment variables
+        export ASPNETCORE_ENVIRONMENT=Development
         export DJAMBI_Api__apiAddress="http://*:5100"
+        export DJAMBI_Api__allowedOrigins="http://localhost:3000"
         export DJAMBI_Api__cookieDomain="localhost"
         export DJAMBI_Api__webAddress="http://localhost:3000"
         export DJAMBI_Sql__connectionString="Server=localhost;Port=3306;Database=Apex2;Uid=root;Pwd=devpassword;"
