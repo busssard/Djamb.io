@@ -37,6 +37,7 @@ const CanvasPolygon: FC<Props> = ({ polygon, style }) => (
     stroke={style.strokeColor}
     strokeWidth={style.strokeWidth}
     opacity={style.opacity !== undefined ? style.opacity : 1}
+    listening={false}
   />
 );
 export default CanvasPolygon;

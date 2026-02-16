@@ -32,6 +32,7 @@ const CanvasCellPieceLayer: FC<Props> = ({ size, image, cell }) => {
       shadowBlur={5}
       shadowOffsetX={5}
       shadowOffsetY={5}
+      listening={false}
     />
   );
 };
