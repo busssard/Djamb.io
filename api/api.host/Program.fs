@@ -8,6 +8,7 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
 open Microsoft.EntityFrameworkCore
 open Microsoft.Extensions.Options
+open Pomelo.EntityFrameworkCore.MySql.Infrastructure
 open Microsoft.OpenApi.Models
 open Serilog
 open Serilog.Events
@@ -73,7 +74,10 @@ let main args =
 
         // ── CORS ─────────────────────────────────────────────────────────
         builder.Services.AddCors(fun opt ->
-            let allowedOrigins = builder.Configuration.GetValue<string>("Api:AllowedOrigins").Split(',')
+            let originsStr = builder.Configuration.GetValue<string>("Api:AllowedOrigins")
+            let allowedOrigins =
+                if System.String.IsNullOrEmpty originsStr then [| "http://localhost:3000" |]
+                else originsStr.Split(',')
             opt.AddPolicy("ApiCorsPolicy", fun policy ->
                 policy
                     .WithOrigins(allowedOrigins)
@@ -126,7 +130,7 @@ let main args =
         // ── Entity Framework ─────────────────────────────────────────────
         builder.Services.AddDbContext<DjambiDbContext>(fun opt ->
             let cnStr = builder.Configuration.GetValue<string>("Sql:ConnectionString")
-            let serverVersion = ServerVersion.AutoDetect(cnStr)
+            let serverVersion = MySqlServerVersion(Version(8, 0, 0))
             opt.UseMySql(cnStr, serverVersion) |> ignore
         ) |> ignore
 
@@ -186,11 +190,11 @@ let main args =
         // ── Build ────────────────────────────────────────────────────────
         let app = builder.Build()
 
-        // ── Ensure database schema ───────────────────────────────────────
+        // ── Apply database migrations ──────────────────────────────────────
         use scope = app.Services.CreateScope()
         let dbContext = scope.ServiceProvider.GetRequiredService<DjambiDbContext>()
-        Log.Logger.Information("Ensuring database is created...")
-        dbContext.Database.EnsureCreated() |> ignore
+        Log.Logger.Information("Applying database migrations...")
+        dbContext.Database.Migrate() |> ignore
 
         let config =
             app.Services.GetService(typeof<IOptions<AppSettings>>) :?> IOptions<AppSettings>

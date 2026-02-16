@@ -31,6 +31,7 @@ namespace Djambi.Api.Db.Model
             base.OnModelCreating(modelBuilder);
             DisableCascadingDeletesOnForeignKeys(modelBuilder);
             AddAlternateKeys(modelBuilder);
+            AddIndexes(modelBuilder);
             PopulateStaticData(modelBuilder);
         }
 
@@ -56,6 +57,21 @@ namespace Djambi.Api.Db.Model
             {
                 e.HasAlternateKey(nameof(PlayerSqlModel.GameId), nameof(PlayerSqlModel.Name));
             });
+        }
+
+        private void AddIndexes(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<SessionSqlModel>()
+                .HasIndex(s => s.Token).IsUnique();
+
+            modelBuilder.Entity<MagicLinkSqlModel>()
+                .HasIndex(m => m.Token).IsUnique();
+
+            modelBuilder.Entity<UserSqlModel>()
+                .HasIndex(u => u.Email);
+
+            modelBuilder.Entity<GameSqlModel>()
+                .HasIndex(g => g.InviteCode).IsUnique();
         }
 
         private void PopulateStaticData(ModelBuilder modelBuilder)
