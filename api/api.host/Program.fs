@@ -4,6 +4,7 @@ open System
 open System.IO
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
+open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.Hosting
@@ -50,7 +51,7 @@ let main args =
 
         // ── Serilog ──────────────────────────────────────────────────────
         builder.Host.UseSerilog(fun ctx _ loggerConfig ->
-            let template = "{Timestamp:yyyy/MM/dd-HH:mm:ss.fff} {Level:u3} {Message:lj}{NewLine}{Exception}"
+            let template = "{Timestamp:yyyy/MM/dd-HH:mm:ss.fff} {Level:u3} [{CorrelationId}] {Message:lj}{NewLine}{Exception}"
             let levelConfig = ctx.Configuration.GetSection("Log:Levels")
 
             let mutable cfg =
@@ -208,6 +209,22 @@ let main args =
         Log.Logger.Information("Configuration loaded (secrets redacted)")
 
         // ── Middleware pipeline ───────────────────────────────────────────
+
+        // Correlation ID: propagate from request header or generate new
+        app.Use(fun ctx (next : RequestDelegate) ->
+            task {
+                let header = ctx.Request.Headers.["X-Correlation-Id"]
+                let correlationId =
+                    if header.Count > 0 && not (String.IsNullOrEmpty(header.[0]))
+                    then header.[0]
+                    else Guid.NewGuid().ToString("N")
+                ctx.Items.["CorrelationId"] <- correlationId
+                ctx.Response.Headers.["X-Correlation-Id"] <- correlationId
+                use _ = Serilog.Context.LogContext.PushProperty("CorrelationId", correlationId)
+                do! next.Invoke(ctx)
+            } :> System.Threading.Tasks.Task
+        ) |> ignore
+
         app.UseSerilogRequestLogging() |> ignore
         app.UseMiddleware<ErrorHandlingMiddleware>() |> ignore
         app.UseRouting() |> ignore
