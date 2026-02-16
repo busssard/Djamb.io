@@ -1,13 +1,16 @@
 namespace Djambi.Api.Host
 
 open System
+open System.Linq
 open System.Threading
 open System.Threading.Tasks
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
+open Microsoft.EntityFrameworkCore
 open Djambi.Api.Logic.Interfaces
 open Djambi.Api.Db.Interfaces
+open Djambi.Api.Db.Model
 open Djambi.Api.Model
 open Djambi.Api.Enums
 
@@ -38,20 +41,20 @@ type BotRunner(scopeFactory : IServiceScopeFactory,
         task {
             try
                 use scope = scopeFactory.CreateScope()
-                let searchRepo = scope.ServiceProvider.GetRequiredService<ISearchRepository>()
+                let dbContext = scope.ServiceProvider.GetRequiredService<DjambiDbContext>()
                 let gameRepo = scope.ServiceProvider.GetRequiredService<IGameRepository>()
                 let turnManager = scope.ServiceProvider.GetRequiredService<ITurnManager>()
 
-                let query : GamesQuery =
-                    { GamesQuery.empty with
-                        statuses = [GameStatus.InProgress]
-                    }
-                let! searchResults = searchRepo.searchGames (query, 0)
+                let! gameIds =
+                    dbContext.Games
+                        .Where(fun g -> g.GameStatusId = GameStatus.InProgress)
+                        .Select(fun g -> g.GameId)
+                        .ToListAsync(ct)
 
-                for sg in searchResults do
+                for gameId in gameIds do
                     if ct.IsCancellationRequested then () else
                     try
-                        let! game = gameRepo.getGame sg.id
+                        let! game = gameRepo.getGame gameId
 
                         if game.status = GameStatus.InProgress && game.turnCycle.Length > 0 then
                             let currentPlayerId = game.turnCycle.Head
@@ -92,7 +95,7 @@ type BotRunner(scopeFactory : IServiceScopeFactory,
                     with
                     | :? OperationCanceledException -> ()
                     | ex ->
-                        logger.LogWarning(ex, "Bot failed to play turn in game {GameId}", sg.id)
+                        logger.LogWarning(ex, "Bot failed to play turn in game {GameId}", gameId)
             with
             | :? OperationCanceledException -> ()
             | ex ->
