@@ -57,6 +57,10 @@ function getNotificationsMiddleware(): Middleware {
   return {
     post: async (context) => {
       const r = context.response;
+      if (r.status === 401) {
+        // 401 is expected when not logged in — handled by session restore
+        return;
+      }
       if (r.status > 399) {
         const text = await r.text();
         let message = '';

@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { Alert } from '@mui/material';
 import { Notification, NotificationLevel } from '../../model/notifications';
 import { removeNotification } from '../../controllers/notificationsController';
@@ -22,11 +22,12 @@ interface AlertProps {
   notification: Notification;
 }
 
-const NotificationAlert: FC<AlertProps> = ({ notification }) => {
+const NotificationAlert = React.forwardRef<HTMLDivElement, AlertProps>(({ notification }, ref) => {
   const messages = notification.message.split('\n');
 
   return (
     <Alert
+      ref={ref}
       severity={getAlertSeverity(notification.level)}
       onClose={() => removeNotification(notification.id)}
     >
@@ -37,6 +38,8 @@ const NotificationAlert: FC<AlertProps> = ({ notification }) => {
       ))}
     </Alert>
   );
-};
+});
+
+NotificationAlert.displayName = 'NotificationAlert';
 
 export default NotificationAlert;
