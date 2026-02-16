@@ -6,6 +6,7 @@ open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
+open Microsoft.Extensions.Hosting
 open Microsoft.EntityFrameworkCore
 open Microsoft.Extensions.Options
 open Pomelo.EntityFrameworkCore.MySql.Infrastructure
@@ -190,6 +191,12 @@ let main args =
         // ── Build ────────────────────────────────────────────────────────
         let app = builder.Build()
 
+        // ── Validate required configuration ─────────────────────────────
+        let sqlConfig =
+            app.Services.GetRequiredService<IOptions<SqlSettings>>().Value
+        if String.IsNullOrEmpty sqlConfig.connectionString then
+            failwith "Sql:ConnectionString is not configured. Set DJAMBI_Sql__ConnectionString environment variable."
+
         // ── Apply database migrations ──────────────────────────────────────
         use scope = app.Services.CreateScope()
         let dbContext = scope.ServiceProvider.GetRequiredService<DjambiDbContext>()
@@ -199,7 +206,7 @@ let main args =
         let config =
             app.Services.GetService(typeof<IOptions<AppSettings>>) :?> IOptions<AppSettings>
             |> fun x -> x.Value
-        Log.Logger.Information("Configuration: {@config}", config)
+        Log.Logger.Information("Configuration loaded (secrets redacted)")
 
         // ── Middleware pipeline ───────────────────────────────────────────
         app.UseSerilogRequestLogging() |> ignore
@@ -213,10 +220,12 @@ let main args =
         app.MapControllers() |> ignore
         app.MapHealthChecks("/status") |> ignore
 
-        app.UseSwagger() |> ignore
-        app.UseSwaggerUI(fun opt ->
-            opt.SwaggerEndpoint("/swagger/v1/swagger.json", "Djambi API V1")
-        ) |> ignore
+        // ── Swagger (Development only) ──────────────────────────────────
+        if app.Environment.IsDevelopment() then
+            app.UseSwagger() |> ignore
+            app.UseSwaggerUI(fun opt ->
+                opt.SwaggerEndpoint("/swagger/v1/swagger.json", "Djambi API V1")
+            ) |> ignore
 
         // ── Run ──────────────────────────────────────────────────────────
         Log.Logger.Information("Starting host.")
