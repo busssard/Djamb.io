@@ -98,21 +98,27 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
     async (cell: CellView) => {
       if (!game || isSpectator) return;
       const turn = game.currentTurn;
+      if (!turn) return;
 
-      // If we're in Move selection and click a cell that's not in selectionOptions,
-      // check if it's one of our own pieces — if so, reset and re-select
-      if (
-        turn?.requiredSelectionKind === SelectionKind.Move &&
-        turn.selectionOptions &&
-        !turn.selectionOptions.includes(cell.id) &&
-        cell.piece
-      ) {
-        await resetTurn(game.id);
-        await selectCell(game.id, cell.id);
+      const isValidSelection = turn.selectionOptions?.includes(cell.id);
+
+      if (isValidSelection) {
+        // Normal selection — send to API
+        selectCell(game.id, cell.id);
         return;
       }
 
-      selectCell(game.id, cell.id);
+      // Not a valid selection — check if we should reset and re-select a different piece
+      if (
+        turn.requiredSelectionKind === SelectionKind.Move &&
+        turn.selections?.length > 0 &&
+        cell.piece
+      ) {
+        // Clicked a piece while choosing a move destination — switch to that piece
+        await resetTurn(game.id);
+        selectCell(game.id, cell.id);
+      }
+      // Otherwise ignore — clicked an empty/invalid cell
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [game?.id, game?.currentTurn, isSpectator],

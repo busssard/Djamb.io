@@ -28,9 +28,7 @@ const CanvasCell: FC<Props> = ({
   setTooltip,
 }) => {
   function onClick() {
-    if (cell.isSelectable) {
-      selectCell(cell);
-    }
+    selectCell(cell);
   }
 
   function updateTooltip(e: KonvaEventObject<MouseEvent>) {

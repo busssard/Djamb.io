@@ -5,7 +5,7 @@ import * as Pl from './polygon';
 import * as Rpl from './regularPolygon';
 import * as Li from './line';
 import * as Loc from './location';
-import { LocationDto, BoardDto, GameDto, UserDto, PieceDto } from '../api-client';
+import { LocationDto, BoardDto, GameDto, UserDto, PieceDto, PieceKind, SelectionKind } from '../api-client';
 import { exists, groupMatches, mergeMatches } from '../utilities/collections';
 
 // --- Empty boardview creation ---
@@ -271,13 +271,25 @@ export function fillEmptyBoardView(board: BoardView, game: GameDto, user: UserDt
     throw Error('Game is not in a valid state.');
   }
 
+  const turn = game.currentTurn;
+  const currentPlayerId = game?.turnCycle?.[0] as number;
+  const currentUserPlayerIds = game.players.filter((p) => p.userId === user.id).map((p) => p.id);
+  const isCurrentUsersTurn = currentUserPlayerIds.includes(currentPlayerId);
+
+  // Collect piece IDs captured mid-turn (Move or Target selections with a pieceId)
+  const capturedPieceIds = new Set<number>();
+  if (turn?.selections) {
+    for (const s of turn.selections) {
+      if (
+        (s.kind === SelectionKind.Move || s.kind === SelectionKind.Target) &&
+        s.pieceId != null
+      ) {
+        capturedPieceIds.add(s.pieceId);
+      }
+    }
+  }
+
   const newCells: CellView[] = board.cells.map((c) => {
-    const turn = game.currentTurn;
-
-    const currentPlayerId = game?.turnCycle?.[0] as number;
-    const currentUserPlayerIds = game.players.filter((p) => p.userId === user.id).map((p) => p.id);
-    const isCurrentUsersTurn = currentUserPlayerIds.includes(currentPlayerId);
-
     const isSelected =
       !!turn && isCurrentUsersTurn && exists(turn.selections, (s) => s.cellId === c.id);
     const isSelectable =
@@ -285,10 +297,13 @@ export function fillEmptyBoardView(board: BoardView, game: GameDto, user: UserDt
     const piece = game.pieces?.find((p) => p.cellId === c.id) as PieceDto;
     const owner = piece ? game.players.find((p) => p.id === piece.playerId) : null;
     const colorId = owner ? (owner.colorId as number) : null;
+
+    // Show captured pieces as corpses
+    const isCaptured = piece && capturedPieceIds.has(piece.id);
     const pieceView: PieceView | null = piece
       ? {
           id: piece.id,
-          kind: piece.kind,
+          kind: isCaptured ? PieceKind.Corpse : piece.kind,
           colorId,
           playerName: owner ? owner.name : null,
         }
