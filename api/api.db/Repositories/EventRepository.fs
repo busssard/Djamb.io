@@ -3,7 +3,6 @@
 open System
 open System.ComponentModel
 open System.Linq
-open FSharp.Control.Tasks
 open Microsoft.EntityFrameworkCore
 open Djambi.Api.Common.Control
 open Djambi.Api.Db.Interfaces

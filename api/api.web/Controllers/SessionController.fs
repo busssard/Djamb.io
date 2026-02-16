@@ -1,7 +1,6 @@
 namespace Djambi.Api.Web.Controllers
 
 open System.Threading.Tasks
-open FSharp.Control.Tasks
 open Microsoft.AspNetCore.Authorization
 open Microsoft.AspNetCore.Mvc
 open Djambi.Api.Logic.Interfaces

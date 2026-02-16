@@ -23,7 +23,4 @@
     <ProjectReference Include="..\api.common\api.common.fsproj" />
     <ProjectReference Include="..\api.enums\api.enums.fsproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="4.7.2" />
-  </ItemGroup>
 </Project>

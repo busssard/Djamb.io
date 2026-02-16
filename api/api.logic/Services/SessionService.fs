@@ -6,7 +6,6 @@ open Djambi.Api.Db.Interfaces
 open Djambi.Api.Model
 open Djambi.Api.Logic.Interfaces
 open System.Threading.Tasks
-open FSharp.Control.Tasks
 open System.Security.Authentication
 
 type SessionService(encryptionService : IEncryptionService,
@@ -115,29 +114,31 @@ type SessionService(encryptionService : IEncryptionService,
 
         member __.verifyMagicLink token =
             task {
-                match! magicLinkRepo.getByToken token with
-                | None ->
-                    return raise <| AuthenticationException("Invalid or expired link.")
-                | Some magicLink ->
-                    if magicLink.usedOn.IsSome then
-                        return raise <| AuthenticationException("This link has already been used.")
-                    if DateTime.UtcNow > magicLink.expiresOn then
-                        return raise <| AuthenticationException("This link has expired.")
+                let! magicLinkOpt = magicLinkRepo.getByToken token
+                let magicLink =
+                    match magicLinkOpt with
+                    | None -> raise <| AuthenticationException("Invalid or expired link.")
+                    | Some ml -> ml
 
-                    do! magicLinkRepo.markUsed magicLink.id
+                if magicLink.usedOn.IsSome then
+                    raise <| AuthenticationException("This link has already been used.")
+                if DateTime.UtcNow > magicLink.expiresOn then
+                    raise <| AuthenticationException("This link has expired.")
 
-                    // Delete any existing session and create a new one
-                    match! sessionRepo.getSession (SessionQuery.byUserId magicLink.userId) with
-                    | Some existing -> do! sessionRepo.deleteSession existing.token
-                    | None -> ()
+                do! magicLinkRepo.markUsed magicLink.id
 
-                    let request : CreateSessionRequest =
-                        {
-                            userId = magicLink.userId
-                            token = Guid.NewGuid().ToString()
-                            expiresOn = DateTime.UtcNow.Add(sessionTimeout)
-                        }
-                    return! sessionRepo.createSession request
+                // Delete any existing session and create a new one
+                match! sessionRepo.getSession (SessionQuery.byUserId magicLink.userId) with
+                | Some existing -> do! sessionRepo.deleteSession existing.token
+                | None -> ()
+
+                let request : CreateSessionRequest =
+                    {
+                        userId = magicLink.userId
+                        token = Guid.NewGuid().ToString()
+                        expiresOn = DateTime.UtcNow.Add(sessionTimeout)
+                    }
+                return! sessionRepo.createSession request
             }
 
         member __.closeSession session =

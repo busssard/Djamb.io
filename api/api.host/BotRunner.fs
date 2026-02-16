@@ -10,7 +10,6 @@ open Djambi.Api.Logic.Interfaces
 open Djambi.Api.Db.Interfaces
 open Djambi.Api.Model
 open Djambi.Api.Enums
-open FSharp.Control.Tasks
 
 type BotRunner(scopeFactory : IServiceScopeFactory,
                botRegistry : IBotRegistry,

@@ -3,7 +3,6 @@ namespace Djambi.Api.IntegrationTests.Logic.GameManager
 open System
 open Djambi.Api.Common.Control
 open System.Threading.Tasks
-open FSharp.Control.Tasks
 open Xunit
 open Djambi.Api.Enums
 open Djambi.Api.IntegrationTests
