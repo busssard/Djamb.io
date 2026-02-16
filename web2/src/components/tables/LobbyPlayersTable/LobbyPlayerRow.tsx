@@ -69,7 +69,6 @@ const LobbyPlayerRow: FC<Props> = ({ player, game }) => {
   const selfJoin = () => {
     addPlayer(game.id, {
       userId: user.id,
-      name: user.name,
       kind: PlayerKind.User,
     });
   };
