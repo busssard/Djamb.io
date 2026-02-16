@@ -20,6 +20,7 @@ const CanvasCellHighlightLayer: FC<Props> = ({ cell, opacity }) => {
         fillColor: colors.selectableCell,
         opacity,
       }}
+      listening={false}
     />
   );
 };

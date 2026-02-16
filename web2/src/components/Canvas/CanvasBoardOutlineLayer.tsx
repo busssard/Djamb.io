@@ -11,7 +11,7 @@ interface Props {
 const CanvasBoardOutlineLayer: FC<Props> = ({ board, style }) => {
   return (
     <Layer>
-      <CanvasPolygon polygon={board.polygon} style={style} />
+      <CanvasPolygon polygon={board.polygon} style={style} listening={false} />
     </Layer>
   );
 };

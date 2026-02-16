@@ -13,9 +13,10 @@ export interface CanvasPolygonStyle {
 interface Props {
   polygon: Polygon;
   style: CanvasPolygonStyle;
+  listening?: boolean;
 }
 
-const CanvasPolygon: FC<Props> = ({ polygon, style }) => (
+const CanvasPolygon: FC<Props> = ({ polygon, style, listening }) => (
   <Shape
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sceneFunc={(ctx: Context, shape: any) => {
@@ -37,7 +38,7 @@ const CanvasPolygon: FC<Props> = ({ polygon, style }) => (
     stroke={style.strokeColor}
     strokeWidth={style.strokeWidth}
     opacity={style.opacity !== undefined ? style.opacity : 1}
-    listening={false}
+    listening={listening !== undefined ? listening : true}
   />
 );
 export default CanvasPolygon;
