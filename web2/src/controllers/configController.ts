@@ -1,4 +1,6 @@
 import { UserConfig, EnvironmentConfig } from '../model/configuration';
+import { reloadPieceImages } from './imageController';
+import { navigateTo } from './navigationController';
 import { store } from '../redux';
 import { defaultConfigState } from '../redux/config/state';
 import {
@@ -6,6 +8,7 @@ import {
   environmentConfigLoaded,
   userConfigChanged,
 } from '../redux/config/actionFactory';
+import * as Routes from '../utilities/routes';
 
 const localStorageKey = 'Djambi_UserConfig';
 
@@ -41,8 +44,16 @@ export async function loadConfig(): Promise<void> {
 }
 
 export async function setUserConfig(config: UserConfig): Promise<void> {
+  const prevSkin = store.getState().config.user.pieceSkin;
+
   const json = JSON.stringify(config);
   localStorage.setItem(localStorageKey, json);
   const action = userConfigChanged(config);
   store.dispatch(action);
+
+  if (config.pieceSkin !== prevSkin) {
+    reloadPieceImages();
+  }
+
+  navigateTo(Routes.home);
 }
