@@ -4,10 +4,10 @@ import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material'
 import RedirectToSignInIfSignedOut from '../routing/RedirectToSignInIfSignedOut';
 import CanvasBoard from '../Canvas/CanvasBoard';
 import { GamePageProps } from './GamePage';
-import { selectActiveGame, selectSession, selectBoards, selectImages } from '../../hooks/selectors';
+import { selectActiveGame, selectSession, selectBoards, selectImages, selectConfig } from '../../hooks/selectors';
 import { loadGame } from '../../controllers/gameController';
 import { loadBoard } from '../../controllers/boardController';
-import { preloadAllPieceImages } from '../../controllers/imageController';
+import { preloadAllPieceImages, reloadPieceImages } from '../../controllers/imageController';
 import { selectCell, commitTurn, resetTurn } from '../../controllers/turnController';
 import { SelectionKind } from '../../api-client';
 import { fillEmptyBoardView } from '../../board/boardViewFactory';
@@ -22,6 +22,7 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
   const session = useSelector(selectSession);
   const boardsState = useSelector(selectBoards);
   const imagesState = useSelector(selectImages);
+  const pieceSkin = useSelector(selectConfig).user.pieceSkin;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ x: 800, y: 600 });
@@ -50,6 +51,14 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const skinRef = useRef(pieceSkin);
+  useEffect(() => {
+    if (skinRef.current !== pieceSkin) {
+      skinRef.current = pieceSkin;
+      reloadPieceImages();
+    }
+  }, [pieceSkin]);
 
   useEffect(() => {
     const el = containerRef.current;

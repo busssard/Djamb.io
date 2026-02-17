@@ -31,9 +31,6 @@ const playerColors = new Map<number, string>([
 ]);
 
 export const pieceColors = {
-  // The new piece icons use pure red (#FF0000) as the team color placeholder.
-  // The replaceColor function swaps this with the actual player color.
-  placeholder: '#FF0000',
   neutral: '#666666',
   getPlayer: (colorId: number | null): string => {
     if (colorId === null) {

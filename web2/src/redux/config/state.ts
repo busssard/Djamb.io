@@ -11,6 +11,7 @@ export const defaultConfigState: ConfigState = {
     showBoardTooltips: false,
     showCellAndPieceIds: false,
     notificationDisplaySeconds: 5,
+    pieceSkin: 'modern',
   },
   environment: {
     apiUrl: '',

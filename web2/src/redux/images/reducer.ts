@@ -18,6 +18,12 @@ export function imagesReducer(
       };
     }
 
+    case ImagesActionTypes.PieceImagesCleared:
+      return {
+        ...state,
+        pieces: new Map<string, HTMLImageElement>(),
+      };
+
     default:
       return state;
   }

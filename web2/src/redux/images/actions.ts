@@ -6,4 +6,8 @@ export type PieceImageLoadedAction = {
   info: PieceImageInfo;
 };
 
-export type ImagesAction = PieceImageLoadedAction;
+export type PieceImagesClearedAction = {
+  type: typeof ImagesActionTypes.PieceImagesCleared;
+};
+
+export type ImagesAction = PieceImageLoadedAction | PieceImagesClearedAction;

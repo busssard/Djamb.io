@@ -3,6 +3,7 @@ export type UserConfig = {
   notificationDisplaySeconds: number;
   showCellAndPieceIds: boolean;
   showBoardTooltips: boolean;
+  pieceSkin: string;
 };
 
 export type EnvironmentConfig = {
