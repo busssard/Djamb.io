@@ -51,7 +51,7 @@ type GameStartServiceTests() =
             let board = BoardModelUtility.getBoardMetadata(game.parameters.regionCount)
 
             //Act
-            let pieces = host.Get<GameStartService>().createPieces(board, playersWithStartConditions)
+            let pieces = host.Get<GameStartService>().createPieces(board, playersWithStartConditions, game.parameters.rulesetKind)
 
             //Assert
             Assert.Equal(game.parameters.regionCount * Constants.piecesPerPlayer, pieces.Length)

@@ -38,6 +38,8 @@ let getGameParameters() : GameParameters =
         description = Some "Test"
         isPublic = false
         allowGuests = false
+        rulesetKind = RulesetKind.TotalWar
+        turnTimeLimitSeconds = None
     }
 
 let getCreateGameRequest (userId : int) : CreateGameRequest =
@@ -52,6 +54,7 @@ let getCreatePlayerRequest : CreatePlayerRequest =
         kind = PlayerKind.User
         userId = None
         name = None
+        botName = None
     }
 
 let adminUserId = 1
@@ -122,12 +125,15 @@ let defaultGame : Game =
                 description = None
                 isPublic = false
                 regionCount = 0
+                rulesetKind = RulesetKind.TotalWar
+                turnTimeLimitSeconds = None
             }
         players = []
         pieces = []
         turnCycle = []
         currentTurn = None
         inviteCode = None
+        botAssignments = Map.empty
     }
 
 let setSessionUserId (userId : int) (session : Session) : Session=

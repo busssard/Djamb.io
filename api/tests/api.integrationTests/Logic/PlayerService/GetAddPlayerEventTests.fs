@@ -90,6 +90,7 @@ type GetAddPlayerEventTests() =
                     userId = None
                     name = None
                     kind = PlayerKind.User
+                    botName = None
                 }
 
             //Act/Assert
@@ -115,6 +116,7 @@ type GetAddPlayerEventTests() =
                     userId = Some user.id
                     name = Some "test"
                     kind = PlayerKind.User
+                    botName = None
                 }
 
             //Act/Assert
@@ -208,6 +210,7 @@ type GetAddPlayerEventTests() =
                     userId = None
                     name = Some "test"
                     kind = PlayerKind.Guest
+                    botName = None
                 }
 
             //Act/Assert
@@ -230,6 +233,7 @@ type GetAddPlayerEventTests() =
                     userId = Some user.id
                     name = None
                     kind = PlayerKind.Guest
+                    botName = None
                 }
                 
             //Act/Assert

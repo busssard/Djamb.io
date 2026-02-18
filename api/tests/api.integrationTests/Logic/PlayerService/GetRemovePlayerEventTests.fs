@@ -50,6 +50,7 @@ type GetRemovePlayerEventTests() =
                     kind = PlayerKind.Neutral
                     name = Some "test"
                     userId = None
+                    botName = None
                 } |> CreatePlayerRequest.toPlayer None
             let! neutralPlayer = host.Get<IPlayerRepository>().addPlayer(game.id, player)
             let! game = host.Get<IGameRepository>().getGame game.id
@@ -277,6 +278,7 @@ type GetRemovePlayerEventTests() =
                     userId = Some user.id
                     kind = PlayerKind.Guest
                     name = Some "p2"
+                    botName = None
                 }
 
             let! _ = host.Get<IPlayerManager>().addPlayer game.id p2Request session

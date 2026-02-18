@@ -128,6 +128,7 @@ type GetGameStartEventsTests() =
                     userId = Some user.id
                     kind = PlayerKind.Guest
                     name = Some "p2"
+                    botName = None
                 } |> CreatePlayerRequest.toPlayer None
 
             let! _ = host.Get<IPlayerRepository>().addPlayer(game.id, p2)

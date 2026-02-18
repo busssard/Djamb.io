@@ -119,6 +119,8 @@ type EventServiceTests() =
                     isPublic = true
                     description = Some "test"
                     regionCount = 8
+                    rulesetKind = RulesetKind.TotalWar
+                    turnTimeLimitSeconds = None
                 }
             let effect = Effect.ParametersChanged { oldValue = game.parameters; newValue = newParameters }
             let eventRequest = TestUtilities.createEventRequest(user.id)([effect]) //Kind doesn't matter
@@ -129,6 +131,8 @@ type EventServiceTests() =
                     isPublic = false
                     description = None
                     regionCount = 0
+                    rulesetKind = RulesetKind.TotalWar
+                    turnTimeLimitSeconds = None
                 }
 
             //Act

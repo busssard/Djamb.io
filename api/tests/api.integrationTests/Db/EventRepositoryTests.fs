@@ -69,6 +69,7 @@ type EventRepositoryTests() =
                     userId = Some user.id
                     kind = PlayerKind.Guest
                     name = Some "p2"
+                    botName = None
                 } |> CreatePlayerRequest.toPlayer None
 
             let! _ = makePlayer game.id player
@@ -98,6 +99,7 @@ type EventRepositoryTests() =
                     userId = Some user.id
                     kind = PlayerKind.Guest
                     name = Some "p2"
+                    botName = None
                 } |> CreatePlayerRequest.toPlayer None
 
             let! _ = makePlayer game.id p2
@@ -151,6 +153,8 @@ type EventRepositoryTests() =
                     isPublic = false
                     regionCount = 3
                     description = Some "Test"
+                    rulesetKind = RulesetKind.TotalWar
+                    turnTimeLimitSeconds = None
                 }
             game.currentTurn |> shouldBe None
             game.turnCycle |> shouldBe []
@@ -165,6 +169,8 @@ type EventRepositoryTests() =
                             isPublic = true
                             regionCount = 8
                             description = None
+                            rulesetKind = RulesetKind.TotalWar
+                            turnTimeLimitSeconds = None
                         }
                     currentTurn = Some Turn.empty
                     turnCycle = [ 1 ]
@@ -231,6 +237,7 @@ type EventRepositoryTests() =
                     userId = Some user.id
                     name = Some "p2"
                     kind = PlayerKind.Guest
+                    botName = None
                 }
 
             let p3Request = { p2Request with name = Some "p3" }

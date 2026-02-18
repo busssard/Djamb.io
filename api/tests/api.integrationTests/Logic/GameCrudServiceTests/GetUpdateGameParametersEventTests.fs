@@ -28,6 +28,8 @@ type GetUpdateGameParametersEventTests() =
                     isPublic = true
                     description = Some "new description"
                     regionCount = 5
+                    rulesetKind = RulesetKind.TotalWar
+                    turnTimeLimitSeconds = None
                 }
 
             //Act
