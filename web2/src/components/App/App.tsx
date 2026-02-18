@@ -1,5 +1,5 @@
 import React, { FC, useEffect, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CircularProgress, Box } from '@mui/material';
 import NavigationDrawer from '../NavigationDrawer/NavigationDrawer';
@@ -7,10 +7,13 @@ import { loadConfig } from '../../controllers/configController';
 import * as RoutePaths from '../../utilities/routes';
 import RedirectBasedOnStore from '../routing/RedirectBasedOnStore';
 import { restoreSession } from '../../controllers/userController';
+import { wsService } from '../../services/websocketService';
+import { preloadGong } from '../../services/soundService';
 import TopBar from '../TopBar/TopBar';
 import { theme } from '../../styles/materialTheme';
 import LatestNotificationSnackbar from '../notifications/LatestNotificationSnackBar';
 import { loadGame, blockGameLoading } from '../../controllers/gameController';
+import { store } from '../../redux';
 
 // Lazy-loaded page components
 const NoMatchPage = React.lazy(() => import('../pages/NoMatchPage'));
@@ -60,6 +63,15 @@ const GamePlayRoute: FC = () => <GamePlayPage gameId={useGameId()} />;
 const GameSnapshotsRoute: FC = () => <GameSnapshotsPage gameId={useGameId()} />;
 const GameRoute: FC = () => <GamePage gameId={useGameId()} />;
 
+const connectNotifications = () => {
+  const state = store.getState();
+  const apiUrl = state.config.environment.apiUrl;
+  if (apiUrl) {
+    wsService.connect(apiUrl);
+    preloadGong();
+  }
+};
+
 const App: FC = () => {
   useEffect(() => {
     // All API calls must happen after config is loaded, because that sets the API URL.
@@ -73,10 +85,17 @@ const App: FC = () => {
       blockGameLoading();
       loadConfig()
         .then(() => restoreSession())
-        .then(() => loadGame(gameId, true));
+        .then(() => {
+          loadGame(gameId, true);
+          connectNotifications();
+        });
     } else {
-      loadConfig().then(() => restoreSession());
+      loadConfig()
+        .then(() => restoreSession())
+        .then(() => connectNotifications());
     }
+
+    return () => wsService.disconnect();
   }, []);
 
   return (
@@ -109,7 +128,8 @@ const App: FC = () => {
               <Route path={RoutePaths.gamePlayTemplate} element={<GamePlayRoute />} />
               <Route path={RoutePaths.gameSnapshotsTemplate} element={<GameSnapshotsRoute />} />
               <Route path={RoutePaths.gameTemplate} element={<GameRoute />} />
-              {/* Misc pages */}
+              {/* Root redirect + catch-all */}
+              <Route path="/" element={<Navigate to={RoutePaths.join} replace />} />
               <Route path="*" element={<NoMatchPage />} />
             </Routes>
           </Suspense>

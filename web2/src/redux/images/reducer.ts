@@ -10,8 +10,8 @@ export function imagesReducer(
 ): ImagesState {
   switch (action.type) {
     case ImagesActionTypes.PieceImageLoaded: {
-      const { image, kind, playerColorId } = action.info;
-      const key = getPieceImageKey(kind, playerColorId);
+      const { image, kind, playerColorId, customKey } = action.info;
+      const key = customKey ?? getPieceImageKey(kind, playerColorId);
       return {
         ...state,
         pieces: add(state.pieces, key, image),

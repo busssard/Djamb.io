@@ -23,9 +23,10 @@ interface Props {
   selectCell: (cell: CellView) => void;
   style: CanvasBoardStyle;
   pieceImages: Map<string, HTMLImageElement>;
+  fieldOfPowerImage: HTMLImageElement | null;
 }
 
-const CanvasBoard: FC<Props> = ({ board, selectCell, style, pieceImages }) => {
+const CanvasBoard: FC<Props> = ({ game, board, selectCell, style, pieceImages, fieldOfPowerImage }) => {
   const [tooltipState, setTooltipState] = useState(defaultBoardTooltipState);
   const { showBoardTooltips } = useSelector(selectConfig).user;
 
@@ -58,6 +59,7 @@ const CanvasBoard: FC<Props> = ({ board, selectCell, style, pieceImages }) => {
         board={board}
         selectCell={selectCell}
         pieceImages={pieceImages}
+        fieldOfPowerImage={fieldOfPowerImage}
         scale={style.scale}
         setTooltip={updateTooltip}
         showBoardTooltip={showBoardTooltips}

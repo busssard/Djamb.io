@@ -48,7 +48,10 @@ export function getPieceViewLabel(piece: PieceView): string {
     return kindName;
   }
 
-  const base = piece.playerName ? `${piece.playerName}'s ${kindName}` : `Neutral ${kindName}`;
+  const liegelordSuffix = piece.isLiegelord ? ' (Liegelord)' : '';
+  const base = piece.playerName
+    ? `${piece.playerName}'s ${kindName}${liegelordSuffix}`
+    : `Neutral ${kindName}`;
 
   return showIds() ? `${base} (#${piece.id})` : base;
 }

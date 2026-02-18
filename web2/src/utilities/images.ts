@@ -4,6 +4,14 @@ export function getPieceImageKey(kind: PieceKind, colorId: number | null): strin
   return colorId !== null ? `${kind}${colorId}` : `${kind}Neutral`;
 }
 
+export function getLiegelordImageKey(colorId: number | null): string {
+  return colorId !== null ? `Liegelord${colorId}` : `LiegelordNeutral`;
+}
+
+export function getPoweredConduitImageKey(colorId: number | null): string {
+  return colorId !== null ? `ConduitPowered${colorId}` : `ConduitPoweredNeutral`;
+}
+
 function imageToCanvas(image: HTMLImageElement | HTMLCanvasElement): HTMLCanvasElement {
   const c = document.createElement('canvas');
   c.width = image.width;

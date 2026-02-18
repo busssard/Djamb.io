@@ -5,6 +5,11 @@ import { GameParametersDto, CreatePlayerRequestDto } from '../api-client';
 import * as Routes from '../utilities/routes';
 import { navigateTo } from './navigationController';
 
+export type BotInfo = {
+  name: string;
+  description: string;
+};
+
 export async function blockGameLoading(): Promise<void> {
   const action = attemptingGameLoad();
   store.dispatch(action);
@@ -61,6 +66,87 @@ export async function getGameByInvite(code: string): Promise<any> {
 
   if (!response.ok) {
     throw new Error(response.status === 404 ? 'Game not found' : 'Failed to load game');
+  }
+
+  return response.json();
+}
+
+export async function cancelGame(gameId: number): Promise<void> {
+  const state = store.getState();
+  const apiUrl = state.config.environment.apiUrl;
+
+  const response = await fetch(`${apiUrl}/api/games/${gameId}/cancel-request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = `Failed to cancel game (${response.status})`;
+    try {
+      const problem = JSON.parse(text);
+      if (problem.title) message = problem.title;
+    } catch {
+      // use default
+    }
+    throw new Error(message);
+  }
+}
+
+export async function addBotPlayer(gameId: number, botName: string): Promise<void> {
+  const state = store.getState();
+  const apiUrl = state.config.environment.apiUrl;
+
+  // Generate unique display name for the bot (must match [a-zA-Z0-9\-_]+ regex)
+  const game = state.activeGame.game;
+  let displayName = `${botName}-bot`;
+  if (game) {
+    let counter = 1;
+    while (game.players.some((p) => p.name === displayName)) {
+      counter++;
+      displayName = `${botName}-bot-${counter}`;
+    }
+  }
+
+  const response = await fetch(`${apiUrl}/api/games/${gameId}/players`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      kind: 'Neutral',
+      name: displayName,
+      botName: botName,
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = `Failed to add bot (${response.status})`;
+    try {
+      const problem = JSON.parse(text);
+      if (problem.title) message = problem.title;
+    } catch {
+      // use default
+    }
+    throw new Error(message);
+  }
+
+  const data = await response.json();
+  const action = gameUpdated(data);
+  store.dispatch(action);
+}
+
+export async function fetchBots(): Promise<BotInfo[]> {
+  const state = store.getState();
+  const apiUrl = state.config.environment.apiUrl;
+
+  const response = await fetch(`${apiUrl}/api/bots`, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    return [];
   }
 
   return response.json();

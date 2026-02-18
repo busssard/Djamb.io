@@ -4,6 +4,7 @@ export enum LobbyPlayerActionType {
   None,
   SelfJoin,
   AddGuest,
+  AddBot,
   Remove,
   SelfQuit,
 }
@@ -17,6 +18,11 @@ export type LobbyPlayerViewModel = {
   actionType: LobbyPlayerActionType;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getBotAssignments(game: GameDto): Record<number, string> {
+  return (game as any).botAssignments || {};
+}
+
 function getPlayerNote(player: PlayerDto, game: GameDto): string {
   switch (player.kind) {
     case PlayerKind.Guest: {
@@ -28,8 +34,11 @@ function getPlayerNote(player: PlayerDto, game: GameDto): string {
       }
       return `Guest of ${host.name}`;
     }
-    case PlayerKind.Neutral:
-      return 'Neutral';
+    case PlayerKind.Neutral: {
+      const assignments = getBotAssignments(game);
+      const botName = assignments[player.id];
+      return botName ? `Bot (${botName})` : 'Neutral';
+    }
     default:
       return '';
   }
@@ -79,6 +88,7 @@ export function getViewModels(currentUser: UserDto, game: GameDto): LobbyPlayerV
         actionType: LobbyPlayerActionType.SelfJoin,
       });
     } else {
+      // First empty slot: guest input
       viewModels.push({
         id: null,
         name: '',
@@ -97,9 +107,13 @@ export function getViewModels(currentUser: UserDto, game: GameDto): LobbyPlayerV
       kind: null,
       userId: null,
       note: '',
-      actionType: LobbyPlayerActionType.None,
+      actionType: userIsPlayer ? LobbyPlayerActionType.AddBot : LobbyPlayerActionType.None,
     });
   }
+
+  // If user is a player and there are empty slots, the last non-self-join row gets AddBot
+  // Replace: make the second empty slot also interactive with AddBot
+  // Actually handled above: all remaining slots get AddBot if user is a player
 
   return viewModels;
 }

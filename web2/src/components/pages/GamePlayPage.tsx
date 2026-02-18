@@ -1,21 +1,38 @@
 import React, { FC, useEffect, useRef, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import UndoIcon from '@mui/icons-material/Undo';
+import FlagIcon from '@mui/icons-material/Flag';
+import CancelIcon from '@mui/icons-material/Cancel';
 import RedirectToSignInIfSignedOut from '../routing/RedirectToSignInIfSignedOut';
 import CanvasBoard from '../Canvas/CanvasBoard';
 import { GamePageProps } from './GamePage';
 import { selectActiveGame, selectSession, selectBoards, selectImages } from '../../hooks/selectors';
-import { loadGame } from '../../controllers/gameController';
+import { loadGame, cancelGame } from '../../controllers/gameController';
 import { loadBoard } from '../../controllers/boardController';
-import { preloadAllPieceImages } from '../../controllers/imageController';
+import { preloadAllPieceImages, getFieldOfPowerImage } from '../../controllers/imageController';
 import { selectCell, commitTurn, resetTurn } from '../../controllers/turnController';
+import { concedePlayer } from '../../controllers/playerController';
 import { SelectionKind } from '../../api-client';
 import { fillEmptyBoardView } from '../../board/boardViewFactory';
 import { getScale, getSize, transformBoardView, CanvasTranformData } from '../../board/canvasTransformService';
 import { CellView } from '../../board/model';
-import { GameStatus, TurnStatus } from '../../api-client';
+import { GameStatus, TurnStatus, PlayerStatus } from '../../api-client';
 import { navigateTo } from '../../controllers/navigationController';
 import * as Routes from '../../utilities/routes';
+import TurnTimer from '../game/TurnTimer';
+import TurnOrderPanel from '../game/TurnOrderPanel';
+import DebugPanel from '../game/DebugPanel';
 
 const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
   const { game } = useSelector(selectActiveGame);
@@ -73,7 +90,7 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
   const transformData: CanvasTranformData | undefined = game
     ? {
         containerSize,
-        canvasMargin: 10,
+        canvasMargin: 80,
         contentPadding: 5,
         regionCount: game.parameters.regionCount,
         zoomLevel: 0,
@@ -123,11 +140,6 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
     [game?.id, game?.currentTurn, isSpectator],
   );
 
-  const handleReset = useCallback(() => {
-    if (game) resetTurn(game.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game?.id]);
-
   const turn = game?.currentTurn;
   const currentPlayer =
     game && game.turnCycle && game.turnCycle.length > 0
@@ -135,13 +147,51 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
       : undefined;
   const isMyTurn = currentPlayer && user && currentPlayer.userId === user.id;
 
-  // Auto-commit when turn reaches AwaitingCommit
+  const hasSelections = (turn?.selections?.length ?? 0) > 0;
+  const isAwaitingCommit = turn?.status === TurnStatus.AwaitingCommit;
+  const showTurnActions = isMyTurn && hasSelections;
+
+  const isCreator = game && user && game.createdBy.userId === user.id;
+  const myPlayers =
+    game && user
+      ? (game.players?.filter(
+          (p) => p.userId === user.id && p.status === PlayerStatus.Alive,
+        ) ?? [])
+      : [];
+  const canConcede = !isSpectator && myPlayers.length > 0 && game?.status === GameStatus.InProgress;
+  const canCancelGame =
+    isCreator &&
+    game &&
+    (game.status === GameStatus.Pending || game.status === GameStatus.InProgress);
+
+  const [concedeDialogOpen, setConcedeDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+
   useEffect(() => {
-    if (game && isMyTurn && turn?.status === TurnStatus.AwaitingCommit) {
-      commitTurn(game.id);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && isMyTurn && isAwaitingCommit && game) {
+        e.preventDefault();
+        commitTurn(game.id);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMyTurn, isAwaitingCommit, game?.id]);
+
+  const handleConcede = async () => {
+    if (!game || myPlayers.length === 0) return;
+    setConcedeDialogOpen(false);
+    for (const p of myPlayers) {
+      await concedePlayer(game.id, p.id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game?.id, isMyTurn, turn?.status]);
+  };
+
+  const handleCancelGame = async () => {
+    if (!game) return;
+    setCancelDialogOpen(false);
+    await cancelGame(game.id);
+    navigateTo(Routes.home);
+  };
 
   if (!game || !filledBoard || !canvasStyle || imagesState.pieces.size === 0) {
     return (
@@ -153,51 +203,119 @@ const GamePlayPage: FC<GamePageProps> = ({ gameId }) => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: 1 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', p: 0, m: -2.5 }}>
       <RedirectToSignInIfSignedOut />
 
-      <Paper sx={{ p: 1, mb: 1 }} elevation={1}>
-        <Typography variant="subtitle1">
-          {game.status === GameStatus.Over
-            ? 'Game Over'
-            : currentPlayer
-              ? `${currentPlayer.name}'s turn${isMyTurn ? ' (You)' : ''}`
-              : 'Waiting...'}
-          {isSpectator && ' — Watching'}
-        </Typography>
-        {turn?.requiredSelectionKind && isMyTurn && (
-          <Typography variant="body2" color="text.secondary">
-            {`Select: ${turn.requiredSelectionKind}`}
-          </Typography>
+      {game.parameters.turnTimeLimitSeconds &&
+        game.status === GameStatus.InProgress &&
+        turn?.turnStartedAt && (
+          <TurnTimer
+            turnStartedAt={turn.turnStartedAt}
+            turnTimeLimitSeconds={game.parameters.turnTimeLimitSeconds}
+          />
         )}
-      </Paper>
+
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, py: 0.5 }}>
+        {showTurnActions && (
+          <>
+            {isAwaitingCommit && (
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
+                startIcon={<CheckIcon />}
+                onClick={() => commitTurn(game.id)}
+              >
+                Confirm
+              </Button>
+            )}
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              startIcon={<UndoIcon />}
+              onClick={() => resetTurn(game.id)}
+            >
+              Cancel
+            </Button>
+          </>
+        )}
+        {canConcede && (
+          <Button
+            variant="outlined"
+            color="warning"
+            size="small"
+            startIcon={<FlagIcon />}
+            onClick={() => setConcedeDialogOpen(true)}
+          >
+            Concede
+          </Button>
+        )}
+        {canCancelGame && (
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            startIcon={<CancelIcon />}
+            onClick={() => setCancelDialogOpen(true)}
+          >
+            Stop Game
+          </Button>
+        )}
+      </Box>
 
       <Box
         ref={containerRef}
         sx={{
           flex: 1,
-          minHeight: 300,
+          minHeight: 0,
           display: 'flex',
           justifyContent: 'center',
-          overflow: 'auto',
+          position: 'relative',
         }}
       >
+        <TurnOrderPanel game={game} />
         <CanvasBoard
           game={game}
           board={filledBoard}
           selectCell={handleSelectCell}
           style={canvasStyle}
           pieceImages={imagesState.pieces}
+          fieldOfPowerImage={getFieldOfPowerImage()}
         />
       </Box>
 
-      {isMyTurn && game.status === GameStatus.InProgress && turn?.selections && turn.selections.length > 0 && (
-        <Paper sx={{ p: 1, mt: 1 }} elevation={1}>
-          <Button variant="outlined" onClick={handleReset}>
-            Reset Turn
+      <Dialog open={concedeDialogOpen} onClose={() => setConcedeDialogOpen(false)}>
+        <DialogTitle>Concede?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Your pieces will be abandoned and you will be removed from the game. This cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConcedeDialogOpen(false)}>No</Button>
+          <Button onClick={handleConcede} color="warning" variant="contained">
+            Concede
           </Button>
-        </Paper>
-      )}
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)}>
+        <DialogTitle>Stop Game?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will cancel the game for all players. This cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCancelDialogOpen(false)}>No</Button>
+          <Button onClick={handleCancelGame} color="error" variant="contained">
+            Stop Game
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <DebugPanel game={game} />
     </Box>
   );
 };

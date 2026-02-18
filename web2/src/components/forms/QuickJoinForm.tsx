@@ -32,6 +32,7 @@ const QuickJoinForm: FC = () => {
                 username: e.target.value,
               })
             }
+            onSubmit={submit}
           />
           <FormTextField
             label="Email (optional)"
@@ -43,6 +44,7 @@ const QuickJoinForm: FC = () => {
                 email: e.target.value,
               })
             }
+            onSubmit={submit}
           />
           <br />
           <FormSubmitButton text="Join" onClick={submit} />

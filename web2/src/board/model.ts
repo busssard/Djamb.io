@@ -25,6 +25,8 @@ export type PieceView = {
   kind: PieceKind;
   colorId: number | null;
   playerName: string | null;
+  isLiegelord: boolean;
+  isPoweredThisTurn: boolean;
 };
 
 export type CellView = {

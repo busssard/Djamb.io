@@ -266,6 +266,86 @@ export function createEmptyBoardView(board: BoardDto): BoardView {
   };
 }
 
+/**
+ * Build a map of cellId → visual piece override based on mid-turn selections.
+ *
+ * During a turn, game.pieces still reflects positions from before the turn started.
+ * This function computes where pieces should be DISPLAYED based on the selections
+ * made so far:
+ *
+ *   Subject(X) + Move(Y)           → subject shown at Y, X empty
+ *   Move captures targetId         → target shown as corpse (see below for placement)
+ *   Drop(Z)                        → captured target shown as corpse at Z
+ *   Vacate(W)                      → subject shown at W instead of Move cell
+ *   Target(Z, targetId)            → targeted piece shown as corpse at Z
+ *
+ * For captured targets without a Drop selection:
+ *   - If awaiting Drop: target not shown (being placed)
+ *   - Otherwise (Hunter-style swap): target shown as corpse at subject's origin
+ */
+function buildMidTurnPieceOverrides(
+  game: GameDto,
+): Map<number, { pieceId: number; asCorpse: boolean } | null> {
+  const overrides = new Map<number, { pieceId: number; asCorpse: boolean } | null>();
+  const turn = game.currentTurn;
+  if (!turn?.selections?.length) return overrides;
+
+  const sel = (kind: SelectionKind) => turn.selections.find((s) => s.kind === kind);
+
+  const subjectSel = sel(SelectionKind.Subject);
+  const moveSel = sel(SelectionKind.Move);
+  const dropSel = sel(SelectionKind.Drop);
+  const vacateSel = sel(SelectionKind.Vacate);
+  const targetSel = sel(SelectionKind.Target);
+
+  if (!subjectSel?.pieceId || !moveSel) return overrides;
+
+  const subjectPieceId = subjectSel.pieceId;
+  const subjectOriginCell = subjectSel.cellId;
+  const moveDestCell = moveSel.cellId;
+  const capturedTargetId = moveSel.pieceId ?? null;
+
+  // --- Subject piece relocation ---
+  // Remove subject from its original cell
+  overrides.set(subjectOriginCell, null);
+  // Show subject at its final position: Vacate cell if it exists, otherwise Move cell
+  const subjectDisplayCell = vacateSel ? vacateSel.cellId : moveDestCell;
+  overrides.set(subjectDisplayCell, { pieceId: subjectPieceId, asCorpse: false });
+
+  // --- Captured target relocation (from Move selection) ---
+  if (capturedTargetId != null) {
+    // Diplomat moves pieces alive; all other captures are kills
+    const subjectPiece = game.pieces?.find((p) => p.id === subjectPieceId);
+    const captureIsKill = subjectPiece?.kind !== PieceKind.Diplomat;
+
+    // Remove captured target from its original cell (= Move destination) if subject isn't there
+    if (subjectDisplayCell !== moveDestCell) {
+      overrides.set(moveDestCell, null);
+    }
+
+    if (dropSel) {
+      // Target was dropped at a specific cell
+      overrides.set(dropSel.cellId, { pieceId: capturedTargetId, asCorpse: captureIsKill });
+    } else if (turn.requiredSelectionKind !== SelectionKind.Drop) {
+      // No drop needed (Hunter-style swap) — target goes to subject's origin
+      overrides.set(subjectOriginCell, { pieceId: capturedTargetId, asCorpse: captureIsKill });
+    } else if (subjectDisplayCell !== moveDestCell) {
+      // Awaiting Drop and subject vacated — show target at the now-free move cell
+      overrides.set(moveDestCell, { pieceId: capturedTargetId, asCorpse: captureIsKill });
+    } else {
+      // Awaiting Drop and subject is at move cell — show target at subject's origin
+      overrides.set(subjectOriginCell, { pieceId: capturedTargetId, asCorpse: captureIsKill });
+    }
+  }
+
+  // --- Scientist-style post-move target ---
+  if (targetSel?.pieceId != null) {
+    overrides.set(targetSel.cellId, { pieceId: targetSel.pieceId, asCorpse: true });
+  }
+
+  return overrides;
+}
+
 export function fillEmptyBoardView(board: BoardView, game: GameDto, user: UserDto): BoardView {
   if (!game.pieces || !game.turnCycle) {
     throw Error('Game is not in a valid state.');
@@ -276,38 +356,62 @@ export function fillEmptyBoardView(board: BoardView, game: GameDto, user: UserDt
   const currentUserPlayerIds = game.players.filter((p) => p.userId === user.id).map((p) => p.id);
   const isCurrentUsersTurn = currentUserPlayerIds.includes(currentPlayerId);
 
-  // Collect piece IDs captured mid-turn (Move or Target selections with a pieceId)
-  const capturedPieceIds = new Set<number>();
-  if (turn?.selections) {
-    for (const s of turn.selections) {
-      if (
-        (s.kind === SelectionKind.Move || s.kind === SelectionKind.Target) &&
-        s.pieceId != null
-      ) {
-        capturedPieceIds.add(s.pieceId);
-      }
-    }
-  }
+  const pieceOverrides = buildMidTurnPieceOverrides(game);
 
   const newCells: CellView[] = board.cells.map((c) => {
     const isSelected =
       !!turn && isCurrentUsersTurn && exists(turn.selections, (s) => s.cellId === c.id);
     const isSelectable =
       !!turn && isCurrentUsersTurn && exists(turn.selectionOptions, (cellId) => cellId === c.id);
-    const piece = game.pieces?.find((p) => p.cellId === c.id) as PieceDto;
-    const owner = piece ? game.players.find((p) => p.id === piece.playerId) : null;
-    const colorId = owner ? (owner.colorId as number) : null;
 
-    // Show captured pieces as corpses
-    const isCaptured = piece && capturedPieceIds.has(piece.id);
-    const pieceView: PieceView | null = piece
-      ? {
-          id: piece.id,
-          kind: isCaptured ? PieceKind.Corpse : piece.kind,
-          colorId,
-          playerName: owner ? owner.name : null,
+    let pieceView: PieceView | null = null;
+
+    if (pieceOverrides.has(c.id)) {
+      const override = pieceOverrides.get(c.id);
+      if (override) {
+        const piece = game.pieces?.find((p) => p.id === override.pieceId);
+        if (piece) {
+          const owner = game.players.find((p) => p.id === piece.playerId) ?? null;
+          pieceView = {
+            id: piece.id,
+            kind: override.asCorpse ? PieceKind.Corpse : piece.kind,
+            colorId: override.asCorpse ? null : (owner?.colorId ?? null),
+            playerName: owner?.name ?? null,
+            isLiegelord:
+              !override.asCorpse &&
+              piece.kind === PieceKind.Conduit &&
+              piece.playerId != null &&
+              piece.playerId !== piece.originalPlayerId,
+            isPoweredThisTurn:
+              !override.asCorpse &&
+              piece.kind === PieceKind.Conduit &&
+              c.type === CellType.Center &&
+              piece.playerId === currentPlayerId,
+          };
         }
-      : null;
+      }
+      // override === null means cell is explicitly empty
+    } else {
+      const piece = game.pieces?.find((p) => p.cellId === c.id) as PieceDto;
+      if (piece) {
+        const isCorpse = piece.kind === PieceKind.Corpse;
+        const owner = game.players.find((p) => p.id === piece.playerId) ?? null;
+        pieceView = {
+          id: piece.id,
+          kind: piece.kind,
+          colorId: isCorpse ? null : (owner?.colorId ?? null),
+          playerName: owner?.name ?? null,
+          isLiegelord:
+            piece.kind === PieceKind.Conduit &&
+            piece.playerId != null &&
+            piece.playerId !== piece.originalPlayerId,
+          isPoweredThisTurn:
+            piece.kind === PieceKind.Conduit &&
+            c.type === CellType.Center &&
+            piece.playerId === currentPlayerId,
+        };
+      }
+    }
 
     return {
       ...c,

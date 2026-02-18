@@ -27,7 +27,7 @@ const GameLobbyPage: FC<GamePageProps> = ({ gameId }) => {
   }
 
   if (game.status !== GameStatus.Pending) {
-    navigateTo(Routes.gameInfo(game.id));
+    navigateTo(Routes.game(game.id));
     return <></>;
   }
 

@@ -4,6 +4,7 @@ import { KonvaEventObject } from 'konva/lib/Node';
 import CanvasCellPieceLayer from './CanvasCellPieceLayer';
 import CanvasCellHighlightLayer from './CanvasCellHighlightLayer';
 import CanvasCellBackgroundLayer from './CanvasCellBackgroundLayer';
+import CanvasCellFieldOfPowerLayer from './CanvasCellFieldOfPowerLayer';
 import { BoardTooltipState } from '../model';
 import { CellView } from '../../../board/model';
 import { getCellViewLabel, getPieceViewLabel } from '../../../utilities/copy';
@@ -13,6 +14,9 @@ interface Props {
   highlightOpacity: number;
   selectCell: (cell: CellView) => void;
   pieceImage: HTMLImageElement | null;
+  poweredPieceImage: HTMLImageElement | null;
+  powerPulsePhase: number;
+  fieldOfPowerImage: HTMLImageElement | null;
   pieceSize: number;
   showBoardTooltip: boolean;
   setTooltip: (state: BoardTooltipState) => void;
@@ -23,6 +27,9 @@ const CanvasCell: FC<Props> = ({
   highlightOpacity,
   selectCell,
   pieceImage,
+  poweredPieceImage,
+  powerPulsePhase,
+  fieldOfPowerImage,
   pieceSize,
   showBoardTooltip,
   setTooltip,
@@ -60,8 +67,15 @@ const CanvasCell: FC<Props> = ({
   return (
     <Group onMouseMove={updateTooltip} onClick={onClick} onTap={onClick}>
       <CanvasCellBackgroundLayer cell={cell} />
+      <CanvasCellFieldOfPowerLayer cell={cell} image={fieldOfPowerImage} />
       <CanvasCellHighlightLayer cell={cell} opacity={highlightOpacity} />
-      <CanvasCellPieceLayer cell={cell} size={pieceSize} image={pieceImage} />
+      <CanvasCellPieceLayer
+        cell={cell}
+        size={pieceSize}
+        image={pieceImage}
+        poweredImage={poweredPieceImage}
+        powerPulsePhase={powerPulsePhase}
+      />
     </Group>
   );
 };

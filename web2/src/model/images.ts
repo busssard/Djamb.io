@@ -4,4 +4,5 @@ export type PieceImageInfo = {
   kind: PieceKind;
   playerColorId: number | null;
   image: HTMLImageElement;
+  customKey?: string;
 };

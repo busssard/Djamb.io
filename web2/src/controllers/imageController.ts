@@ -4,10 +4,18 @@ import { getSkin } from '../model/pieceSkins';
 import { store } from '../redux';
 import { pieceImageLoadedAction, pieceImagesClearedAction } from '../redux/images/actionFactory';
 import { pieceColors } from '../styles/styles';
-import { replaceColor, addOutline, canvasToImage } from '../utilities/images';
+import {
+  replaceColor,
+  addOutline,
+  canvasToImage,
+  getLiegelordImageKey,
+  getPoweredConduitImageKey,
+} from '../utilities/images';
 
 const minPlayerColorId = 0;
 const maxPlayerColorId = 7;
+
+let fieldOfPowerImage: HTMLImageElement | null = null;
 
 function getPieceImagePath(kind: PieceKind, skinPath: string): string {
   switch (kind) {
@@ -88,6 +96,99 @@ function createPieceImageForEachPlayerColor(
   createPieceImage(kind, null, skinPath, placeholderColor); // Neutral sprite for abandoned pieces
 }
 
+function createLiegelordImage(
+  colorId: number | null,
+  skinPath: string,
+  placeholderColor: string,
+): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const image = new (window as any).Image() as HTMLImageElement;
+  image.src = `${skinPath}/liegelord.png`;
+  image.onload = () => {
+    let canvas: HTMLCanvasElement;
+    canvas = replaceColor(image, placeholderColor, pieceColors.getPlayer(colorId));
+    canvas = addOutline(canvas, 2, 'white');
+    const finalImage = canvasToImage(canvas);
+    const dispatch = () => {
+      const info: PieceImageInfo = {
+        kind: PieceKind.Conduit,
+        playerColorId: colorId,
+        image: finalImage,
+        customKey: getLiegelordImageKey(colorId),
+      };
+      store.dispatch(pieceImageLoadedAction(info));
+    };
+    if (finalImage.complete) {
+      dispatch();
+    } else {
+      finalImage.onload = dispatch;
+    }
+  };
+}
+
+function createLiegelordImageForEachPlayerColor(
+  skinPath: string,
+  placeholderColor: string,
+): void {
+  for (let colorId = minPlayerColorId; colorId <= maxPlayerColorId; colorId += 1) {
+    createLiegelordImage(colorId, skinPath, placeholderColor);
+  }
+  createLiegelordImage(null, skinPath, placeholderColor);
+}
+
+function createPoweredConduitImage(
+  colorId: number | null,
+  skinPath: string,
+  placeholderColor: string,
+): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const image = new (window as any).Image() as HTMLImageElement;
+  image.src = `${skinPath}/conduit.png`;
+  image.onload = () => {
+    let canvas: HTMLCanvasElement;
+    canvas = replaceColor(image, placeholderColor, pieceColors.getPlayer(colorId));
+    canvas = addOutline(canvas, 2, pieceColors.getPlayer(colorId));
+    const finalImage = canvasToImage(canvas);
+    const dispatch = () => {
+      const info: PieceImageInfo = {
+        kind: PieceKind.Conduit,
+        playerColorId: colorId,
+        image: finalImage,
+        customKey: getPoweredConduitImageKey(colorId),
+      };
+      store.dispatch(pieceImageLoadedAction(info));
+    };
+    if (finalImage.complete) {
+      dispatch();
+    } else {
+      finalImage.onload = dispatch;
+    }
+  };
+}
+
+function createPoweredConduitImageForEachPlayerColor(
+  skinPath: string,
+  placeholderColor: string,
+): void {
+  for (let colorId = minPlayerColorId; colorId <= maxPlayerColorId; colorId += 1) {
+    createPoweredConduitImage(colorId, skinPath, placeholderColor);
+  }
+}
+
+function loadFieldOfPowerImage(): void {
+  if (fieldOfPowerImage) return;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const image = new (window as any).Image() as HTMLImageElement;
+  image.src = '/pieces/field_of_power.png';
+  image.onload = () => {
+    fieldOfPowerImage = image;
+  };
+}
+
+export function getFieldOfPowerImage(): HTMLImageElement | null {
+  return fieldOfPowerImage;
+}
+
 export async function preloadAllPieceImages(): Promise<void> {
   const skinId = store.getState().config.user.pieceSkin;
   const skin = getSkin(skinId);
@@ -104,6 +205,10 @@ export async function preloadAllPieceImages(): Promise<void> {
   kinds.forEach((k) => createPieceImageForEachPlayerColor(k, skin.path, skin.placeholderColor));
 
   createPieceImage(PieceKind.Corpse, null, skin.path, skin.placeholderColor); // Corpses are only ever neutral
+  createLiegelordImageForEachPlayerColor(skin.path, skin.placeholderColor);
+  createPoweredConduitImageForEachPlayerColor(skin.path, skin.placeholderColor);
+
+  loadFieldOfPowerImage();
 }
 
 export function reloadPieceImages(): void {

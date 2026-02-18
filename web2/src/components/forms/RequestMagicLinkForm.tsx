@@ -51,6 +51,7 @@ const RequestMagicLinkForm: FC = () => {
             label="Email"
             value={email}
             onChanged={(e) => setEmail(e.target.value)}
+            onSubmit={submit}
           />
           {error && (
             <Typography variant="body2" color="error" sx={{ mt: 1 }}>

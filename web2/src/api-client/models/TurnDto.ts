@@ -58,6 +58,12 @@ export interface TurnDto {
      * @memberof TurnDto
      */
     requiredSelectionKind?: SelectionKind;
+    /**
+     *
+     * @type {string}
+     * @memberof TurnDto
+     */
+    turnStartedAt?: string;
 }
 
 export function TurnDtoFromJSON(json: any): TurnDto {
@@ -74,6 +80,7 @@ export function TurnDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): T
         'selections': ((json['selections'] as Array<any>).map(SelectionDtoFromJSON)),
         'selectionOptions': json['selectionOptions'],
         'requiredSelectionKind': !exists(json, 'requiredSelectionKind') ? undefined : SelectionKindFromJSON(json['requiredSelectionKind']),
+        'turnStartedAt': !exists(json, 'turnStartedAt') ? undefined : json['turnStartedAt'],
     };
 }
 
@@ -90,6 +97,7 @@ export function TurnDtoToJSON(value?: TurnDto | null): any {
         'selections': ((value.selections as Array<any>).map(SelectionDtoToJSON)),
         'selectionOptions': value.selectionOptions,
         'requiredSelectionKind': SelectionKindToJSON(value.requiredSelectionKind),
+        'turnStartedAt': value.turnStartedAt,
     };
 }
 

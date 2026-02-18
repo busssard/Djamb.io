@@ -38,11 +38,23 @@ export interface GameParametersDto {
      */
     isPublic: boolean;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof GameParametersDto
      */
     allowGuests: boolean;
+    /**
+     *
+     * @type {number}
+     * @memberof GameParametersDto
+     */
+    rulesetKind: number;
+    /**
+     *
+     * @type {number}
+     * @memberof GameParametersDto
+     */
+    turnTimeLimitSeconds?: number | null;
 }
 
 export function GameParametersDtoFromJSON(json: any): GameParametersDto {
@@ -59,6 +71,8 @@ export function GameParametersDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         'regionCount': json['regionCount'],
         'isPublic': json['isPublic'],
         'allowGuests': json['allowGuests'],
+        'rulesetKind': !exists(json, 'rulesetKind') ? 1 : json['rulesetKind'],
+        'turnTimeLimitSeconds': !exists(json, 'turnTimeLimitSeconds') ? undefined : json['turnTimeLimitSeconds'],
     };
 }
 
@@ -75,6 +89,8 @@ export function GameParametersDtoToJSON(value?: GameParametersDto | null): any {
         'regionCount': value.regionCount,
         'isPublic': value.isPublic,
         'allowGuests': value.allowGuests,
+        'rulesetKind': value.rulesetKind,
+        'turnTimeLimitSeconds': value.turnTimeLimitSeconds,
     };
 }
 
