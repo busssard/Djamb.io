@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Setup ECR
-      run: $( aws ecr get-login --no-include-email )
+      run: aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_API_ECR_REPOSITORY }}
 
     - name: Build image
       run: docker build -t djambi_api-prod -f api/Dockerfile .
