@@ -73,6 +73,32 @@ For example:
 
 **Do NOT use `npx`** — it uses `#!/usr/bin/env node` which resolves to system Node v12.
 
+### Browser Automation (Chrome DevTools MCP)
+
+Claude Code can inspect the running frontend via Chrome DevTools Protocol. Setup:
+
+1. **Chromium** is installed as a Flatpak (`org.chromium.Chromium`). It must be launched with remote debugging enabled:
+   ```bash
+   flatpak run org.chromium.Chromium --remote-debugging-port=9222
+   ```
+
+2. **MCP config** at `.claude/mcp.json` connects the `chrome-devtools-mcp` server to the running instance:
+   ```json
+   {
+     "mcpServers": {
+       "chrome-devtools": {
+         "command": "/home/ole/.local/node/bin/npx",
+         "args": ["-y", "chrome-devtools-mcp@latest", "--browserUrl", "http://127.0.0.1:9222"]
+       }
+     }
+   }
+   ```
+   Uses `/home/ole/.local/node/bin/npx` (Node 22) instead of system `npx` (Node 12).
+
+3. **Startup order**: Chromium must be running with `--remote-debugging-port=9222` **before** Claude Code starts, so the MCP server can connect on launch.
+
+4. **Verify** the debug port is live: `curl -s http://localhost:9222/json/version` should return browser info.
+
 ### Frontend Tech Stack (web2/)
 | Tool | Version | Config File |
 |------|---------|-------------|

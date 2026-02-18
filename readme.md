@@ -26,4 +26,4 @@ For more details, see the [wiki](https://github.com/JamesFaix/djambi-n/wiki).
 
 ## Contributing
 
-See the [contribution guidlines](CONTRIBUTING.md).
+See the [contribution guidelines](CONTRIBUTING.md).
