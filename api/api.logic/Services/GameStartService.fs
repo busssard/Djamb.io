@@ -1,5 +1,6 @@
 namespace Djambi.Api.Logic.Services
 
+open System
 open System.Linq
 open Djambi.Api.Common
 open Djambi.Api.Common.Collections
@@ -17,9 +18,13 @@ type GameStartService(playerServ : PlayerService,
 
     member x.getGameStartEvents (game : Game) (session : Session) : Task<(CreateEventRequest option * CreateEventRequest)> =
         Security.ensureCreatorOrEditPendingGames session game
-        if game.players
-            |> List.filter (fun p -> p.kind <> PlayerKind.Neutral)
-            |> List.length = 1
+        let participantCount =
+            game.players
+            |> List.filter (fun p ->
+                p.kind <> PlayerKind.Neutral
+                || game.botAssignments |> Map.containsKey p.id)
+            |> List.length
+        if participantCount <= 1
         then raise <| GameConfigurationException("Cannot start game with only one player.")
         elif game.status <> GameStatus.Pending
         then raise <| GameConfigurationException("Cannot start game unless it is pending.") 
@@ -55,7 +60,52 @@ type GameStartService(playerServ : PlayerService,
                 return (e1, e2)                
             }
 
+    member private x.isDuelMode(players : Player list) : bool =
+        let uniqueUserIds =
+            players
+            |> List.choose (fun p -> p.userId)
+            |> List.distinct
+        players.Length = 4 && uniqueUserIds.Length = 2
+
     member x.assignStartingConditions(players : Player list) : Player list =
+        if x.isDuelMode players then
+            x.assignDuelStartingConditions players
+        else
+            x.assignNormalStartingConditions players
+
+    member private x.assignDuelStartingConditions(players : Player list) : Player list =
+        // 2-player duel: each user gets 2 opposite regions with the same color
+        let twoColors = [0..(Constants.maxRegions-1)] |> List.shuffle |> Seq.take 2 |> Seq.toList
+        // Regions 0,2 are opposite; 1,3 are opposite on a 4-region board
+        let regionPairs = if Random().Next(2) = 0 then ([0; 2], [1; 3]) else ([1; 3], [0; 2])
+
+        let grouped = players |> List.groupBy (fun p -> p.userId)
+        let userA = grouped.[0] |> snd
+        let userB = grouped.[1] |> snd
+
+        let assignPair (pair : Player list) (color : int) (regions : int list) =
+            pair |> List.mapi (fun i p ->
+                { p with startingRegion = Some regions.[i]; colorId = Some color }
+            )
+
+        let assigned =
+            (assignPair userA twoColors.[0] (fst regionPairs))
+            @ (assignPair userB twoColors.[1] (snd regionPairs))
+
+        let dict = Enumerable.ToDictionary (assigned, (fun p -> p.name))
+
+        // Interleave turns: A1, B1, A2, B2
+        let aSlots = assignPair userA twoColors.[0] (fst regionPairs)
+        let bSlots = assignPair userB twoColors.[1] (snd regionPairs)
+        let interleaved = [aSlots.[0]; bSlots.[0]; aSlots.[1]; bSlots.[1]]
+        for (i, p) in interleaved |> Seq.mapi (fun i p -> (i, p)) do
+            dict.[p.name] <- { dict.[p.name] with startingTurnNumber = Some i }
+
+        dict.Values
+        |> Seq.map (fun p -> { p with status = PlayerStatus.Alive })
+        |> Seq.toList
+
+    member private x.assignNormalStartingConditions(players : Player list) : Player list =
         let colorIds = [0..(Constants.maxRegions-1)] |> List.shuffle |> Seq.take players.Length
         let regions = [0..(players.Length-1)] |> List.shuffle
 
@@ -93,42 +143,34 @@ type GameStartService(playerServ : PlayerService,
         )
         |> Seq.toList
 
-    member x.createPieces(board : BoardMetadata, players : Player list) : Piece list =
-        let createPlayerPieces(board : BoardMetadata, player : Player, startingId : int) : Piece list =
-            let getPiece(id : int, pieceType: PieceKind, x : int, y : int) =
-                {
-                    id = id
-                    kind = pieceType
-                    playerId = Some player.id
-                    originalPlayerId = player.id
-                    cellId = board.cellAt({x = x; y = y; region = player.startingRegion.Value}).id
-                }
-            let n = Constants.regionSize - 1
-            [
-                getPiece(startingId, PieceKind.Conduit, n,n)
-                getPiece(startingId+1, PieceKind.Scientist, n,n-1)
-                getPiece(startingId+2, PieceKind.Hunter, n-1,n)
-                getPiece(startingId+3, PieceKind.Diplomat, n-1,n-1)
-                getPiece(startingId+4, PieceKind.Reaper, n-2,n-2)
-                getPiece(startingId+5, PieceKind.Thug, n-2,n-1)
-                getPiece(startingId+6, PieceKind.Thug, n-2,n)
-                getPiece(startingId+7, PieceKind.Thug, n-1,n-2)
-                getPiece(startingId+8, PieceKind.Thug, n,n-2)
-            ]
-
-        players
-        |> List.mapi (fun i cond -> createPlayerPieces(board, cond, i*Constants.piecesPerPlayer))
-        |> List.collect id
+    member x.createPieces(board : BoardMetadata, players : Player list, rulesetKind : RulesetKind) : Piece list =
+        match rulesetKind with
+        | RulesetKind.Classic -> Rulesets.ClassicPieceLayout.createPieces(board, players)
+        | _ -> Rulesets.TotalWarPieceLayout.createPieces(board, players)
 
     member x.applyStartGame (game : Game) : Game =
         let board = BoardModelUtility.getBoardMetadata game.parameters.regionCount
         let players = x.assignStartingConditions game.players
 
+        let mutable pieces = x.createPieces(board, players, game.parameters.rulesetKind)
+
+        // In duel mode, replace one Conduit per user with a Corpse
+        if x.isDuelMode players then
+            let grouped = players |> List.groupBy (fun p -> p.userId)
+            for (_, userPlayers) in grouped do
+                // Each user has 2 player slots, each with a Conduit. Replace the second one.
+                let secondSlot = userPlayers.[1]
+                pieces <- pieces |> List.map (fun piece ->
+                    if piece.playerId = Some secondSlot.id && piece.kind = PieceKind.Conduit
+                    then { piece with kind = PieceKind.Corpse; playerId = None }
+                    else piece
+                )
+
         let game =
             {
                 game with
                     status = GameStatus.InProgress
-                    pieces = x.createPieces(board, players) //Starting conditions must first be assigned
+                    pieces = pieces
                     players = players
                     turnCycle = players //Starting conditions must first be assigned
                         |> List.filter (fun p -> p.startingTurnNumber.IsSome)
@@ -138,5 +180,5 @@ type GameStartService(playerServ : PlayerService,
             }
 
         let options = (selectionOptionsServ.getSelectableCellsFromState game)
-        let turn = { game.currentTurn.Value with selectionOptions = options }
+        let turn = { game.currentTurn.Value with selectionOptions = options; turnStartedAt = Some DateTime.UtcNow }
         { game with  currentTurn =  Some turn }

@@ -58,7 +58,8 @@ type SelectionDto = {
 type TurnDto(status : TurnStatus,
             selections : List<SelectionDto>,
             selectionOptions : List<int>,
-            requiredSelectionKind : Nullable<SelectionKind>) =
+            requiredSelectionKind : Nullable<SelectionKind>,
+            turnStartedAt : Nullable<DateTime>) =
     member __.Status = status
 
     [<Required>]
@@ -69,20 +70,27 @@ type TurnDto(status : TurnStatus,
 
     member __.RequiredSelectionKind = requiredSelectionKind
 
+    member __.TurnStartedAt = turnStartedAt
+
 [<CLIMutable>]
 type GameParametersDto = {
     // Nullable
     [<StringLength(100)>]
     description : string
-    
+
     [<Required>]
     regionCount : int
-    
+
     [<Required>]
     isPublic : bool
-    
+
     [<Required>]
     allowGuests : bool
+
+    [<Required>]
+    rulesetKind : RulesetKind
+
+    turnTimeLimitSeconds : Nullable<int>
 }
 
 type GameDto = {
@@ -112,4 +120,7 @@ type GameDto = {
 
     // Nullable — only set for private games
     inviteCode : string
+
+    // Nullable — map of playerId -> botName
+    botAssignments : System.Collections.Generic.Dictionary<int, string>
 }

@@ -3,6 +3,7 @@ using System;
 using Djambi.Api.Db.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Djambi.Api.Db.Model.Migrations
 {
     [DbContext(typeof(DjambiDbContext))]
-    partial class DjambiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260217104606_AddTurnTimeLimitSeconds")]
+    partial class AddTurnTimeLimitSeconds
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,9 +134,6 @@ namespace Djambi.Api.Db.Model.Migrations
 
                     b.Property<bool>("AllowGuests")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("BotAssignmentsJson")
-                        .HasColumnType("longtext");
 
                     b.Property<int>("CreatedByUserId")
                         .HasColumnType("int");

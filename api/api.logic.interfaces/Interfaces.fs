@@ -43,6 +43,7 @@ type IGameManager =
     abstract member createGame : parameters:GameParameters -> session:Session -> Task<Game>
     abstract member updateGameParameters : gameId:int -> parameters:GameParameters -> session:Session -> Task<StateAndEventResponse>
     abstract member startGame : gameId:int -> session:Session -> Task<StateAndEventResponse>
+    abstract member cancelGame : gameId:int -> session:Session -> Task<StateAndEventResponse>
 
 type ISearchManager =
     abstract member searchGames : query:GamesQuery -> session:Session -> Task<list<SearchGame>>
@@ -66,6 +67,7 @@ type ITurnManager =
     abstract member selectCell : gameId:int * cellId:int -> session:Session -> Task<StateAndEventResponse>
     abstract member resetTurn : gameId:int -> session:Session -> Task<StateAndEventResponse>
     abstract member commitTurn : gameId:int -> session:Session -> Task<StateAndEventResponse>
+    abstract member skipTurn : gameId:int -> session:Session -> Task<StateAndEventResponse>
 
 type IUserManager =
     abstract member createUser : request:CreateUserRequest -> sessionOption:Session option -> Task<User>

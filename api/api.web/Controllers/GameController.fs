@@ -63,6 +63,17 @@ type GameController(manager : IGameManager,
             return OkObjectResult(dto) :> IActionResult
         }
 
+    [<HttpPost("{gameId}/cancel-request")>]
+    [<ProducesResponseType(200, Type = typeof<StateAndEventResponseDto>)>]
+    member __.CancelGame(gameId : int) : Task<IActionResult> =
+        let ctx = base.HttpContext
+        task {
+            let session = ctx.GetSession()
+            let! response = manager.cancelGame gameId session
+            let dto = response |> toStateAndEventResponseDto
+            return OkObjectResult(dto) :> IActionResult
+        }
+
     [<AllowAnonymous>]
     [<HttpGet("invite/{code}")>]
     [<ProducesResponseType(200, Type = typeof<GameDto>)>]
@@ -91,6 +102,7 @@ type GameController(manager : IGameManager,
                         kind = PlayerKind.User
                         userId = Some session.user.id
                         name = Some session.user.name
+                        botName = None
                     }
                 let! response = playerManager.addPlayer game.id playerRequest session
                 let dto = response |> toStateAndEventResponseDto

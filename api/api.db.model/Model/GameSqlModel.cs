@@ -38,8 +38,16 @@ namespace Djambi.Api.Db.Model
         [Required]
         public bool IsPublic { get; set; }
 
+        [Required]
+        public byte RulesetKindId { get; set; } = 1; // Default: TotalWar
+
         [StringLength(12)]
         public string InviteCode { get; set; }
+
+        public int? TurnTimeLimitSeconds { get; set; }
+
+        // Nullable — JSON map of playerId -> botName (e.g. {"3":"minimax","4":"random"})
+        public string BotAssignmentsJson { get; set; }
 
         // Nullable
         public string TurnCycleJson { get; set; }

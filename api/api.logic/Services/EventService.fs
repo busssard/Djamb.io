@@ -53,7 +53,7 @@ type EventService(gameStartServ : GameStartService) =
     let applyPieceEnlistedEffect (effect : PieceEnlistedEffect) (game : Game) : Game =
         { game with
             pieces = game.pieces |> List.replaceIf
-                (fun p -> p.id = effect.oldPiece.id)
+                (fun p -> p.id = effect.oldPiece.id && p.kind <> PieceKind.Corpse)
                 (fun p -> { p with playerId = Some effect.newPlayerId })
         }
 
@@ -99,6 +99,14 @@ type EventService(gameStartServ : GameStartService) =
         //the same event should also create a PlayerEliminated and PiecesOwnershipChanged effect
         game
 
+    let applyPlayerSuffocatedEffect (effect : PlayerSuffocatedEffect) (game : Game) : Game =
+        //Informational marker, actual state changes come from accompanying effects
+        game
+
+    let applyPlayerForcedPassEffect (effect : PlayerForcedPassEffect) (game : Game) : Game =
+        //Informational marker, turn skip handled by caller
+        game
+
     let applyPlayerRemovedEffect (effect : PlayerRemovedEffect) (game : Game) : Game =
         { game with
             players = game.players |> List.filter (fun p -> p.id <> effect.oldPlayer.id)
@@ -139,6 +147,8 @@ type EventService(gameStartServ : GameStartService) =
         | Effect.PlayerOutOfMoves e -> applyPlayerOutOfMovesEffect e game
         | Effect.PlayerRemoved e -> applyPlayerRemovedEffect e game
         | Effect.PlayerStatusChanged e -> applyPlayerStatusChangedEffect e game
+        | Effect.PlayerSuffocated e -> applyPlayerSuffocatedEffect e game
+        | Effect.PlayerForcedPass e -> applyPlayerForcedPassEffect e game
         | Effect.TurnCycleAdvanced e -> applyTurnCycleAdvancedEffect e game
         | Effect.TurnCyclePlayerFellFromPower e -> applyTurnCyclePlayerFellFromPowerEffect e game
         | Effect.TurnCyclePlayerRemoved e -> applyTurnCyclePlayerRemovedEffect e game

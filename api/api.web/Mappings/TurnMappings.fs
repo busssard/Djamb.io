@@ -18,5 +18,6 @@ module TurnMappings =
             source.status,
             source.selections |> List.map toSelectionDto,
             source.selectionOptions,
-            source.requiredSelectionKind |> Option.toNullable
+            source.requiredSelectionKind |> Option.toNullable,
+            source.turnStartedAt |> Option.toNullable
         )

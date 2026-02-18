@@ -63,6 +63,11 @@ module GameMappings =
                 isPublic =source. IsPublic
                 description = source.Description |> Option.ofObj
                 regionCount = int source.RegionCount
+                rulesetKind = LanguagePrimitives.EnumOfValue source.RulesetKindId
+                turnTimeLimitSeconds =
+                    if source.TurnTimeLimitSeconds.HasValue
+                    then Some (int source.TurnTimeLimitSeconds.Value)
+                    else None
             }
             status = source.GameStatusId
             players = source.Players |> Seq.map toPlayer |> Seq.toList
@@ -70,6 +75,14 @@ module GameMappings =
             turnCycle = source.TurnCycleJson |> JsonConvert.DeserializeObject<list<int>>
             currentTurn = source.CurrentTurnJson |> JsonConvert.DeserializeObject<Option<Turn>>
             inviteCode = source.InviteCode |> Option.ofObj
+            botAssignments =
+                match source.BotAssignmentsJson |> Option.ofObj with
+                | None -> Map.empty
+                | Some json ->
+                    json
+                    |> JsonConvert.DeserializeObject<Dictionary<int, string>>
+                    |> Seq.map (fun kv -> (kv.Key, kv.Value))
+                    |> Map.ofSeq
         }
 
     let toGameSqlModel (source : CreateGameRequest) : GameSqlModel =
@@ -78,6 +91,8 @@ module GameMappings =
         x.AllowGuests <- source.parameters.allowGuests
         x.Description <- source.parameters.description |> Option.toObj
         x.RegionCount <- byte source.parameters.regionCount
+        x.RulesetKindId <- byte source.parameters.rulesetKind
+        x.TurnTimeLimitSeconds <- source.parameters.turnTimeLimitSeconds |> Option.toNullable
         x.Players <- List<PlayerSqlModel>()
         x.CreatedOn <- DateTime.UtcNow
         x.GameStatusId <- GameStatus.Pending

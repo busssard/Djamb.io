@@ -30,7 +30,7 @@ type SelectionOptionsService() =
                         then yield c
             }
 
-        let strategy = Pieces.getStrategy piece
+        let strategy = Pieces.getStrategy game.parameters.rulesetKind piece
 
         paths
         |> Seq.map (fun path -> path |> List.take (min strategy.moveMaxDistance path.Length))
@@ -41,6 +41,7 @@ type SelectionOptionsService() =
             else
                 match pieceIndex.TryFind cell.id with
                 | None -> strategy.canStayInCenter
+                          && piece.playerId = Some piece.originalPlayerId //Liegelords cannot stay in center
                 | Some p -> strategy.canTargetPiece piece p
                             && strategy.canEnterCenterToEvictPiece
         )
@@ -61,7 +62,7 @@ type SelectionOptionsService() =
             match turn.subjectPiece game with
             | None -> []
             | Some subject ->
-                let strategy = Pieces.getStrategy(subject)
+                let strategy = Pieces.getStrategy game.parameters.rulesetKind subject
                 if not strategy.canTargetAfterMove
                 then []
                 else
@@ -100,9 +101,9 @@ type SelectionOptionsService() =
                             if not c.isCenter then true
                             else 
                                 //If the center is vacant, you must check if the target piece could stay there
-                                let subjectStrategy = Pieces.getStrategy subject
+                                let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
                                 let targetKind = if subjectStrategy.killsTarget then PieceKind.Corpse else target.kind
-                                let targetStrategy = Pieces.getStrategyForKind targetKind
+                                let targetStrategy = Pieces.getStrategyForKind game.parameters.rulesetKind targetKind
                                 targetStrategy.canStayInCenter
                     ) 
                     |> Seq.map (fun c -> c.id)
@@ -115,8 +116,8 @@ type SelectionOptionsService() =
             match turn.destinationCell game.parameters.regionCount with
             | None -> []
             | Some destination ->
-                let strategy = Pieces.getStrategy subject
-                if not destination.isCenter || strategy.canStayInCenter
+                let strategy = Pieces.getStrategy game.parameters.rulesetKind subject
+                if not destination.isCenter || (strategy.canStayInCenter && subject.playerId = Some subject.originalPlayerId)
                 then []
                 else
                     let board = BoardModelUtility.getBoardMetadata game.parameters.regionCount
@@ -126,6 +127,9 @@ type SelectionOptionsService() =
                     |> Seq.filter (fun cell -> not cell.isCenter)
                     |> Seq.map (fun cell -> cell.id)
                     |> Seq.toList
+
+    member __.getMoveOptionsForPiece(game : Game, piece : Piece) : int list =
+        getMoveSelectionOptions(game, piece)
 
     member __.getSelectableCellsFromState(game : Game) : int list =
         let turn = game.currentTurn.Value

@@ -76,3 +76,9 @@ type GameManager(eventRepo : IEventRepository,
 
         member x.startGame gameId session =
             processGameStartEventsAsync gameId (fun game -> gameStartServ.getGameStartEvents game session)
+
+        member x.cancelGame gameId session =
+            EventProcessing.processEvent eventRepo eventServ gameRepo notificationServ
+                gameId (fun game ->
+                    gameCrudServ.getCancelGameEvent game session
+                )

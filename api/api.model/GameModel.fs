@@ -1,6 +1,7 @@
 [<AutoOpen>]
 module Djambi.Api.Model.GameModel
 
+open System
 open Djambi.Api.Enums
 
 type Player =
@@ -81,6 +82,7 @@ type Turn =
         selections : Selection list
         selectionOptions : int list
         requiredSelectionKind : SelectionKind option
+        turnStartedAt : DateTime option
     }
 
 module Turn =
@@ -90,6 +92,7 @@ module Turn =
             selections = []
             selectionOptions = []
             requiredSelectionKind = Some SelectionKind.Subject
+            turnStartedAt = None
         }
 
     let deadEnd (selections) =
@@ -98,6 +101,7 @@ module Turn =
             selections = selections
             selectionOptions = []
             requiredSelectionKind = None
+            turnStartedAt = None
         }
 
 type GameParameters =
@@ -106,6 +110,8 @@ type GameParameters =
         regionCount : int
         isPublic : bool
         allowGuests : bool
+        rulesetKind : RulesetKind
+        turnTimeLimitSeconds : int option
     }
 
 type Game =
@@ -119,4 +125,5 @@ type Game =
         turnCycle : int list
         currentTurn : Turn option
         inviteCode : string option
+        botAssignments : Map<int, string>
     }

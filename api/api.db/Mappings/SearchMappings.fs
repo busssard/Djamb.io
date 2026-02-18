@@ -1,6 +1,7 @@
 ﻿namespace Djambi.Api.Db.Mappings
 
 open Djambi.Api.Db.Model
+open Djambi.Api.Enums
 open Djambi.Api.Model
 open System.Linq
 
@@ -20,6 +21,8 @@ module SearchMappings =
                 allowGuests = source.AllowGuests
                 isPublic = source.IsPublic
                 regionCount = int source.RegionCount
+                rulesetKind = LanguagePrimitives.EnumOfValue source.RulesetKindId
+                turnTimeLimitSeconds = None
             }
             createdBy = {
                 userId = source.CreatedByUser.UserId

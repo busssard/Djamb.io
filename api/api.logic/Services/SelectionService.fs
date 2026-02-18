@@ -25,7 +25,7 @@ type SelectionService(selectionOptionsServ : SelectionOptionsService) =
         let pieces = game.piecesIndexedByCell
         let board = BoardModelUtility.getBoardMetadata game.parameters.regionCount
         let subject = game.currentTurn.Value.subjectPiece(game).Value
-        let subjectStrategy = Pieces.getStrategy subject
+        let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
         match pieces.TryFind(cellId) with
         | None ->
             let selection = Selection.move(cellId)
@@ -34,7 +34,7 @@ type SelectionService(selectionOptionsServ : SelectionOptionsService) =
                     |> Seq.map (fun c -> pieces.TryFind c.id)
                     |> Seq.values
                     |> Seq.exists (fun p ->
-                        let str = Pieces.getStrategy p
+                        let str = Pieces.getStrategy game.parameters.rulesetKind p
                         str.isAlive && p.playerId <> subject.playerId
                     )
             then (selection, TurnStatus.AwaitingSelection, Some SelectionKind.Target)
@@ -62,7 +62,7 @@ type SelectionService(selectionOptionsServ : SelectionOptionsService) =
         let turn = game.currentTurn.Value
         let subject = turn.subjectPiece(game).Value
         let destination = turn.destinationCell(game.parameters.regionCount).Value
-        let subjectStrategy = Pieces.getStrategy subject
+        let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
         let selection = Selection.drop(cellId)
         if subjectStrategy.canEnterCenterToEvictPiece
             && (not subjectStrategy.canStayInCenter)
@@ -102,6 +102,7 @@ type SelectionService(selectionOptionsServ : SelectionOptionsService) =
                         selections = List.append currentTurn.selections [selection]
                         selectionOptions = []
                         requiredSelectionKind = requiredSelectionKind
+                        turnStartedAt = currentTurn.turnStartedAt
                     }
                 let updatedGame = { game with currentTurn = Some turn }
                 let selectionOptions = selectionOptionsServ.getSelectableCellsFromState updatedGame

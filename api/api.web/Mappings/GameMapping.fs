@@ -1,5 +1,7 @@
 ﻿namespace Djambi.Api.Web.Mappings
 
+open System.Collections.Generic
+open Djambi.Api.Enums
 open Djambi.Api.Model
 open Djambi.Api.Web.Model
 
@@ -12,6 +14,8 @@ module GameMapping =
             isPublic = source.isPublic
             description = source.description |> Option.toObj
             regionCount = source.regionCount
+            rulesetKind = source.rulesetKind
+            turnTimeLimitSeconds = source.turnTimeLimitSeconds |> Option.toNullable
         }
 
     let toGameParameters (source : GameParametersDto) : GameParameters =
@@ -20,6 +24,8 @@ module GameMapping =
             description = source.description |> Option.ofObj
             isPublic = source.isPublic
             regionCount = source.regionCount
+            rulesetKind = if int source.rulesetKind = 0 then RulesetKind.TotalWar else source.rulesetKind
+            turnTimeLimitSeconds = source.turnTimeLimitSeconds |> Option.ofNullable |> Option.map int
         }
 
     let toPieceDto (source : Piece) : PieceDto =
@@ -42,5 +48,11 @@ module GameMapping =
             status = source.status
             turnCycle = source.turnCycle
             inviteCode = source.inviteCode |> Option.toObj
+            botAssignments =
+                if source.botAssignments.IsEmpty then null
+                else
+                    let dict = Dictionary<int, string>()
+                    source.botAssignments |> Map.iter (fun k v -> dict.Add(k, v))
+                    dict
         }
         

@@ -10,6 +10,7 @@ type CreatePlayerRequest =
         kind : PlayerKind
         userId : int option
         name : string option
+        botName : string option
     }
 
 module CreatePlayerRequest =
@@ -19,6 +20,7 @@ module CreatePlayerRequest =
             kind = PlayerKind.User
             userId = Some user.id
             name = None
+            botName = None
         }
 
     let guest (userId : int, name : string) : CreatePlayerRequest =
@@ -26,6 +28,7 @@ module CreatePlayerRequest =
             kind = PlayerKind.Guest
             userId = Some userId
             name = Some name
+            botName = None
         }
 
     let neutral (name : string) : CreatePlayerRequest =
@@ -33,6 +36,15 @@ module CreatePlayerRequest =
             kind = PlayerKind.Neutral
             userId = None
             name = Some name
+            botName = None
+        }
+
+    let bot (name : string, botName : string) : CreatePlayerRequest =
+        {
+            kind = PlayerKind.Neutral
+            userId = None
+            name = Some name
+            botName = Some botName
         }
 
     let toPlayer (userName : Option<string>) (request : CreatePlayerRequest) : Player =

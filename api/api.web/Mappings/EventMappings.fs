@@ -70,6 +70,12 @@ module EventMappings =
 
     let toPlayerOutOfMovesEffectDto (source : PlayerOutOfMovesEffect) : EffectDto =
         PlayerOutOfMovesEffectDto(source.playerId) :> EffectDto
+
+    let toPlayerSuffocatedEffectDto (source : PlayerSuffocatedEffect) : EffectDto =
+        PlayerSuffocatedEffectDto(source.playerId) :> EffectDto
+
+    let toPlayerForcedPassEffectDto (source : PlayerForcedPassEffect) : EffectDto =
+        PlayerForcedPassEffectDto(source.playerId) :> EffectDto
     
     let toPlayerRemovedEffectDto (source : PlayerRemovedEffect) : EffectDto =
         PlayerRemovedEffectDto(source.oldPlayer |> toPlayerDto) :> EffectDto
@@ -109,6 +115,8 @@ module EventMappings =
         | PlayerOutOfMoves(e) -> toPlayerOutOfMovesEffectDto e
         | Effect.PlayerRemoved(e) -> toPlayerRemovedEffectDto e
         | Effect.PlayerStatusChanged(e) -> toPlayerStatusChangedEffectDto e
+        | Effect.PlayerSuffocated(e) -> toPlayerSuffocatedEffectDto e
+        | Effect.PlayerForcedPass(e) -> toPlayerForcedPassEffectDto e
         | TurnCycleAdvanced(e) -> toTurnCycleAdvancedEffectDto e
         | TurnCyclePlayerFellFromPower(e) -> toTurnCyclePlayerFellFromPowerEffectDto e
         | TurnCyclePlayerRemoved(e) -> toTurnCyclePlayerRemovedEffectDto e

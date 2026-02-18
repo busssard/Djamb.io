@@ -31,3 +31,9 @@ type TurnManager(eventRepo : IEventRepository,
                 gameId (fun game ->
                     turnServ.getCommitTurnEvent game session
                 )
+
+        member x.skipTurn gameId session =
+            EventProcessing.processEvent eventRepo eventServ gameRepo notificationServ
+                gameId (fun game ->
+                    turnServ.getSkipTurnEvent game session
+                )

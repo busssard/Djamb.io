@@ -19,6 +19,8 @@ type EffectKind =
     | TurnCyclePlayerFellFromPower = 16
     | TurnCyclePlayerRemoved = 17
     | TurnCyclePlayerRoseToPower = 18
+    | PlayerSuffocated = 19
+    | PlayerForcedPass = 20
 
 type EventKind =
     | GameParametersChanged = 1uy
@@ -30,6 +32,7 @@ type EventKind =
     | TurnReset = 7uy
     | CellSelected  = 8uy
     | PlayerStatusChanged = 9uy
+    | TurnSkipped = 10uy
 
 type GameStatus = 
     | Pending = 1uy
@@ -73,6 +76,10 @@ type SelectionKind =
     | Target = 3uy
     | Drop = 4uy
     | Vacate = 5uy
+
+type RulesetKind =
+    | TotalWar = 1uy
+    | Classic = 2uy
 
 type TurnStatus =
     | AwaitingSelection = 1uy

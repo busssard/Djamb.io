@@ -58,6 +58,16 @@ type PlayerOutOfMovesEffectDto(playerId : int) =
     inherit EffectDto(EffectKind.PlayerOutOfMoves)
     [<Required>]
     member __.PlayerId = playerId
+
+type PlayerSuffocatedEffectDto(playerId : int) =
+    inherit EffectDto(EffectKind.PlayerSuffocated)
+    [<Required>]
+    member __.PlayerId = playerId
+
+type PlayerForcedPassEffectDto(playerId : int) =
+    inherit EffectDto(EffectKind.PlayerForcedPass)
+    [<Required>]
+    member __.PlayerId = playerId
     
 type PlayerRemovedEffectDto(oldPlayer : PlayerDto) =
     inherit EffectDto(EffectKind.PlayerRemoved)

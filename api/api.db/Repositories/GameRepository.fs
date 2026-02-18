@@ -65,10 +65,15 @@ type GameRepository(context : DjambiDbContext) =
                 g.AllowGuests <- game.parameters.allowGuests
                 g.Description <- game.parameters.description |> Option.toObj
                 g.RegionCount <- byte game.parameters.regionCount
+                g.RulesetKindId <- byte game.parameters.rulesetKind
+                g.TurnTimeLimitSeconds <- game.parameters.turnTimeLimitSeconds |> Option.toNullable
                 g.GameStatusId <- game.status
                 g.CurrentTurnJson <- game.currentTurn |> JsonConvert.SerializeObject
                 g.TurnCycleJson <- game.turnCycle |> JsonConvert.SerializeObject
                 g.PiecesJson <- game.pieces |> JsonConvert.SerializeObject
+                g.BotAssignmentsJson <-
+                    if game.botAssignments.IsEmpty then null
+                    else game.botAssignments |> JsonConvert.SerializeObject
                 context.Games.Update(g) |> ignore
                 let! _ = maybeSave commit
                 return ()

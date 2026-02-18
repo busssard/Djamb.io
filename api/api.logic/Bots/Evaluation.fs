@@ -52,7 +52,7 @@ let private evaluateAlivePlayer (game : Game) (playerId : int) : float =
             let threatened =
                 enemyPieces
                 |> List.exists (fun ep ->
-                    let strategy = Pieces.getStrategy ep
+                    let strategy = Pieces.getStrategy game.parameters.rulesetKind ep
                     if strategy.canTargetWithMove then
                         let paths = board.pathsFromCellId ep.cellId
                         paths |> List.exists (fun path ->
@@ -98,7 +98,7 @@ let private evaluateAlivePlayer (game : Game) (playerId : int) : float =
             let threatened =
                 myPieces
                 |> List.exists (fun mp ->
-                    let strategy = Pieces.getStrategy mp
+                    let strategy = Pieces.getStrategy game.parameters.rulesetKind mp
                     if strategy.canTargetWithMove then
                         let paths = board.pathsFromCellId mp.cellId
                         paths |> List.exists (fun path ->

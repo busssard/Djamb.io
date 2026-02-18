@@ -30,7 +30,7 @@ let private getMoveSelectionDetails (game : Game) (cellId : int) =
     let pieces = game.piecesIndexedByCell
     let board = BoardModelUtility.getBoardMetadata game.parameters.regionCount
     let subject = game.currentTurn.Value.subjectPiece(game).Value
-    let subjectStrategy = Pieces.getStrategy subject
+    let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
     match pieces.TryFind(cellId) with
     | None ->
         let selection = Selection.move(cellId)
@@ -39,7 +39,7 @@ let private getMoveSelectionDetails (game : Game) (cellId : int) =
                 |> Seq.map (fun c -> pieces.TryFind c.id)
                 |> Seq.values
                 |> Seq.exists (fun p ->
-                    let str = Pieces.getStrategy p
+                    let str = Pieces.getStrategy game.parameters.rulesetKind p
                     str.isAlive && p.playerId <> subject.playerId
                 )
         then (selection, TurnStatus.AwaitingSelection, Some SelectionKind.Target)
@@ -67,7 +67,7 @@ let private getDropSelectionDetails (game : Game) (cellId : int) =
     let turn = game.currentTurn.Value
     let subject = turn.subjectPiece(game).Value
     let destination = turn.destinationCell(game.parameters.regionCount).Value
-    let subjectStrategy = Pieces.getStrategy subject
+    let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
     let selection = Selection.drop(cellId)
     if subjectStrategy.canEnterCenterToEvictPiece
         && (not subjectStrategy.canStayInCenter)
@@ -98,6 +98,7 @@ let applySelection (game : Game) (cellId : int) : Game =
             selections = List.append currentTurn.selections [selection]
             selectionOptions = []
             requiredSelectionKind = requiredSelectionKind
+            turnStartedAt = currentTurn.turnStartedAt
         }
     let updatedGame = { game with currentTurn = Some turn }
     let options = selectionOptionsServ.getSelectableCellsFromState updatedGame
@@ -126,7 +127,7 @@ let private getPrimaryEffects (game : Game) : (Game -> Game) =
     | (None, _) | (_, None) -> id
     | (Some subject, Some destination) ->
         let originCellId = subject.cellId
-        let subjectStrategy = Pieces.getStrategy subject
+        let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
 
         fun (g : Game) ->
             let mutable pieces = g.pieces |> List.map (fun p -> (p.id, p)) |> dict |> Dictionary
@@ -216,7 +217,7 @@ let private applyRiseOrFallFromPower (game : Game) (updatedGame : Game) : Game =
     let subject = (turn.subjectPiece game).Value
     let destination = (turn.destinationCell game.parameters.regionCount).Value
     let origin = (turn.subjectCell game.parameters.regionCount).Value
-    let subjectStrategy = Pieces.getStrategy subject
+    let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
 
     let mutable result = updatedGame
     let mutable turns = updatedGame.turnCycle
@@ -232,7 +233,7 @@ let private applyRiseOrFallFromPower (game : Game) (updatedGame : Game) : Game =
 
     match (turn.targetPiece game, turn.dropCell game.parameters.regionCount) with
     | (Some target, Some drop) ->
-        let targetStrategy = Pieces.getStrategy target
+        let targetStrategy = Pieces.getStrategy game.parameters.rulesetKind target
         if subjectStrategy.canEnterCenterToEvictPiece
             && not subjectStrategy.killsTarget
             && subjectStrategy.canDropTarget
@@ -314,11 +315,11 @@ let applyCommit (game : Game) : Game =
     // Handle conduit assassination -> eliminate player
     let turn = game.currentTurn.Value
     let subject = (turn.subjectPiece game).Value
-    let subjectStrategy = Pieces.getStrategy subject
+    let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
 
     match turn.targetPiece game with
     | Some target ->
-        let targetStrategy = Pieces.getStrategy target
+        let targetStrategy = Pieces.getStrategy game.parameters.rulesetKind target
         if subjectStrategy.killsTarget && targetStrategy.killsControllingPlayerWhenKilled then
             if target.playerId.IsSome then
                 g <- getEliminatePlayerUpdate target.playerId.Value subject.playerId g

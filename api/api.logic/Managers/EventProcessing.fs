@@ -17,6 +17,7 @@ let isPublishable (event : Event) : bool =
     | EventKind.PlayerRemoved
     | EventKind.PlayerStatusChanged
     | EventKind.TurnCommitted
+    | EventKind.TurnSkipped
         -> true
     | _ -> false
 

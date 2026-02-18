@@ -19,6 +19,7 @@
     <Content Include="Properties\launchSettings.json" />
     <Compile Include="ErrorHandlingMiddleware.fs" />
     <Compile Include="BotRunner.fs" />
+    <Compile Include="TurnTimeoutRunner.fs" />
     <Compile Include="Program.fs" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

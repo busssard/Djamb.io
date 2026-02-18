@@ -112,6 +112,16 @@ type TurnCyclePlayerRoseToPowerEffect =
         playerId : int
     }
 
+type PlayerSuffocatedEffect =
+    {
+        playerId : int
+    }
+
+type PlayerForcedPassEffect =
+    {
+        playerId : int
+    }
+
 type Effect =
     | CurrentTurnChanged of CurrentTurnChangedEffect
     | GameStatusChanged of GameStatusChangedEffect
@@ -127,6 +137,8 @@ type Effect =
     | PlayerOutOfMoves of PlayerOutOfMovesEffect
     | PlayerRemoved of PlayerRemovedEffect
     | PlayerStatusChanged of PlayerStatusChangedEffect
+    | PlayerSuffocated of PlayerSuffocatedEffect
+    | PlayerForcedPass of PlayerForcedPassEffect
     | TurnCycleAdvanced of TurnCycleAdvancedEffect
     | TurnCyclePlayerFellFromPower of TurnCyclePlayerFellFromPowerEffect
     | TurnCyclePlayerRemoved of TurnCyclePlayerRemovedEffect

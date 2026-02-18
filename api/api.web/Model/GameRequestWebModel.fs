@@ -9,13 +9,16 @@ open System.ComponentModel.DataAnnotations
 type CreatePlayerRequestDto = {
     [<Required>]
     kind : PlayerKind
-    
+
     userId : Nullable<int>
 
     // Nullable
     [<StringLength(20, MinimumLength = 1)>]
     [<RegularExpression("[a-zA-Z0-9\-_]+")>]
     name : string
+
+    // Nullable — bot strategy name (e.g. "minimax", "maxn", "random")
+    botName : string
 }
 
 [<CLIMutable>]

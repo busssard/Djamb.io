@@ -40,7 +40,7 @@ type TurnService(eventServ : EventService,
             match currentTurn.targetPiece game with
             | None -> ()
             | Some target ->
-                let subjectStrategy = Pieces.getStrategy subject
+                let subjectStrategy = Pieces.getStrategy game.parameters.rulesetKind subject
 
                 //Kill target
                 if subjectStrategy.killsTarget
@@ -106,7 +106,9 @@ type TurnService(eventServ : EventService,
         Security.ensureCurrentPlayerOrOpenParticipation session game
         let updatedGame = { game with currentTurn = Some Turn.empty }
         let selectionOptions = selectionOptionsServ.getSelectableCellsFromState updatedGame
-        let turn = { Turn.empty with selectionOptions = selectionOptions }
+        let turn = { Turn.empty with
+                        selectionOptions = selectionOptions
+                        turnStartedAt = game.currentTurn |> Option.bind (fun t -> t.turnStartedAt) }
         let effects = [
             Effect.CurrentTurnChanged { oldValue = game.currentTurn; newValue = Some turn }
         ]            
@@ -115,4 +117,15 @@ type TurnService(eventServ : EventService,
             effects = effects
             createdByUserId = session.user.id
             actingPlayerId = Context.getActingPlayerId session game
+        }
+
+    //--- Skip (timeout)
+
+    member x.getSkipTurnEvent (game : Game) (session : Session) : CreateEventRequest =
+        let effects = indirectEffectsServ.getSkipTurnEffects game
+        {
+            kind = EventKind.TurnSkipped
+            effects = effects
+            createdByUserId = session.user.id
+            actingPlayerId = Some game.turnCycle.Head
         }

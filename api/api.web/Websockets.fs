@@ -5,26 +5,29 @@ open System.Net.WebSockets
 open System.Text
 open System.Threading
 open Newtonsoft.Json
+open Newtonsoft.Json.Converters
+open Newtonsoft.Json.Serialization
 open Serilog
 open Djambi.Api.Common.Control
 open Djambi.Api.Logic.Interfaces
 open Djambi.Api.Model
-
-type WebSocketMessage = 
-    {
-        data : string
-    }
+open Djambi.Api.Web.Mappings
 
 type WebsocketSubscriber(userId : int,
                          socket : WebSocket,
                          log : ILogger) =
-    let mapResponseToWebsocketMessage (response : StateAndEventResponse) =
-        {
-            data = JsonConvert.SerializeObject response
-        }
+    static let serializerSettings =
+        let s = JsonSerializerSettings()
+        s.ContractResolver <- CamelCasePropertyNamesContractResolver()
+        s.Converters.Add(StringEnumConverter())
+        s
 
-    let writeMessage (message : WebSocketMessage) =
-        let buffer = Encoding.UTF8.GetBytes(message.data)
+    let serializeResponse (response : StateAndEventResponse) =
+        let dto = response |> toStateAndEventResponseDto
+        JsonConvert.SerializeObject(dto, serializerSettings)
+
+    let writeMessage (json : string) =
+        let buffer = Encoding.UTF8.GetBytes(json)
         let segment = new ArraySegment<byte>(buffer)
 
         if socket.State = WebSocketState.Open then            
@@ -39,6 +42,6 @@ type WebsocketSubscriber(userId : int,
         member x.userId = userId
         member x.send response =
             log.Information(sprintf "WS: Sending event to User %i" userId)
-            response |> mapResponseToWebsocketMessage |> writeMessage
+            response |> serializeResponse |> writeMessage
         member x.Dispose() =
             socket.Dispose()

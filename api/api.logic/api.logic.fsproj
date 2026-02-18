@@ -7,6 +7,9 @@
     <Compile Include="Errors.fs" />
     <Compile Include="Context.fs" />
     <Compile Include="Security.fs" />
+    <Compile Include="PieceStrategy.fs" />
+    <Compile Include="TotalWarPieces.fs" />
+    <Compile Include="ClassicPieces.fs" />
     <Compile Include="Pieces.fs" />
     <Compile Include="ModelExtensions\BoardModelExtensions.fs" />
     <Compile Include="ModelExtensions\BoardModelUtility.fs" />
@@ -19,6 +22,8 @@
     <Compile Include="Services\PlayerService.fs" />
     <Compile Include="Services\SelectionOptionsService.fs" />
     <Compile Include="Services\SelectionService.fs" />
+    <Compile Include="Rulesets\TotalWarPieceLayout.fs" />
+    <Compile Include="Rulesets\ClassicPieceLayout.fs" />
     <Compile Include="Services\GameStartService.fs" />
     <Compile Include="Services\EventService.fs" />
     <Compile Include="Services\IndirectEffectsService.fs" />
@@ -40,6 +45,7 @@
     <Compile Include="Bots\MoveEnumerator.fs" />
     <Compile Include="Bots\Evaluation.fs" />
     <Compile Include="Bots\MinimaxBot.fs" />
+    <Compile Include="Bots\MaxNBot.fs" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>

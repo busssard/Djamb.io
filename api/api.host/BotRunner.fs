@@ -19,7 +19,7 @@ type BotRunner(scopeFactory : IServiceScopeFactory,
                logger : ILogger<BotRunner>) =
 
     let mutable timer : Timer option = None
-    let mutable cancellationToken = CancellationToken.None
+    let cts = new CancellationTokenSource()
     let executionLock = new SemaphoreSlim(1, 1)
 
     let createBotSession (game : Game) : Session =
@@ -62,13 +62,22 @@ type BotRunner(scopeFactory : IServiceScopeFactory,
 
                             match currentPlayer with
                             | Some player when player.kind = PlayerKind.Neutral ->
+                                let botName =
+                                    match game.botAssignments.TryFind currentPlayerId with
+                                    | Some name -> name
+                                    | None -> "minimax"  // fallback for legacy games / auto-filled neutrals
+
                                 let bot =
-                                    match botRegistry.getBot "minimax" with
+                                    match botRegistry.getBot botName with
                                     | Some b -> b
                                     | None ->
-                                        match botRegistry.getBot "random" with
+                                        // Fallback: try minimax, then random
+                                        match botRegistry.getBot "minimax" with
                                         | Some b -> b
-                                        | None -> failwith "No bot available"
+                                        | None ->
+                                            match botRegistry.getBot "random" with
+                                            | Some b -> b
+                                            | None -> failwith "No bot available"
 
                                 let session = createBotSession game
 
@@ -106,25 +115,25 @@ type BotRunner(scopeFactory : IServiceScopeFactory,
         if executionLock.Wait(0) then
             task {
                 try
-                    do! tryPlayBotTurn cancellationToken
+                    do! tryPlayBotTurn cts.Token
                 finally
                     executionLock.Release() |> ignore
             } |> ignore
 
     interface IHostedService with
-        member _.StartAsync(ct : CancellationToken) =
-            cancellationToken <- ct
+        member _.StartAsync(_ct : CancellationToken) =
             logger.LogInformation("BotRunner starting - polling every 5 seconds for Neutral player turns")
             timer <- Some (new Timer(TimerCallback(onTimerTick), null, TimeSpan.FromSeconds(5.0), TimeSpan.FromSeconds(5.0)))
             Task.CompletedTask
 
         member _.StopAsync(_ct : CancellationToken) =
             logger.LogInformation("BotRunner stopping")
+            cts.Cancel()
             match timer with
             | Some t ->
                 t.Change(Timeout.Infinite, 0) |> ignore
-                executionLock.Wait() |> ignore
-                executionLock.Release() |> ignore
+                if executionLock.Wait(TimeSpan.FromSeconds(5.0)) then
+                    executionLock.Release() |> ignore
                 t.Dispose()
                 timer <- None
             | None -> ()
@@ -132,6 +141,7 @@ type BotRunner(scopeFactory : IServiceScopeFactory,
 
     interface IDisposable with
         member _.Dispose() =
+            cts.Dispose()
             executionLock.Dispose()
             match timer with
             | Some t -> t.Dispose()

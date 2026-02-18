@@ -31,6 +31,7 @@ type GameCrudService(gameRepo : IGameRepository) =
                 kind = PlayerKind.User
                 userId = Some self.id
                 name = Some session.user.name
+                botName = None
             }
 
         task {
@@ -74,3 +75,15 @@ type GameCrudService(gameRepo : IGameRepository) =
             createdByUserId = session.user.id
             actingPlayerId = Context.getActingPlayerId session game
         }
+
+    member x.getCancelGameEvent (game : Game) (session : Session) : CreateEventRequest =
+        Security.ensureCreatorOrEditPendingGames session game
+        if game.status <> GameStatus.Pending && game.status <> GameStatus.InProgress
+        then raise <| GameConfigurationException("Cannot cancel a game that is already over.")
+        else
+            {
+                kind = EventKind.GameCanceled
+                effects = [ Effect.GameStatusChanged { oldValue = game.status; newValue = GameStatus.Canceled } ]
+                createdByUserId = session.user.id
+                actingPlayerId = Context.getActingPlayerId session game
+            }

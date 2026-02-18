@@ -24,4 +24,5 @@ module PlayerMappings =
             kind = source.kind
             name = source.name |> Option.ofObj
             userId = source.userId |> Option.ofNullable
+            botName = source.botName |> Option.ofObj
         }
